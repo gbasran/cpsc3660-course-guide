@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 02 : E-R Model &amp; Diagrams | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 02</span>
+<h1>Entity-Relationship Model &amp; Diagrams</h1>
+<p class="subtitle">Designing the schema before you write any SQL; entities, attributes, relationships, and how to translate them into tables.</p>
+
+<!-- ============================================================ -->
+<h2>Part A: Entities (Strong and Weak)</h2>
+
+<div class="analogy">
+<strong>Physical analogy; a family tree on the wall.</strong><br><br>
+Look at a family tree. Each <em>person</em> is drawn as a rectangle with a name inside; they are <strong>entities</strong>. A person can stand on their own; given just "Ada Lovelace, born 1815" you know who is being discussed. That is a <strong>strong entity</strong>. But then there is a side-box that says "Ada's pet cat, Mr. Whiskers"; Mr. Whiskers the cat only makes sense if you also know which human he belongs to. "Mr. Whiskers" alone is ambiguous; maybe ten households have a cat named Mr. Whiskers. So on the diagram, his box is drawn with a <strong>double border</strong> to signal "I cannot identify myself; I need my owner." That is a <strong>weak entity</strong>, and it always attaches to a strong entity through an <em>identifying relationship</em> (also drawn with a double border). The cat contributes a <em>discriminator</em> (his name, unique within the household) and the household contributes the rest of the identification.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Entity types.</strong>
+<dl class="breakdown">
+<dt>Entity</dt>
+<dd>A real-world thing the database needs to remember. Drawn as a rectangle with the type name inside.</dd>
+<dt>Strong entity</dt>
+<dd>Can be identified by its own attributes alone; has a primary key of its own. Single-line rectangle.</dd>
+<dt>Weak entity</dt>
+<dd>Cannot be identified by its own attributes; needs a strong owner. Drawn with a <em>double-line rectangle</em>.</dd>
+<dt>Identifying relationship</dt>
+<dd>The relationship that connects a weak entity to its owner. Drawn as a <em>double-line diamond</em>. Participation of the weak entity is always total (thick line).</dd>
+<dt>Discriminator (partial key)</dt>
+<dd>Attribute(s) of the weak entity that are unique <em>within a single owner</em>. Drawn with a <em>dashed underline</em>. The weak entity's full primary key is (owner's PK) + discriminator.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Modeling Payments for a Loan (classic weak-entity example)</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Identify the entities</div>
+<p>A <code>loan</code> has a unique <code>loan_number</code>; it is a strong entity. A <code>payment</code> is made toward a specific loan; each payment has a <code>payment_number</code> starting from 1 for that loan. Payment #1 for loan L-17 and payment #1 for loan L-18 are different payments; the number alone does not identify.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Classify and draw</div>
+<p><code>loan</code>: strong entity, single rectangle, primary key <code>loan_number</code>.<br>
+<code>payment</code>: weak entity, double rectangle, discriminator <code>payment_number</code>, also <code>amount</code> and <code>date</code>.<br>
+<code>loan_payment</code>: identifying relationship, double diamond, connecting them.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Full primary key of the weak entity</div>
+<p>When we map to relations, <code>payment</code> becomes:</p>
+<div class="algo-box">payment(<u>loan_number, payment_number</u>, amount, date)</div>
+<p>The primary key is the owner's PK plus the discriminator. <code>loan_number</code> is also a foreign key back to <code>loan</code>.</p>
+<p class="result">Weak entity rule: <span class="hl">PK = owner.PK &cup; discriminator</span>.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (A3 Q7)</h4>
+<p>The prof has asked "justify why payment is modeled as a weak entity." Good answer: "payment_number alone is not unique across all loans; without knowing which loan owns it, we cannot pick out a specific payment; therefore payment cannot identify itself and must borrow loan_number from its owner." Always name the <em>identifying relationship</em> and the <em>discriminator</em> explicitly.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: Attributes</h2>
+
+<div class="analogy">
+<strong>Physical analogy; the fields on a driver's licence.</strong><br><br>
+Your licence has several kinds of fields. The licence number is a single value written once; that is a <strong>simple</strong> attribute. Your full name is printed as one string but logically it splits into first / middle / last; three sub-parts of one attribute, a <strong>composite</strong>. Under emergency contacts you can list up to three people; one attribute, many values, a <strong>multivalued</strong>. And nowhere is your age printed, but your date of birth is; anyone can compute age from birthdate + today, so age is <strong>derived</strong>. Four distinct flavors, one mental picture.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Attribute types (with diagram conventions).</strong>
+<dl class="breakdown">
+<dt>Simple (atomic)</dt>
+<dd>Single indivisible value. Drawn as an ellipse connected to the entity. e.g., <code>age</code>, <code>empid</code>.</dd>
+<dt>Composite</dt>
+<dd>Decomposes into sub-attributes. The parent ellipse has child ellipses branching off it. e.g., <code>name(first, middle, last)</code>, <code>address(street, city, postal)</code>.</dd>
+<dt>Multivalued</dt>
+<dd>Can hold a set of values for a single entity. Drawn as a <em>double ellipse</em>. e.g., <code>phone_numbers</code>, <code>authors</code> of a book.</dd>
+<dt>Derived</dt>
+<dd>Computed from other attributes or context; not stored. Drawn as a <em>dashed ellipse</em>. e.g., <code>age</code> derived from <code>dob</code>.</dd>
+<dt>Key attribute</dt>
+<dd>Underlined ellipse; marks the primary identifier.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Attribute decomposition for employee</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Starting ER description</div>
+<p>"An employee has an empid, a full name (first, middle, last), a set of phone numbers, an age computed from their date of birth."</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Classify each attribute</div>
+<table class="step-table">
+<tr><th>Attribute</th><th>Type</th><th>Diagram marker</th></tr>
+<tr><td>empid</td><td>Simple, key</td><td>Underlined ellipse</td></tr>
+<tr><td>name</td><td>Composite (first, middle, last)</td><td>Parent with three children</td></tr>
+<tr><td>phone_numbers</td><td>Multivalued</td><td>Double ellipse</td></tr>
+<tr><td>age</td><td>Derived from dob</td><td>Dashed ellipse</td></tr>
+<tr><td>dob</td><td>Simple</td><td>Plain ellipse</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: When mapping to relations (preview)</div>
+<p><strong>Composite</strong>: flatten to atomic columns: <code>first_name, middle_name, last_name</code>. (See A3 Q6.)<br>
+<strong>Multivalued</strong>: create a separate table <code>emp_phone(empid, phone_number)</code> with both columns as the primary key. (See A3 Q5.)<br>
+<strong>Derived</strong>: do not store; compute on demand in a query or view.</p>
+<p class="check">The prof specifically tests "decompose this composite" and "separate this multivalued"; see A3 Q5 and A3 Q6.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (A3 Q5, A3 Q6)</h4>
+<p>Given an ER with a multivalued attribute <code>authors</code> on <code>books</code>, you will be asked to produce the relational schema. Correct answer has TWO tables: <code>books(isbn, title, publisher, ...)</code> and <code>book_authors(isbn, author)</code> with <code>(isbn, author)</code> as the PK of the second table, and <code>isbn</code> as a FK back. Never put a comma-separated list of authors inside one column.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: Relationships</h2>
+
+<div class="analogy">
+<strong>Physical analogy; the lines on the family tree.</strong><br><br>
+Two rectangles sitting side-by-side on the wall mean nothing by themselves. It is the <em>line</em> drawn between them, labeled "married to" or "parent of," that gives the structure meaning. In ER diagrams the line is drawn as a <strong>diamond</strong> with the relationship name inside, connected to the rectangles it relates. A relationship can connect two entities (<strong>binary</strong>), three (<strong>ternary</strong>), or more, and we decorate each connecting line with two pieces of information: the <em>cardinality</em> (how many of the other side each side can have; 1:1, 1:N, or M:N) and the <em>participation</em> (does every entity have to participate? total vs partial).
+</div>
+
+<div class="formula-box">
+<strong>Definition: Relationship anatomy.</strong>
+<dl class="breakdown">
+<dt>Degree</dt>
+<dd>How many entity types participate. Binary (2), ternary (3), n-ary.</dd>
+<dt>Cardinality ratio</dt>
+<dd><strong>1:1</strong> each entity on either side has at most one partner. <strong>1:N</strong> one entity on the "1" side pairs with many on the "N" side, but each on "N" has at most one on "1." <strong>M:N</strong> both sides are many.</dd>
+<dt>Participation (total vs partial)</dt>
+<dd><strong>Total</strong> participation means every entity of that type <em>must</em> participate in the relationship (thick line); <strong>partial</strong> means participation is optional (thin line).</dd>
+<dt>Role names</dt>
+<dd>Labels on the connecting lines; needed when an entity plays more than one role (e.g., employee as "manager" vs "subordinate" in a <code>manages</code> relationship).</dd>
+<dt>Descriptive attributes</dt>
+<dd>Attributes that belong to the relationship itself, not to either entity; e.g., <code>borrow_date</code> belongs to <code>borrows</code>, not to <code>employee</code> or <code>book</code>.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Cardinality for employee-borrows-books</h3>
+
+<div class="step">
+<div class="step-label">Step 1: State the business rule</div>
+<p>An employee may borrow many books; a book may be borrowed by many employees (over time); every borrow event has a date. Therefore <code>borrows</code> is <strong>M:N</strong> between <code>employee</code> and <code>books</code>, and has a descriptive attribute <code>borrow_date</code>.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Draw it</div>
+<p>Rectangles: <code>employee</code> on the left, <code>books</code> on the right. Diamond in the middle labeled <code>borrows</code>. An ellipse <code>borrow_date</code> hangs off the diamond. Both connecting lines are thin (partial participation; some employees never borrow, some books never get borrowed).</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Map to a relation</div>
+<p>Because <code>borrows</code> is M:N, we need its <em>own</em> table (we cannot fold it into either entity's table):</p>
+<div class="algo-box">
+borrow(<u>empid, isbn</u>, borrow_date)<br>
+&nbsp;&nbsp;foreign key (empid) references employee(empid)<br>
+&nbsp;&nbsp;foreign key (isbn) references books(isbn)
+</div>
+<p class="result">M:N always becomes its own relation. 1:N folds the FK into the "N" side. 1:1 can go either way.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: Generalization / ISA Hierarchies</h2>
+
+<div class="analogy">
+<strong>Physical analogy; the taxonomy of animals.</strong><br><br>
+"Dog," "cat," and "horse" are all species, but they share the general traits of "mammal" (warm-blooded, has fur, breathes air). Rather than repeat those traits on every species box, we introduce a parent box called <code>mammal</code> and draw an arrow from each specific-kind box <em>up</em> to it, labeled <strong>ISA</strong> (read: "is a"). Dog ISA mammal. Cat ISA mammal. The specific species inherit the general traits and add their own. In an ER diagram, the parent entity sits above the children, connected through a triangle labeled "ISA" with arrows pointing upward.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Generalization / Specialization.</strong>
+<dl class="breakdown">
+<dt>Superclass / superentity</dt>
+<dd>The general entity with shared attributes; e.g., <code>person(ssn, name, address)</code>.</dd>
+<dt>Subclass / subentity</dt>
+<dd>A specialization of the superclass with extra attributes; e.g., <code>student(gpa)</code>, <code>employee(salary)</code>.</dd>
+<dt>ISA relationship</dt>
+<dd>Drawn as a triangle labeled ISA. Inheritance: every subclass instance is also a superclass instance.</dd>
+<dt>Disjoint vs Overlapping</dt>
+<dd><strong>Disjoint</strong>: a superclass instance belongs to at most one subclass. <strong>Overlapping</strong>: may belong to several (a person could be both student and employee).</dd>
+<dt>Total vs Partial</dt>
+<dd><strong>Total</strong>: every superclass instance must appear in some subclass. <strong>Partial</strong>: some superclass instances belong to no subclass.</dd>
+</dl>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (A3 Q8(c))</h4>
+<p>A bookstore sells both printed books and e-books. Both share <code>isbn, title, publisher, price</code>; printed books also have <code>weight, shipping_cost</code>; e-books have <code>file_format, download_url</code>. Model with <code>book</code> as the superclass and <code>printed_book</code>, <code>e_book</code> as subclasses connected by an ISA triangle. State whether disjoint or overlapping (a physical book is not also an e-book, so disjoint) and whether total or partial (every book in the store is one kind, so total). Justify in one sentence.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: ER → Relational Mapping</h2>
+
+<div class="analogy">
+<strong>Physical analogy; translating a blueprint into carpentry cuts.</strong><br><br>
+An architect draws a house on paper; rectangles for rooms, lines for walls, symbols for doors and windows. A carpenter looks at that blueprint and translates it into a cut list: "I need seven 2x4s of length 96 inches, four sheets of drywall, three doors." ER-to-relational mapping is the same kind of translation. You look at rectangles, diamonds, and ellipses and you produce CREATE TABLE statements, with specific rules for each ER element. The rules are mechanical; if you follow them step by step, you get a correct schema every time.
+</div>
+
+<div class="formula-box">
+<strong>Rule: Mapping each ER element to relations.</strong>
+<dl class="breakdown">
+<dt>Strong entity</dt>
+<dd>Becomes its own table. Attributes become columns. The key attribute becomes the primary key.</dd>
+<dt>Weak entity</dt>
+<dd>Becomes its own table. Columns = its own attributes + the owner's primary key. PK = owner PK + discriminator. FK = owner PK, with ON DELETE CASCADE.</dd>
+<dt>1:1 relationship</dt>
+<dd>Add the PK of one side as a FK (and UNIQUE) on the other side. Either side works; pick the one with total participation.</dd>
+<dt>1:N relationship</dt>
+<dd>Add the PK of the "1" side as a FK on the "N" side. No new table needed.</dd>
+<dt>M:N relationship</dt>
+<dd>Create a new table. Columns = PKs of both sides + any descriptive attributes. PK = both FKs combined.</dd>
+<dt>Ternary / n-ary relationship</dt>
+<dd>Create a new table. Columns = PKs of all participating entities + descriptive attributes. PK usually = all participating PKs combined.</dd>
+<dt>Multivalued attribute</dt>
+<dd>Create a separate table. Columns = owner PK + the multivalued attribute. PK = both.</dd>
+<dt>Composite attribute</dt>
+<dd>Decompose into atomic sub-attributes (columns) in the same table. Do not create a separate table.</dd>
+<dt>Derived attribute</dt>
+<dd>Do NOT store. Compute at query time or use a view.</dd>
+<dt>ISA (generalization)</dt>
+<dd>Three options. (1) One table per subclass only, replicating parent attributes. (2) One table per class, each subclass table has the superclass PK as both PK and FK. (3) One big table with all attributes and a "type" column; nulls where inapplicable. Option (2) is the textbook-standard.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Full mapping of the library ER</h3>
+
+<div class="step">
+<div class="step-label">Step 1: List the ER elements</div>
+<p>Entities: <code>employee</code> (strong, PK empid), <code>books</code> (strong, PK isbn) with multivalued attribute <code>authors</code>. Relationship: <code>borrows</code> (M:N, with <code>borrow_date</code>).</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Apply the rules</div>
+<p>Strong entity employee → one table.<br>
+Strong entity books with multivalued <code>authors</code> → two tables; <code>books</code> itself (sans authors) and <code>book_authors</code>.<br>
+M:N borrows → one table.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Write the schema</div>
+<div class="algo-box">
+employee(<u>empid</u>, name, office, age)<br><br>
+books(<u>isbn</u>, title, publisher)<br><br>
+book_authors(<u>isbn, author</u>)<br>
+&nbsp;&nbsp;foreign key (isbn) references books(isbn)<br><br>
+borrow(<u>empid, isbn</u>, borrow_date)<br>
+&nbsp;&nbsp;foreign key (empid) references employee(empid)<br>
+&nbsp;&nbsp;foreign key (isbn) references books(isbn)
+</div>
+<p class="result">Four tables from one ER; notice the multivalued attribute did NOT stay in <code>books</code>.</p>
+</div>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>Every ER-design exam question ends with "map to a relational schema." The mapping is mechanical, but the common mistake is to leave a multivalued attribute as one column with commas inside. That is <em>not</em> first normal form and loses all points. Always give multivalueds their own table; always put composites as atomic columns in the parent table.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>Almost every ER question on the final follows the same script: (1) read the business description, (2) draw the ER with correct notation (double rectangles for weak entities, double ellipses for multivalued, double diamonds for identifying relationships, dashed ellipses for derived), (3) translate to relational schema using the rules above. Always show the FK declarations explicitly; do not just underline keys.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Entity</dt><dd>A thing the database models. Drawn as a rectangle.</dd>
+<dt>Strong entity</dt><dd>Self-identifying; single-line rectangle; has its own PK.</dd>
+<dt>Weak entity</dt><dd>Needs a strong owner to be identified; double-line rectangle; PK = owner PK + discriminator.</dd>
+<dt>Discriminator (partial key)</dt><dd>Unique within an owner; dashed underline in the diagram.</dd>
+<dt>Identifying relationship</dt><dd>Connects a weak entity to its owner; drawn as a double diamond.</dd>
+<dt>Simple attribute</dt><dd>Atomic single value; ellipse.</dd>
+<dt>Composite attribute</dt><dd>Breaks into sub-attributes; ellipse with children.</dd>
+<dt>Multivalued attribute</dt><dd>Can hold a set of values; double ellipse; maps to a separate table.</dd>
+<dt>Derived attribute</dt><dd>Computed from others; dashed ellipse; never stored.</dd>
+<dt>Cardinality ratio</dt><dd>1:1, 1:N, or M:N; how many partners each side may have.</dd>
+<dt>Total participation</dt><dd>Every entity must participate; thick connecting line.</dd>
+<dt>Partial participation</dt><dd>Participation is optional; thin connecting line.</dd>
+<dt>Role name</dt><dd>Label on a connecting line; needed when an entity plays multiple roles (e.g., self-relationships).</dd>
+<dt>Generalization / ISA</dt><dd>Subclasses specialize a superclass; triangle notation.</dd>
+<dt>Disjoint / overlapping</dt><dd>Whether subclass memberships are exclusive or allow overlap.</dd>
+<dt>Total / partial specialization</dt><dd>Whether every superclass instance must appear in some subclass.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-01-db-concepts.html">&larr; 01. Database Concepts</a>
+<a class="bottom-nav-btn next" href="cg-03-relational-model.html">03. Relational Model &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

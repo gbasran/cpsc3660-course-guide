@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 06 : SQL Advanced | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 06</span>
+<h1>SQL: Advanced</h1>
+<p class="subtitle">Aggregation, GROUP BY / HAVING, views, subqueries, set operations, and NULL handling; everything beyond the SELECT/FROM/WHERE skeleton.</p>
+
+<!-- ============================================================ -->
+<h2>Part A: Aggregate Functions</h2>
+
+<div class="analogy">
+<strong>Physical analogy; a cashier totaling a sales receipt.</strong><br><br>
+After a busy day the cashier runs the register's "Z-report." It spits out: total number of transactions (<code>count</code>), total dollars (<code>sum</code>), average transaction size (<code>avg</code>), smallest sale (<code>min</code>), largest (<code>max</code>). Each number summarizes an entire day of rows into one scalar. SQL's aggregate functions do the same; you feed them a column (or the special <code>*</code>) and they collapse the whole result set into one value, unless GROUP BY tells them to produce one value per group.
+</div>
+
+<div class="formula-box">
+<strong>The five aggregates.</strong>
+<dl class="breakdown">
+<dt>count(*)</dt>
+<dd>Number of rows, including rows with all NULLs.</dd>
+<dt>count(col)</dt>
+<dd>Number of rows where col is NOT NULL.</dd>
+<dt>count(distinct col)</dt>
+<dd>Number of distinct non-NULL values in col.</dd>
+<dt>sum(col), avg(col)</dt>
+<dd>Sum and average; NULL values ignored; <code>avg</code> is sum / count(col).</dd>
+<dt>min(col), max(col)</dt>
+<dd>Smallest and largest non-NULL value. Works for numbers, dates, strings.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Simple aggregate queries on employee</h3>
+<div class="algo-box">
+select count(*) as num_employees,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;avg(age) as avg_age,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min(age) as youngest,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max(age) as oldest<br>
+from employee;
+</div>
+<p>Returns ONE row. No GROUP BY was needed because the whole table is treated as a single group.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: GROUP BY</h2>
+
+<div class="analogy">
+<strong>Physical analogy; sorting mail into bins by zip code.</strong><br><br>
+Imagine a bag of mixed mail hitting a sorting table. The sorter partitions it by zip code; at the end there are many little stacks, one per zip. Now a per-stack summary becomes natural: "how many envelopes in zip 90210?" or "heaviest package in zip 60601?" GROUP BY is that partitioning. Once tuples are in their groups, every aggregate function runs <em>per group</em>, producing one row of output per distinct group.
+</div>
+
+<div class="formula-box">
+<strong>GROUP BY skeleton.</strong>
+<div class="algo-box">
+select &lt;group-cols&gt;, &lt;aggregate(...)&gt;<br>
+from &lt;tables&gt;<br>
+where &lt;row-filter&gt;<br>
+group by &lt;group-cols&gt;<br>
+having &lt;group-filter&gt;<br>
+order by &lt;col&gt;;
+</div>
+<dl class="breakdown">
+<dt>SELECT constraint</dt>
+<dd>Any non-aggregate column in SELECT <em>must</em> appear in GROUP BY. Otherwise the query is ambiguous (which value of that column for each group?).</dd>
+<dt>WHERE vs HAVING</dt>
+<dd>WHERE filters rows <em>before</em> grouping. HAVING filters groups <em>after</em> aggregation. Both are allowed in the same query.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Books borrowed per publisher</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Join borrow and books</div>
+<div class="algo-box">
+select bk.publisher, count(*) as n<br>
+from borrow br<br>
+join books bk on br.isbn = bk.isbn<br>
+group by bk.publisher;
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Trace it</div>
+<p>Each tuple of the join carries one publisher. Partitioning by publisher gives one group per publisher. <code>count(*)</code> counts the rows in each group. Result: one row per publisher with the number of borrow events attributed to it.</p>
+<p class="result">Adding <code>order by n desc</code> ranks publishers by popularity.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: HAVING; the "avg &gt; threshold" Pattern</h2>
+
+<div class="analogy">
+<strong>Physical analogy; the sorter sets aside only the heavy stacks.</strong><br><br>
+After sorting mail into zip-code stacks, the sorter flags only the stacks that weigh more than 5 kg. She is not filtering individual envelopes (those stayed in stacks); she is filtering <em>whole stacks</em> by a property of the stack as a group. HAVING is that post-grouping filter. It sees the output of GROUP BY plus aggregates, and lets through only the groups whose aggregate value satisfies the condition.
+</div>
+
+<div class="formula-box">
+<strong>Rule: when to use HAVING.</strong>
+<p>If the condition depends on an <em>aggregate</em> (count, sum, avg, min, max over the group), use HAVING. If the condition depends on an individual-row attribute, use WHERE.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Publishers with average book-age over 10 years</h3>
+<p>Assume books also have a <code>year_published</code> column. Using year 2026:</p>
+<div class="algo-box">
+select publisher, avg(2026 - year_published) as avg_age<br>
+from books<br>
+group by publisher<br>
+having avg(2026 - year_published) &gt; 10;
+</div>
+<p class="result">WHERE would have filtered individual books; HAVING filters whole publisher groups by their average.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (Midterm Q6(d), A2 Q7(b)) &mdash; 95%-guaranteed</h4>
+<p>The prof tests some variant of <strong>"groups where avg(x) &gt; threshold"</strong> almost every term. Template:</p>
+<div class="algo-box">
+select group_col, avg(x)<br>
+from table<br>
+group by group_col<br>
+having avg(x) &gt; T;
+</div>
+<p>Variants swap avg for count (branches with more than 3 accounts), sum (publishers whose total-pages-borrowed exceeds N), or min (courses whose lowest grade is still an A). The <em>skeleton</em> is always group-by then having-aggregate-condition; memorize it cold.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: Views</h2>
+
+<div class="analogy">
+<strong>Physical analogy; a saved search shortcut.</strong><br><br>
+You keep running the same three-table join to see "employees and the books they borrowed this month." Rather than retype that query every time, you save it under a name, <code>employee_borrows</code>. Now anywhere you would write that big query, you write <code>select * from employee_borrows</code>. That is a <strong>view</strong>: a named query that behaves like a virtual table. There are two execution modes: <em>computed on demand</em> (every use re-runs the underlying query against current data) and <em>materialized</em> (the result is stored physically and refreshed periodically; faster to read, stale between refreshes).
+</div>
+
+<div class="formula-box">
+<strong>Syntax: CREATE VIEW.</strong>
+<div class="algo-box">
+create view &lt;name&gt; [(col1, col2, ...)] as<br>
+&nbsp;&nbsp;select ...;<br><br>
+-- use it like a table:<br>
+select * from &lt;name&gt; where ...;
+</div>
+<dl class="breakdown">
+<dt>Computed (virtual)</dt>
+<dd>Default. The view holds no data; every query expands the view's SELECT inline.</dd>
+<dt>Materialized</dt>
+<dd><code>create materialized view ...</code>. The view's result is stored on disk. Must be refreshed (<code>refresh materialized view</code>) to see new data.</dd>
+<dt>Updatability</dt>
+<dd>Simple single-table views may allow INSERT/UPDATE/DELETE that propagates to the base table. Views with JOINs, GROUP BY, or aggregates are usually read-only.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>View for "who borrowed what"</h3>
+<div class="algo-box">
+create view who_borrowed as<br>
+&nbsp;&nbsp;select e.empid, e.name, bk.title, br.borrow_date<br>
+&nbsp;&nbsp;from employee e<br>
+&nbsp;&nbsp;join borrow br on e.empid = br.empid<br>
+&nbsp;&nbsp;join books bk on br.isbn = bk.isbn;<br><br>
+select name, title<br>
+from who_borrowed<br>
+where borrow_date &gt;= '2026-01-01';
+</div>
+<p class="result">The outer query reads as if <code>who_borrowed</code> were a physical table; the DBMS expands it inline.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: Subqueries (Correlated and Uncorrelated)</h2>
+
+<div class="analogy">
+<strong>Physical analogy; asking a question whose answer depends on another question.</strong><br><br>
+An uncorrelated subquery is "find the list of book ISBNs published by Penguin" computed once and then used as a lookup list in the outer query: "give me every borrow whose ISBN is in that list." The inner answer is computed one time, regardless of how many outer rows we examine. A <strong>correlated</strong> subquery is different: the inner query references a column from the outer row, so it must be re-evaluated for each outer row. "For this specific employee, what is the average salary of people at their company?" The inner computation depends on who the outer row is.
+</div>
+
+<div class="formula-box">
+<strong>Two shapes of subquery.</strong>
+<dl class="breakdown">
+<dt>Uncorrelated</dt>
+<dd>Inner SELECT can be computed independently. Runs once. Results used via IN, =, &lt;, &lt;=, etc.</dd>
+<dt>Correlated</dt>
+<dd>Inner SELECT references a column from the outer query's table. Logically re-runs once per outer row.</dd>
+<dt>EXISTS / NOT EXISTS</dt>
+<dd>Boolean test: true if the subquery returns at least one row. Commonly used with correlated subqueries.</dd>
+<dt>ALL / ANY / SOME</dt>
+<dd>Quantified comparisons: <code>x &gt; ALL(...)</code> means x exceeds every value; <code>x &gt; ANY(...)</code> means x exceeds at least one.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Uncorrelated: employees who borrowed any Penguin book</h3>
+<div class="algo-box">
+select name<br>
+from employee<br>
+where empid in (<br>
+&nbsp;&nbsp;select br.empid<br>
+&nbsp;&nbsp;from borrow br<br>
+&nbsp;&nbsp;join books bk on br.isbn = bk.isbn<br>
+&nbsp;&nbsp;where bk.publisher = 'Penguin'<br>
+);
+</div>
+<p>The inner query runs once; it returns a fixed list of empids.</p>
+</div>
+
+<!-- ===== the correlated subquery worked example (A3 Q3 style) ===== -->
+<div class="hand-calc">
+<h3>Correlated: employees earning more than the average at their own company (A3 Q3 style)</h3>
+
+<p>Schema: <code>works(employee_name, company_name, employee_salary)</code>. Find employees whose salary exceeds the average salary at their own company.</p>
+
+<div class="step">
+<div class="step-label">Step 1: Think about what "average at their own company" means</div>
+<p>The average depends on <em>which</em> employee we are looking at; two employees at different companies have different reference averages. That is the signature of a correlated subquery.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Write the outer query with an alias</div>
+<div class="algo-box">
+select w1.employee_name<br>
+from works w1<br>
+where w1.employee_salary &gt; (<br>
+&nbsp;&nbsp;select avg(w2.employee_salary)<br>
+&nbsp;&nbsp;from works w2<br>
+&nbsp;&nbsp;where w2.company_name = w1.company_name<br>
+);
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Trace it</div>
+<p>For each outer row <code>w1</code>: the DBMS conceptually re-runs the inner query, restricting <code>w2</code> to the same company as <code>w1</code>; computes the average salary at that company; compares <code>w1</code>'s salary against it; keeps the row iff strictly greater.</p>
+<p class="result">The key linkage is the predicate <code>w2.company_name = w1.company_name</code> inside the inner WHERE; remove that and the subquery degenerates to "company-wide average" which is wrong.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (A3 Q3(a))</h4>
+<p>Any time the English spec uses the possessive ("their own company," "the branch where they work," "the course they are enrolled in") you are likely writing a correlated subquery. Template:</p>
+<div class="algo-box">
+select col<br>
+from T1 t1<br>
+where t1.x OP (<br>
+&nbsp;&nbsp;select AGG(t2.y)<br>
+&nbsp;&nbsp;from T1 t2&nbsp;&nbsp;&nbsp;&nbsp;-- same table, or a joined table<br>
+&nbsp;&nbsp;where t2.linking_col = t1.linking_col<br>
+);
+</div>
+<p>The linking predicate is non-negotiable. Always use explicit aliases (<code>t1, t2</code>) so the marker can see which reference is outer and which is inner.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part F: EXISTS, NOT EXISTS, and Division in SQL</h2>
+
+<div class="analogy">
+<strong>Physical analogy; checking whether a drawer contains anything.</strong><br><br>
+EXISTS is a Boolean: "does the drawer contain at least one item?" You do not care what the items are, just whether any exist. NOT EXISTS is the opposite: "is the drawer empty?" In SQL these are used with subqueries: <code>EXISTS (SELECT ...)</code> returns true if the inner query would return at least one row, false otherwise. NOT EXISTS is the standard way to express the "ALL" pattern from relational algebra division in SQL.
+</div>
+
+<div class="formula-box">
+<strong>Division in SQL via double NOT EXISTS.</strong>
+<p>"Find employees who have borrowed ALL books from Penguin" translates to "find employees for whom there does NOT EXIST a Penguin book that they have NOT borrowed":</p>
+<div class="algo-box">
+select e.empid, e.name<br>
+from employee e<br>
+where not exists (<br>
+&nbsp;&nbsp;select *<br>
+&nbsp;&nbsp;from books bk<br>
+&nbsp;&nbsp;where bk.publisher = 'Penguin'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and not exists (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select *<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from borrow br<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where br.empid = e.empid and br.isbn = bk.isbn<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+);
+</div>
+<p>Read aloud: "there is no Penguin book that this employee has not borrowed."</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>When an English problem uses "all" or "every," consider two SQL approaches: (1) the double NOT EXISTS pattern above, or (2) GROUP BY with a COUNT match (<code>count(distinct borrowed_isbn) = (select count(*) from ...penguin...)</code>). Both work; NOT EXISTS is the textbook answer and always correct.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part G: ALL, ANY, SOME</h2>
+
+<div class="formula-box">
+<strong>Quantified comparisons.</strong>
+<dl class="breakdown">
+<dt>x &gt; ALL (subquery)</dt>
+<dd>True iff x is greater than every value the subquery returns. Equivalent to "x &gt; max."</dd>
+<dt>x &gt; ANY (subquery)</dt>
+<dd>True iff x exceeds at least one value. Equivalent to "x &gt; min."</dd>
+<dt>ANY vs SOME</dt>
+<dd>Synonyms. <code>= ANY</code> is equivalent to <code>IN</code>; <code>&lt;&gt; ALL</code> is equivalent to <code>NOT IN</code> (but safer around NULLs).</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Employees older than every D-214 employee</h3>
+<div class="algo-box">
+select name<br>
+from employee<br>
+where age &gt; all (<br>
+&nbsp;&nbsp;select age<br>
+&nbsp;&nbsp;from employee<br>
+&nbsp;&nbsp;where office = 'D-214'<br>
+);
+</div>
+<p class="result">Equivalent and often cleaner: <code>where age &gt; (select max(age) from employee where office = 'D-214')</code>.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part H: UNION, INTERSECT, EXCEPT</h2>
+
+<div class="analogy">
+<strong>Physical analogy; combining two guest lists.</strong><br><br>
+Two guest lists, same columns (name, rsvp). UNION merges them (everyone on either list, no duplicates). INTERSECT keeps only people on both lists (confirmed double-invited). EXCEPT keeps the people on the first list who are NOT on the second. These are exactly the set operations from relational algebra, surfaced directly as SQL keywords.
+</div>
+
+<div class="formula-box">
+<strong>Syntax.</strong>
+<div class="algo-box">
+(select ... from ...) union (select ... from ...);<br>
+(select ...) intersect (select ...);<br>
+(select ...) except (select ...);<br><br>
+-- keep duplicates with "all":<br>
+(select ...) union all (select ...);
+</div>
+<dl class="breakdown">
+<dt>Schema rule</dt>
+<dd>Both SELECTs must produce the same number of columns with compatible types. Column names from the first SELECT are used.</dd>
+<dt>UNION vs UNION ALL</dt>
+<dd>UNION removes duplicates (expensive). UNION ALL keeps duplicates (cheaper). Default is UNION.</dd>
+<dt>EXCEPT</dt>
+<dd>Some DBMSs use <code>MINUS</code> (Oracle). Same meaning.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Customers with an account or a loan (Bank schema)</h3>
+<div class="algo-box">
+(select customer_name from depositor)<br>
+union<br>
+(select customer_name from borrower);
+</div>
+<p>Intersect gives customers with both; except gives customers with an account but no loan.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part I: NULL Handling Revisited</h2>
+
+<div class="formula-box">
+<strong>NULL rules in aggregates and comparisons.</strong>
+<dl class="breakdown">
+<dt>count(*)</dt>
+<dd>Counts all rows, including rows with all-NULL columns.</dd>
+<dt>count(col), sum, avg, min, max</dt>
+<dd>Skip NULL values in col.</dd>
+<dt>IS NULL / IS NOT NULL</dt>
+<dd>Only way to test for NULL. Never <code>= NULL</code>.</dd>
+<dt>NULL propagation</dt>
+<dd>NULL + 5 = NULL, NULL * 0 = NULL, NULL = NULL is NULL (not true).</dd>
+<dt>NOT IN gotcha</dt>
+<dd>If the subquery list contains a NULL, <code>x NOT IN (list)</code> always returns NULL (not true). Use <code>NOT EXISTS</code> instead for safety.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Employees with no office assignment</h3>
+<div class="algo-box">
+select name from employee where office is null;
+</div>
+<p class="result">Writing <code>where office = null</code> returns zero rows; the predicate evaluates to NULL for every row.</p>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>A surprising number of exam-losing bugs are NULL handling: using <code>=</code> instead of <code>IS</code>, forgetting that <code>NOT IN</code> fails with NULL-containing lists, forgetting that aggregates skip NULL. Build a mental habit: any column that could be NULL needs explicit handling. When in doubt, use NOT EXISTS instead of NOT IN.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>COUNT(*)</dt><dd>Number of rows including all-NULL rows.</dd>
+<dt>COUNT(col)</dt><dd>Number of non-NULL values in col.</dd>
+<dt>COUNT(DISTINCT col)</dt><dd>Number of distinct non-NULL values.</dd>
+<dt>SUM / AVG / MIN / MAX</dt><dd>Aggregate functions; all skip NULLs.</dd>
+<dt>GROUP BY</dt><dd>Partition rows by grouping columns; aggregates apply per group.</dd>
+<dt>HAVING</dt><dd>Post-grouping filter; condition on aggregate or grouping column.</dd>
+<dt>View</dt><dd>Named query behaving like a virtual table. Virtual (default) or materialized.</dd>
+<dt>Materialized view</dt><dd>Results stored on disk; must be refreshed to reflect changes.</dd>
+<dt>Uncorrelated subquery</dt><dd>Inner query independent of outer row; runs once.</dd>
+<dt>Correlated subquery</dt><dd>Inner query references an outer column; re-evaluated per outer row.</dd>
+<dt>EXISTS</dt><dd>True if subquery returns at least one row.</dd>
+<dt>NOT EXISTS</dt><dd>True if subquery returns no rows; used for division ("all" pattern).</dd>
+<dt>ALL / ANY / SOME</dt><dd>Quantified comparisons with a subquery-returned set.</dd>
+<dt>UNION / INTERSECT / EXCEPT</dt><dd>Set operations on SELECT results; schemas must match.</dd>
+<dt>UNION ALL</dt><dd>Union that keeps duplicates.</dd>
+<dt>IS NULL / IS NOT NULL</dt><dd>The only correct NULL comparison.</dd>
+<dt>NOT IN gotcha</dt><dd>Returns NULL (not true) if list contains NULL; prefer NOT EXISTS.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-05-sql-ddl-basics.html">&larr; 05. SQL: DDL + Basics</a>
+<a class="bottom-nav-btn next" href="cg-07-ra-to-sql.html">07. RA to SQL Translation &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

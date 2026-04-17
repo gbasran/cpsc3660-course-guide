@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 16 : ER Walkthrough | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 16; EXAM PREP</span>
+<h1>3 Full ER Design Walkthroughs</h1>
+<p class="subtitle">Car insurance, online bookstore with ISA, and a novel hospital scenario. Each walked from natural-language prompt to schema.</p>
+
+<div class="analogy">
+<strong>Physical analogy; a pathologist reading an X-ray.</strong><br><br>
+A pathologist does not stare at an X-ray and freestyle a diagnosis; she follows a checklist: scan for the big shapes first (heart, lungs, spine), then look for symmetry, then look for specific abnormalities one region at a time. ER design works the same way: scan for the nouns (entities), then the verbs (relationships), then the cardinalities, then the ISA patterns, then the weak entities. The discipline is the checklist; the creativity is filling it in. These three exercises walk through the checklist on real problems.
+</div>
+
+<div class="note">
+<strong>The ER checklist.</strong>
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li>Identify entities (nouns that have attributes of their own).</li>
+<li>Identify relationships (verbs between entities).</li>
+<li>Assign cardinalities (1:1, 1:N, M:N).</li>
+<li>Identify multi-valued, composite, and derived attributes.</li>
+<li>Identify ISA / generalization (shared attribute subsets).</li>
+<li>Identify weak entities (no natural standalone key).</li>
+<li>Draw the diagram.</li>
+<li>Map to relations (one table per entity, one per M:N relationship, flatten 1:N into the "many" side).</li>
+</ol>
+</div>
+
+<!-- ============================================================ -->
+<h2>Exercise 1: Car Insurance (A3 Q4 verbatim)</h2>
+
+<div class="analogy">
+<strong>The domain.</strong> An insurance company tracks customers, cars, and insurance policies. A customer owns one or more cars; each car has exactly one owner (at a time). Each car has one or more insurance types attached to it. Start from the requirements and walk through the whole pipeline.
+</div>
+
+<div class="formula-box">
+<strong>Requirements (verbatim from A3 Q4).</strong>
+<ul style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>Customer</strong>: CID (unique), name, phone, email.</li>
+<li><strong>Car</strong>: VID (unique), brand, year, price.</li>
+<li><strong>Insurance</strong>: IID (unique), type, price, start_date, end_date.</li>
+<li><strong>Owns</strong>: each customer owns 1+ cars; each car has exactly 1 owner.</li>
+<li><strong>Insured_by</strong>: each car has 1+ insurance instances; one insurance instance may apply to many cars.</li>
+</ul>
+</div>
+
+<div class="hand-calc">
+<h3>Step-by-step design</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Identify entities</div>
+<p>Three nouns with their own attributes: Customer, Car, Insurance.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Identify relationships and cardinalities</div>
+<p><strong>Owns</strong>: Customer 1 &mdash; N Car; total participation on Car (every car has exactly one owner). <br>
+<strong>Insured_by</strong>: Car M &mdash; N Insurance (many-to-many); total participation on Car (every car is insured by something).</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Draw the ER diagram</div>
+<pre style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; line-height:1.4; color:var(--text-secondary); background:var(--bg-raised); padding:16px; border-radius:4px;">
+  +------------+       1    owns    N     +--------+
+  |  Customer  |&lt;---------- &lt;&gt; -----------&gt;|  Car   |
+  +------------+                          +--------+
+  CID* name phone email                   VID* brand year price
+                                                |
+                                                | M
+                                              &lt;&gt;insured_by
+                                                | N
+                                                v
+                                           +-----------+
+                                           | Insurance |
+                                           +-----------+
+                                           IID* type price start_date end_date
+</pre>
+<p>(*) marks the primary key. &lt;&gt; marks a relationship diamond. On paper, draw rectangles for entities, diamonds for relationships, ovals for attributes; underline PK attributes.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 4: Map to relations</div>
+<p>One table per entity; the 1:N relationship (owns) is merged into the "many" side (Car), which picks up a FK to Customer. The M:N relationship (insured_by) becomes its own junction table.</p>
+<div class="algo-box">
+customer(<u>CID</u>, name, phone, email)<br>
+car(<u>VID</u>, brand, year, price, ownerCID)<br>
+&nbsp;&nbsp;foreign key (ownerCID) references customer(CID)<br>
+insurance(<u>IID</u>, type, price, start_date, end_date)<br>
+car_insurance(<u>VID, IID</u>)<br>
+&nbsp;&nbsp;foreign key (VID) references car(VID)<br>
+&nbsp;&nbsp;foreign key (IID) references insurance(IID)
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Step 5: Verify requirements</div>
+<p>Every car has an owner (ownerCID NOT NULL). One customer can own many cars (many rows in car with the same ownerCID). One car can have many insurance types (many rows in car_insurance with the same VID). <span class="hl">All checks pass.</span></p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q4 verbatim; ~12-15 marks on the final</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Exercise 2: Online Bookstore with Generalization (A3 Q8 verbatim)</h2>
+
+<div class="analogy">
+<strong>The domain.</strong> An online bookstore initially sells only books. Then the business expands to music (CDs and cassettes). Music items ship the same way books do, so they share a lot of structure. ER generalization (ISA) captures this without duplicating attributes.
+</div>
+
+<div class="formula-box">
+<strong>Requirements (verbatim from A3 Q8).</strong>
+<ul style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>Book</strong>: isbn (unique), title, year, price.</li>
+<li><strong>Customer</strong>: email (unique), name, address.</li>
+<li><strong>Shopping_basket</strong>: basketID (unique), owned by one customer.</li>
+<li><strong>Warehouse</strong>: code (unique), location.</li>
+<li><strong>Author</strong>: name, bio.</li>
+<li><strong>Publisher</strong>: name, address.</li>
+<li>Relationships: written_by (book M &mdash; N author), published_by (book N &mdash; 1 publisher), contains (basket M &mdash; N book), stocks (warehouse M &mdash; N book).</li>
+<li><strong>Extension</strong>: music (cassettes, CDs) shipped like books; has its own attributes (e.g. playlist, format) plus shared attributes (isbn-like identifier, title, price, warehouse stocking).</li>
+</ul>
+</div>
+
+<div class="hand-calc">
+<h3>Step-by-step design</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Identify entities and classify shared attributes</div>
+<p>Book and music share <strong>id (isbn-like), title, price</strong>. They differ on author/publisher (book) vs playlist/format (music). This is the ISA pattern.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Introduce the supertype Item</div>
+<p>Promote the shared attributes into a parent entity <strong>Item</strong>(itemID, title, price). Let Book and Music ISA Item; each subtype inherits Item's attributes and adds its own.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Draw the ER fragment around ISA</div>
+<pre style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; line-height:1.4; color:var(--text-secondary); background:var(--bg-raised); padding:16px; border-radius:4px;">
+                    +--------+
+                    |  Item  |   itemID* title price
+                    +--------+
+                        ^
+                       / \
+                      / \ \          &lt;-- ISA triangle
+                     /   \ \
+                    /-----\\
+                   /       \\
+             +--------+  +---------+
+             |  Book  |  |  Music  |
+             +--------+  +---------+
+             year            playlist format
+
+  written_by, published_by        (stocks, contains relations apply to Item)
+</pre>
+</div>
+
+<div class="step">
+<div class="step-label">Step 4: Work out cardinalities</div>
+<p><strong>written_by</strong>: Book M &mdash; N Author (each book may have multiple authors; each author may write many books). <br>
+<strong>published_by</strong>: Book N &mdash; 1 Publisher (each book has exactly one publisher). <br>
+<strong>contains</strong>: Shopping_basket M &mdash; N Item (a basket has many items, an item appears in many baskets). <br>
+<strong>stocks</strong>: Warehouse M &mdash; N Item (with quantity attribute on the relationship). <br>
+<strong>owns</strong>: Customer 1 &mdash; N Shopping_basket.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 5: Map to relations</div>
+<div class="algo-box">
+customer(<u>email</u>, name, address)<br>
+item(<u>itemID</u>, title, price)<br>
+book(<u>itemID</u>, year)  -- PK and FK into item<br>
+music(<u>itemID</u>, playlist, format)<br>
+author(<u>name</u>, bio)<br>
+publisher(<u>name</u>, address)<br>
+shopping_basket(<u>basketID</u>, customer_email)<br>
+warehouse(<u>code</u>, location)<br>
+written_by(<u>itemID, author_name</u>)<br>
+published_by(<u>itemID</u>, publisher_name)  -- 1-side merged<br>
+contains(<u>basketID, itemID</u>, quantity)<br>
+stocks(<u>code, itemID</u>, quantity)
+</div>
+<p>Book and music tables share the itemID PK which is also a FK to item; this is the "table per subtype" mapping of ISA.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 6: Verify requirements</div>
+<p>Shared attributes (title, price) live once in item; subtype-specific attributes (year for book, playlist for music) live in their subtype table. Warehouse stocks item (not book specifically); one relationship covers both books and music. <span class="hl">All checks pass.</span></p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q8 verbatim; ISA is post-midterm territory; ~12-15 marks on the final</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Exercise 3: Hospital (novel scenario; stretch practice)</h2>
+
+<div class="analogy">
+<strong>The domain.</strong> A hospital tracks patients, doctors, appointments, and wards. The prof likes to test novel scenarios with two twists: a reified relationship (appointment) that is rich enough to be an entity, and an optional relationship (patients may or may not be admitted to a ward).
+</div>
+
+<div class="formula-box">
+<strong>Requirements.</strong>
+<ul style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>Patient</strong>: PID (unique), name, dob.</li>
+<li><strong>Doctor</strong>: DID (unique), specialty.</li>
+<li><strong>Appointment</strong>: links patient to doctor; has date and time attributes.</li>
+<li><strong>Ward</strong>: WID (unique), name, capacity.</li>
+<li>A patient <em>may</em> be admitted to a ward (optional).</li>
+<li>A doctor <em>may</em> supervise a ward (optional; at most one supervisor per ward).</li>
+</ul>
+</div>
+
+<div class="hand-calc">
+<h3>Step-by-step design</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Identify the tricky entity; appointment</div>
+<p>Appointment has its own attributes (date, time) and appears in its own right. It is a <strong>reified relationship</strong>; treat it as a weak entity owned by (patient, doctor). Its discriminator is (date, time); the full key is (PID, DID, date, time).</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Cardinalities</div>
+<p><strong>Admitted_to</strong>: Patient 0..1 &mdash; N Ward (optional on patient side).<br>
+<strong>Supervises</strong>: Doctor 0..1 &mdash; 1 Ward (each ward has at most one supervising doctor, possibly none; doctors may or may not supervise).<br>
+<strong>Appointment</strong>: weak entity with total participation on both Patient and Doctor (an appointment must involve both).</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Draw the ER diagram (sketch)</div>
+<pre style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; line-height:1.4; color:var(--text-secondary); background:var(--bg-raised); padding:16px; border-radius:4px;">
+  +---------+      has      +-------------+      has     +---------+
+  | Patient |-----&lt;&gt;-------| Appointment |-----&lt;&gt;-------| Doctor  |
+  +---------+  (weak ent, double-border)                +---------+
+  PID* name dob             date+ time+                 DID* specialty
+       |                                                    |
+       | 0..1 admitted_to N                                 | 0..1 supervises 1
+       v                                                    v
+  +--------+                                           +--------+
+  | Ward   |                                           | Ward   |
+  +--------+                                           +--------+
+  WID* name capacity
+</pre>
+<p>(+) marks the weak-entity discriminator (dashed underline on paper). Double borders mark the weak entity and its identifying relationship.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 4: Map to relations</div>
+<div class="algo-box">
+patient(<u>PID</u>, name, dob, wardWID)  -- wardWID nullable<br>
+&nbsp;&nbsp;foreign key (wardWID) references ward(WID) on delete set null<br>
+doctor(<u>DID</u>, specialty)<br>
+ward(<u>WID</u>, name, capacity, supervisorDID)  -- supervisorDID nullable<br>
+&nbsp;&nbsp;foreign key (supervisorDID) references doctor(DID) on delete set null<br>
+appointment(<u>PID, DID, date, time</u>)<br>
+&nbsp;&nbsp;foreign key (PID) references patient(PID)<br>
+&nbsp;&nbsp;foreign key (DID) references doctor(DID)
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Step 5: Verify</div>
+<p>Patient can be admitted to a ward (wardWID set) or not (NULL). Doctor can supervise a ward (supervisorDID set on the ward row) or not. Appointment is a composite-key entity; its tuple is identified by both the patient and doctor together with the date/time. <span class="hl">All checks pass.</span></p>
+</div>
+
+<div class="step">
+<div class="step-label">Alternative modeling choice</div>
+<p>Appointment could be a pure ternary relationship (patient, doctor, time) without reification, if date/time were the only attributes. Because it has attributes and can have constraints of its own (e.g. status, duration), most designers promote it to an entity. Either is defensible on the exam if you justify the choice.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Stretch practice; the prof has not used this domain but tests this <em>pattern</em> (reified relationship + optional FK)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Mapping rules cheat-sheet</h2>
+
+<table class="step-table">
+<tr><th>Pattern</th><th>Mapping Rule</th></tr>
+<tr><td>Strong entity E</td><td>One table E; PK is E's key attribute.</td></tr>
+<tr><td>Weak entity W owned by E</td><td>One table W; PK is (E.PK, W.discriminator); FK on E.PK.</td></tr>
+<tr><td>1:1 relationship E1 &mdash; E2</td><td>Add one FK to either side; both optional.</td></tr>
+<tr><td>1:N relationship E1 &mdash; N E2</td><td>Add FK on E1.PK to the "many" side (E2).</td></tr>
+<tr><td>M:N relationship E1 &mdash; M N E2</td><td>Create a junction table with (E1.PK, E2.PK) as composite PK, plus any relationship attributes.</td></tr>
+<tr><td>Multi-valued attribute</td><td>Separate table (entityPK, value); PK is the pair.</td></tr>
+<tr><td>Composite attribute</td><td>Flatten: each leaf becomes its own column in the entity's table.</td></tr>
+<tr><td>Derived attribute</td><td>Do not store; compute via a view or query.</td></tr>
+<tr><td>ISA (generalization)</td><td>Option A (table per subtype, shared PK). Option B (single table with discriminator column). Option C (one table per level). The prof prefers Option A.</td></tr>
+</table>
+
+<div class="why-box">
+<h3>Why ER is worth ~15 marks of careful work</h3>
+<p>ER design is the <em>only</em> exam topic where the answer key has judgement calls. The prof looks for: (1) entities chosen correctly, (2) cardinalities marked on every relationship, (3) PK attributes underlined, (4) weak entities with double borders, (5) ISA drawn with a triangle, (6) the mapping to relations matches the diagram. Messy diagrams lose marks even when the logic is right; use pencil first, then ink over the final version.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Entity</dt><dd>A noun with attributes of its own; becomes a rectangle in the ER diagram and (usually) a table in the schema.</dd>
+<dt>Relationship</dt><dd>A verb between entities; becomes a diamond; mapped to a table if M:N, merged into an entity if 1:N.</dd>
+<dt>Cardinality</dt><dd>1:1, 1:N, M:N; written on the edges of the relationship diamond.</dd>
+<dt>Multi-valued attribute</dt><dd>Attribute that takes a set of values; gets its own table.</dd>
+<dt>Composite attribute</dt><dd>Attribute with sub-parts; flattened to leaf columns.</dd>
+<dt>Weak entity</dt><dd>Entity with no natural standalone key; identified by its owner plus a discriminator.</dd>
+<dt>ISA / Generalization</dt><dd>Hierarchy: supertype's attributes are inherited by subtypes; subtypes add their own.</dd>
+<dt>Reified relationship</dt><dd>A relationship that has its own attributes and/or needs to be referenced elsewhere; promoted to a weak entity.</dd>
+<dt>Total participation</dt><dd>Every instance of the entity must participate in the relationship (drawn with a double line).</dd>
+<dt>Partial participation</dt><dd>Some instances may not participate; FK column is nullable.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-15-ra-walkthrough.html">&larr; 15. RA Walkthrough</a>
+<a class="bottom-nav-btn next" href="cg-17-normalization-walkthrough.html">17. Normalization Walkthrough &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

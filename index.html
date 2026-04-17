@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPSC 3660 : Database Systems: Final Exam Course Guide</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<h1>CPSC 3660: Database Systems</h1>
+<p class="subtitle">Complete Final Exam Course Guide; 19 interactive pages; built from forensic pattern analysis of every assignment and the midterm; designed for the 3-hour paper-based cumulative final</p>
+
+<div class="info-box">
+ <p><strong>Textbook:</strong> Silberschatz, Korth, Sudarshan, <em>Database System Concepts</em>, 7th Edition</p>
+ <p><strong>Course:</strong> CPSC 3660; University of Lethbridge; Winter 2026</p>
+ <p><strong>Final Exam:</strong> 3 hours; paper-based; ~120 marks over ~16 questions; 50-60% basic, 25-30% medium, 10-15% hard</p>
+ <p><strong>Scope (per Week 14 slide):</strong> DB concepts; Relational Algebra; SQL; E-R Model; Normalization</p>
+ <p style="color: #9b89b6; margin-top: 12px;">Pages with <span style="border-left: 4px solid #9b89b6; padding-left: 8px;">lilac borders</span> are synthesis &amp; exam prep; work through them close to exam day.</p>
+</div>
+
+<div class="priority-box">
+ <h3>Start Here: The Professor's Signature</h3>
+ <p>Before memorizing topics, read <a href="cg-12-professors-signature.html" style="color:#c9a84c; text-decoration:underline;">Page 12: The Professor's Signature</a>. It shows the exact construction pattern the prof uses across assignments and the midterm, plus the predicted final exam shape. Knowing what's coming makes everything else less stressful.</p>
+ <p class="week">Then prioritize: Page 09 (Normalization, the 15m showpiece), Page 04 (RA with division), Page 06 (Advanced SQL), and Page 19 (the practice final itself).</p>
+</div>
+
+<div class="info-box" style="text-align: left;">
+ <p style="color: #c9a84c; font-weight: 600; margin-bottom: 12px;">PDF Downloads</p>
+ <p>&bullet; <a href="pdfs/3660-final-study-guide.pdf">Complete Study Guide (PDF)</a>; 41 pages built from the ground up, covers every topic with worked examples; ideal for paper reference while studying</p>
+ <p>&bullet; <a href="pdfs/3660-practice-final.pdf">Practice Final Exam (PDF)</a>; 120 marks, 16 questions, 180 minutes; print this and simulate the exam</p>
+ <p>&bullet; <a href="pdfs/3660-practice-final-solutions.pdf">Practice Final Solutions (PDF)</a>; every question fully solved with "Your Answer" and "Understanding" sections, plus which assignment/midterm pattern each question mirrors</p>
+</div>
+
+<!-- ===================== MODULE 1 ===================== -->
+<div class="module">
+ <div class="module-header">MODULE 1: Foundations</div>
+ <p class="module-desc">Core concepts, the entity-relationship model, and the relational model itself. Everything you need before touching queries or design theory.</p>
+
+ <a class="page-link" href="cg-01-db-concepts.html">
+ <span class="num">01</span><span class="title">Database Concepts</span>
+ <div class="desc">Schema vs instance (filing cabinet analogy). DBMS components. Data dictionary. Keys (super, candidate, primary; ID-card analogy). Integrity constraints. Cascading deletes. Mirrors the prof's opening 5-6 concept questions (2m each, always on every exam).</div>
+ </a>
+
+ <a class="page-link" href="cg-02-er-model.html">
+ <span class="num">02</span><span class="title">E-R Model &amp; Diagrams</span>
+ <div class="desc">Entities (strong/weak), attributes (simple, composite, multivalued, derived), relationships, cardinality, participation, weak entities with discriminators, generalization/ISA, ER&rarr;relational mapping rules. Family-tree analogy. Mirrors A3 Q4 and Q8 (bookstore with generalization).</div>
+ </a>
+
+ <a class="page-link" href="cg-03-relational-model.html">
+ <span class="num">03</span><span class="title">Relational Model</span>
+ <div class="desc">Tuples, attributes, domains, schemas, primary keys, foreign keys, referential integrity, NULL handling. Spreadsheet analogy. The formal language your SQL and RA will operate on.</div>
+ </a>
+</div>
+
+<!-- ===================== MODULE 2 ===================== -->
+<div class="module">
+ <div class="module-header">MODULE 2: Query Languages</div>
+ <p class="module-desc">The two query languages the prof tests heavily: Relational Algebra and SQL. The final will have ~25-30 marks of SQL and ~10-12 marks of RA.</p>
+
+ <a class="page-link" href="cg-04-relational-algebra.html">
+ <span class="num">04</span><span class="title">Relational Algebra</span>
+ <div class="desc">Every operator: &sigma; select, &pi; project, &times; product, &#8904; natural join, &cup; &minus; &cap; set ops, &rho; rename, &divide; division, &gamma; grouping. <strong>Deep dive on division</strong>; it is the hard pattern that keeps returning (A1 Q7b, A2 Q1b; 85% probability on final).</div>
+ </a>
+
+ <a class="page-link" href="cg-05-sql-ddl-basics.html">
+ <span class="num">05</span><span class="title">SQL: DDL + Basics</span>
+ <div class="desc">CREATE TABLE with PK/FK, SELECT/FROM/WHERE, JOIN, ORDER BY, DISTINCT, BETWEEN, LIKE, IN. <strong>"Don't over-join" discipline</strong> per the prof's Week 14 hint. Mirrors A2 Q6-Q7 and Midterm Q7-Q8d.</div>
+ </a>
+
+ <a class="page-link" href="cg-06-sql-advanced.html">
+ <span class="num">06</span><span class="title">SQL: Advanced</span>
+ <div class="desc">Aggregate functions, GROUP BY + HAVING (the <strong>95%-guaranteed</strong> pattern), views with update semantics, correlated subqueries, NOT EXISTS, ALL/ANY/SOME, INTERSECT/EXCEPT, NULL handling. Mirrors A3 Q1-Q3 and Midterm Q6-Q9.</div>
+ </a>
+
+ <a class="page-link" href="cg-07-ra-to-sql.html">
+ <span class="num">07</span><span class="title">RA to SQL Translation</span>
+ <div class="desc">Side-by-side RA&rarr;SQL translation for every operator. Special attention to division&rarr;NOT EXISTS+EXCEPT (the hard one). Mirrors A2 Q3-Q5.</div>
+ </a>
+</div>
+
+<!-- ===================== MODULE 3 ===================== -->
+<div class="module">
+ <div class="module-header">MODULE 3: Design Theory</div>
+ <p class="module-desc">The theoretical backbone. These topics were 0 marks on the midterm but will be ~40-45% of the final. Heaviest weight: normalization (15m BCNF showpiece).</p>
+
+ <a class="page-link" href="cg-08-fd-theory.html">
+ <span class="num">08</span><span class="title">Functional Dependencies</span>
+ <div class="desc">FD definition; Armstrong's 3 core axioms (reflexivity, augmentation, transitivity) and 3 derived rules (union, decomposition, pseudo-transitivity); attribute closure algorithm; F&#8314; closure. <strong>Full pseudo-transitivity proof</strong> (A4 Q4; high reappearance probability). Family-tree-of-rules analogy.</div>
+ </a>
+
+ <a class="page-link" href="cg-09-normalization.html">
+ <span class="num">09</span><span class="title">Normalization &amp; BCNF</span>
+ <div class="desc"><strong>Heaviest page on the guide.</strong> 1NF&rarr;2NF&rarr;3NF&rarr;BCNF ladder. Candidate key enumeration. BCNF violation detection. BCNF decomposition algorithm walked verbatim on A4 Q6. Lossless test and dependency-preservation test with the two Week 14 handwritten examples (Borrow-loan lossless; Employee/Project/Branch lossy). Jigsaw-puzzle analogy.</div>
+ </a>
+</div>
+
+<!-- ===================== MODULE 4 ===================== -->
+<div class="module">
+ <div class="module-header">MODULE 4: Safety Net</div>
+ <p class="module-desc">Brief primer on topics the prof mentioned but didn't emphasize. Probability on final: &le; 5%. Skim, don't memorize.</p>
+
+ <a class="page-link" href="cg-10-oodb-nosql.html">
+ <span class="num">10</span><span class="title">OO-DB &amp; NoSQL Primer</span>
+ <div class="desc">Object-oriented DBs (objects, classes, inheritance, ODL vs SQL). NoSQL categories (key-value, document, column-family, graph). Data lake concept. Relational vs OO vs NoSQL comparison table.</div>
+ </a>
+</div>
+
+<!-- ===================== MODULE 5 ===================== -->
+<div class="module">
+ <div class="module-header">MODULE 5: Exam Prep &amp; Synthesis</div>
+ <p class="module-desc">The high-value pages. Once you know the material, spend most of your time here. Each page was built from forensic analysis of the prof's exam patterns.</p>
+
+ <a class="page-link synthesis" href="cg-11-formula-sheet.html">
+ <span class="num">11</span><span class="title">Formula &amp; Syntax Sheet</span>
+ <div class="desc">One-page cheat sheet. Every RA operator + SQL equivalent. Armstrong's axioms. Attribute closure pseudocode. BCNF decomposition pseudocode. ER&rarr;relational mapping rules. Lossless and dependency-preservation tests. Cross-referenced to full explanation pages.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-12-professors-signature.html">
+ <span class="num">12</span><span class="title">The Professor's Signature</span>
+ <div class="desc"><strong>START HERE.</strong> Forensic analysis of how the prof constructs exams. The opening 5-6 concept pattern. SQL graduation. RA multi-part anatomy. Schema recycling matrix (Library 85%, Employee-Works 80%). Post-midterm territory prediction. Exactly what to expect on the final.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-13-concept-questions.html">
+ <span class="num">13</span><span class="title">Concept Walkthroughs</span>
+ <div class="desc">15 concept-style questions with 2-mark model answers. Every answer sized for 2 lines (what the prof accepts for full marks). Covers every opening-question pattern across all 4 assignments and the midterm.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-14-sql-walkthrough.html">
+ <span class="num">14</span><span class="title">SQL Walkthroughs</span>
+ <div class="desc">10 SQL problems walked step by step. Uses recycled schemas (Library, Employee-Works, Bank) so you see the exact styles the prof will recycle. "Don't over-join" callouts where relevant.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-15-ra-walkthrough.html">
+ <span class="num">15</span><span class="title">RA Walkthroughs</span>
+ <div class="desc">8 RA problems side-by-side with equivalent SQL. Includes the hard division pattern (borrowed ALL books from publisher X), grouping with count-distinct, and multi-level grouping. Each step constructs the expression piece by piece.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-16-er-walkthrough.html">
+ <span class="num">16</span><span class="title">ER Design Walkthroughs</span>
+ <div class="desc">3 full ER design exercises. Car insurance (A3 Q4 verbatim). Online bookstore with music CDs and generalization (A3 Q8 verbatim). Hospital (novel stretch scenario). Each walks requirements&rarr;diagram&rarr;schema conversion&rarr;key identification.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-17-normalization-walkthrough.html">
+ <span class="num">17</span><span class="title">Normalization Walkthroughs</span>
+ <div class="desc">3 full walkthroughs. A4 Q6 BCNF gold standard. Week 14 Borrow-loan lossless example. Week 14 Employee/Project/Branch lossy counter-example with the actual spurious tuples highlighted. Line-by-line decomposition and checks.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-18-paper-exam-techniques.html">
+ <span class="num">18</span><span class="title">Paper Exam Techniques</span>
+ <div class="desc"><strong>Critical for this paper-based exam.</strong> How to draw RA symbols by hand (&sigma; &pi; &#8904; &divide;). Hand-writable SQL layout. ER notation conventions (rectangles, diamonds, ISA triangles). FD proof layout. BCNF decomposition tree on paper. Time budget for 120m over 180 min.</div>
+ </a>
+
+ <a class="page-link synthesis" href="cg-19-practice-final.html">
+ <span class="num">19</span><span class="title">Predicted Practice Final Exam</span>
+ <div class="desc"><strong>THE page to work through.</strong> 120 marks, 16 questions, 180 minutes; designed to mirror the prof's construction signature exactly. Novel schemas (hospital, airline, music-streaming, researcher-papers) structurally analogous to the prof's recycled ones, so it's real practice. Solutions hidden behind "Reveal" toggles; full solutions also in the PDF.</div>
+ </a>
+</div>
+
+<div class="info-box" style="margin-top: 40px;">
+ <p style="color: #d4956a; font-size: 18px; font-weight: bold;">Built for one job: passing the CPSC 3660 final.</p>
+ <p style="color: #b8b4ac;">Every page was constructed by reverse-engineering the prof's assignment and midterm patterns. The practice final mirrors his construction signature question by question.</p>
+ <p style="color: #b8b4ac;">If something feels unclear, check the cross-reference links; they point back to where the concept was first explained.</p>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

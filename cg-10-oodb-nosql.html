@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 10 : OO-DB and NoSQL Primer | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 10</span>
+<h1>OO-DB, NoSQL, and Data Lakes</h1>
+<p class="subtitle">Safety-net primer on the post-relational landscape in case it appears on the final.</p>
+
+<div class="analogy">
+<p>Relational databases are the tidy filing cabinets of the data world: every drawer labeled, every folder the same shape. Most business data fits in filing cabinets beautifully. But when the data is a photo, a graph of social connections, a half-gigabyte sensor log, or a document with nested structure, the filing-cabinet metaphor breaks down. OO databases, NoSQL systems, and data lakes are different filing systems for different shapes of information.</p>
+<p>This page is a safety-net tour. Week 14 of the course confirmed the final will focus on the five core topics (DB concepts, RA, SQL, ER, normalization); if OO-DB or NoSQL appears, it will be a short definition or conceptual question worth ~5% of the exam at most.</p>
+</div>
+
+<h2>Part A: Object-Oriented Databases</h2>
+
+<span class="tag">PART A</span>
+
+<div class="analogy">
+<p>An OO-DB stores objects directly the way your programming language uses them: with classes, inheritance, and methods. Instead of shredding an <code>Employee</code> object into rows across three relational tables and rebuilding it in application code on every query (the "object-relational impedance mismatch"), the database stores it as a single object graph. If your domain has deeply nested types (CAD drawings, multimedia, scientific data, chemistry compounds), OO-DBs are more natural than relational.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Core OO-DB concepts:</strong></p>
+<dl class="breakdown">
+<dt>Object</dt><dd>An instance of a class with identity (OID), state (attributes), and behavior (methods).</dd>
+<dt>Class</dt><dd>A template defining the structure and behavior of its objects.</dd>
+<dt>Inheritance</dt><dd>A subclass inherits attributes and methods from a superclass (Manager inherits from Employee).</dd>
+<dt>Encapsulation</dt><dd>Objects expose methods; internal state is hidden behind the interface.</dd>
+<dt>ODL</dt><dd>Object Definition Language: the OO-DB counterpart of SQL's DDL (create table).</dd>
+<dt>OQL</dt><dd>Object Query Language: the OO-DB counterpart of SQL's DML (select).</dd>
+</dl>
+</div>
+
+<div class="note">
+<p><strong>Why OO-DBs exist.</strong> Complex data types (images, graphs, CAD, chemistry), direct mapping to OO program code (no ORM layer), persistent object references without foreign-key joins. Downsides: less mature than relational, weaker query optimizer, vendor lock-in.</p>
+</div>
+
+<h2>Part B: NoSQL Families</h2>
+
+<span class="tag">PART B</span>
+
+<div class="analogy">
+<p>NoSQL ("not only SQL") is an umbrella for four very different database styles that share only one thing: they chose horizontal scaling and flexible schemas over strict ACID guarantees and relational joins. Each family is optimized for a different data shape.</p>
+</div>
+
+<table class="step-table">
+<thead>
+<tr><th>Family</th><th>Data Model</th><th>Example</th><th>Best For</th></tr>
+</thead>
+<tbody>
+<tr><td>Key-value</td><td>String key → opaque blob</td><td>Redis, DynamoDB</td><td>caches, session stores</td></tr>
+<tr><td>Document</td><td>JSON-like documents</td><td>MongoDB, Couchbase</td><td>content management, catalogs</td></tr>
+<tr><td>Column-family</td><td>Sparse wide rows grouped by column</td><td>Cassandra, HBase</td><td>time-series, write-heavy analytics</td></tr>
+<tr><td>Graph</td><td>Nodes + edges with properties</td><td>Neo4j, Neptune</td><td>social networks, recommendation, fraud</td></tr>
+</tbody>
+</table>
+
+<div class="formula-box">
+<p><strong>Key distinguishing features:</strong></p>
+<dl class="breakdown">
+<dt>Schema-less</dt><dd>Documents in the same collection can have different fields (flexibility over guarantees).</dd>
+<dt>Horizontal scaling</dt><dd>Data is partitioned across many commodity machines; scales out, not just up.</dd>
+<dt>BASE not ACID</dt><dd>Basically Available, Soft state, Eventual consistency. Trade strict consistency for availability and performance (see CAP theorem).</dd>
+<dt>No joins (mostly)</dt><dd>Queries are single-collection; you denormalize data and embed related info inside documents.</dd>
+</dl>
+</div>
+
+<h2>Part C: Data Lakes</h2>
+
+<span class="tag">PART C</span>
+
+<div class="analogy">
+<p>A data warehouse is a curated library: books cataloged, organized, sorted before being shelved (ETL-then-store, schema-on-write). A data lake is a storage locker you throw raw crates into; you organize on retrieval (store-then-ETL, schema-on-read). Data lakes accept any format (CSV, JSON, logs, images, Parquet), store it cheaply on object storage (S3, Azure Blob), and let different consumers each impose their own structure at query time.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Data warehouse vs data lake:</strong></p>
+</div>
+
+<table class="step-table">
+<thead>
+<tr><th>Dimension</th><th>Data Warehouse</th><th>Data Lake</th></tr>
+</thead>
+<tbody>
+<tr><td>Schema</td><td>On write (fixed upfront)</td><td>On read (applied at query)</td></tr>
+<tr><td>Data shape</td><td>Structured, cleaned</td><td>Any format, raw</td></tr>
+<tr><td>Cost</td><td>Higher (compute + premium storage)</td><td>Lower (object storage)</td></tr>
+<tr><td>Users</td><td>Analysts, BI tools</td><td>Data scientists, ML pipelines</td></tr>
+<tr><td>Queries</td><td>SQL / OLAP</td><td>Spark, Hive, notebook code</td></tr>
+<tr><td>Governance</td><td>Strict (curated)</td><td>Looser (raw storage)</td></tr>
+</tbody>
+</table>
+
+<div class="note">
+<p><strong>Data lakehouse.</strong> A recent hybrid (Databricks Delta Lake, Iceberg) that adds ACID and schema enforcement on top of data-lake storage, trying to combine the flexibility of a lake with the reliability of a warehouse. Not on this exam, but worth knowing as context.</p>
+</div>
+
+<h2>Part D: Pros and Cons — Quick Comparison</h2>
+
+<span class="tag">PART D</span>
+
+<table class="step-table">
+<thead>
+<tr><th>Dimension</th><th>Relational</th><th>OO-DB</th><th>NoSQL</th></tr>
+</thead>
+<tbody>
+<tr><td>Schema</td><td>Fixed, strict</td><td>Class hierarchy</td><td>Flexible / none</td></tr>
+<tr><td>Query language</td><td>SQL (mature, declarative)</td><td>OQL</td><td>Per-family API</td></tr>
+<tr><td>Consistency</td><td>ACID</td><td>ACID (usually)</td><td>BASE / eventual</td></tr>
+<tr><td>Scaling</td><td>Vertical (mostly)</td><td>Vertical</td><td>Horizontal</td></tr>
+<tr><td>Complex types</td><td>Awkward (JSON columns)</td><td>Native</td><td>Native (document)</td></tr>
+<tr><td>Joins</td><td>Excellent</td><td>Replaced by traversal</td><td>Limited or none</td></tr>
+<tr><td>Ecosystem</td><td>Huge (50+ years)</td><td>Small</td><td>Large, fragmented</td></tr>
+<tr><td>Best for</td><td>Transactional business data</td><td>CAD, graphics, chemistry</td><td>Web-scale, flexible</td></tr>
+</tbody>
+</table>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>The relational model will remain dominant for transactional business data for the foreseeable future because ACID guarantees and SQL's expressiveness are genuinely hard to replicate. But modern systems are almost always polyglot: Postgres for transactions, Redis for caching, Elasticsearch for full-text, S3 for blobs, Neo4j for graph analytics. Knowing when to reach for a non-relational tool is the practical take-away of this chapter.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>Likely 5% of the final at most, if OO-DB or NoSQL appears at all. Week 14 slide confirmed scope is the five core topics (DB concepts, RA, SQL, ER, normalization). If a question does come up, expect a definition or "when would you use X over a relational DB" style. Skim this page once; do not over-invest.</p>
+</div>
+
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>OID</dt><dd>Object Identifier. Immutable unique handle for an object in an OO-DB, analogous to a primary key but opaque.</dd>
+<dt>ODL / OQL</dt><dd>Object Definition Language / Object Query Language. The OO-DB analogs of SQL's DDL / DML.</dd>
+<dt>Impedance mismatch</dt><dd>The friction between an OO program's object model and a relational DB's row-and-table model. OO-DBs remove it; ORMs (Hibernate, Entity Framework) paper over it.</dd>
+<dt>ACID</dt><dd>Atomicity, Consistency, Isolation, Durability. The transaction guarantees of traditional databases.</dd>
+<dt>BASE</dt><dd>Basically Available, Soft state, Eventual consistency. The looser guarantee common in NoSQL.</dd>
+<dt>CAP theorem</dt><dd>A distributed system can give you at most two of: Consistency, Availability, Partition-tolerance. NoSQL systems typically pick AP; relational picks CP.</dd>
+<dt>Schema-on-read</dt><dd>Store data raw; impose structure at query time. Hallmark of data lakes.</dd>
+<dt>Schema-on-write</dt><dd>Enforce structure when data is stored; reject non-conforming inputs. Hallmark of relational DBs and data warehouses.</dd>
+<dt>Polyglot persistence</dt><dd>Using multiple database technologies in one application, each chosen for the data shape it handles best.</dd>
+</dl>
+</div>
+
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-09-normalization.html">&larr; 09. Normalization</a>
+<a class="bottom-nav-btn next" href="cg-11-formula-sheet.html">11. Formula Sheet &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

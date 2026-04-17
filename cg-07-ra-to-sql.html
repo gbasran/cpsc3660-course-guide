@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 07 : Relational Algebra to SQL Translation | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 07</span>
+<h1>Relational Algebra to SQL Translation</h1>
+<p class="subtitle">Every RA operator mapped to a concrete SQL pattern, with the Division pattern walked through end-to-end.</p>
+
+<div class="analogy">
+<p>Relational algebra is the blueprint; SQL is the building. An architect sketches $\sigma_{P}(R)$ on paper, then a contractor turns it into <code>select * from R where P</code>. Same idea, two dialects. Once you learn the translation table below, you can read an RA expression and write the SQL by rote, the way a chef reads a recipe in French and cooks it without thinking in English first.</p>
+<p>Six of the seven RA operators translate in one or two lines. The seventh, division ($\div$), needs a double-nested <code>not exists</code> trick; that is the one pattern worth memorizing cold, because SQL has no native division keyword and the professor tests it almost every year.</p>
+</div>
+
+<h2>Part A: Selection &amp; Projection</h2>
+
+<span class="tag">PART A</span>
+
+<div class="analogy">
+<p>Think of a relation as a spreadsheet. Selection ($\sigma$) is the row filter: "show me only the rows where price &gt; 100." Projection ($\pi$) is the column filter: "show me only the Name and Price columns, and throw away any duplicate rows that appear after hiding the other columns." SQL spells the filters out with <code>where</code> and with the column list in <code>select</code>.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Selection:</strong> $\sigma_{P}(R)$ returns every tuple of $R$ that satisfies predicate $P$.</p>
+<dl class="breakdown">
+<dt>$\sigma$</dt><dd>the selection operator (a row filter)</dd>
+<dt>$P$</dt><dd>a boolean predicate on attributes of $R$, like $\text{price} \gt 100$ or $\text{dept} = \text{'CS'}$</dd>
+<dt>$R$</dt><dd>the input relation (a table)</dd>
+</dl>
+<p><strong>SQL equivalent:</strong></p>
+<div class="algo-box">
+<span class="algo-line">select * from R where P;</span>
+</div>
+</div>
+
+<div class="formula-box">
+<p><strong>Projection:</strong> $\pi_{A_1, A_2, \ldots, A_k}(R)$ returns only the listed columns and removes duplicate rows (RA sets have no duplicates).</p>
+<dl class="breakdown">
+<dt>$\pi$</dt><dd>the projection operator (a column filter)</dd>
+<dt>$A_i$</dt><dd>attribute names to keep</dd>
+<dt>$R$</dt><dd>the input relation</dd>
+</dl>
+<p><strong>SQL equivalent:</strong></p>
+<div class="algo-box">
+<span class="algo-line">select distinct A1, A2, ..., Ak from R;</span>
+</div>
+</div>
+
+<div class="note">
+<p><strong>Why <code>distinct</code> matters.</strong> SQL is a multiset (bag) language by default. If you write <code>select dept from employee</code> you will get the department name once per employee. RA's $\pi$ is a set operator, so it automatically removes duplicates. Adding <code>distinct</code> is how you bridge the semantic gap. If the exam asks you to write SQL for $\pi_{\text{dept}}(\text{Employee})$ and you forget <code>distinct</code>, the answer is technically wrong.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Example: filter and project</h3>
+<div class="step">
+<div class="step-label">RA expression</div>
+<p>$\pi_{\text{name, salary}}(\sigma_{\text{salary} \gt 50000}(\text{Employee}))$</p>
+</div>
+<div class="step">
+<div class="step-label">Read it right-to-left</div>
+<p>First apply the row filter, then keep only two columns, then drop duplicates.</p>
+</div>
+<div class="step">
+<div class="step-label">SQL</div>
+<div class="algo-box">
+<span class="algo-line">select distinct name, salary</span>
+<span class="algo-line">from   employee</span>
+<span class="algo-line">where  salary &gt; 50000;</span>
+</div>
+</div>
+<p class="result">Inside-out nesting in RA becomes top-to-bottom clauses in SQL.</p>
+</div>
+
+<h2>Part B: Cartesian Product and Join</h2>
+
+<span class="tag">PART B</span>
+
+<div class="analogy">
+<p>Cartesian product ($\times$) is every pairing of two decks of cards laid side by side; if deck R has 4 cards and deck S has 13 cards, you end up with 52 rows. A join ($\bowtie$) is Cartesian product followed by a filter that keeps only the pairings where the shared attribute matches (so a Heart from R pairs only with a Heart from S). SQL does the product with a comma in the <code>from</code> clause and does the filter with <code>where</code>, or spells it out with <code>natural join</code>.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Cartesian product:</strong> $R \times S$ pairs every tuple of $R$ with every tuple of $S$; the result has $|R| \cdot |S|$ rows and all attributes of both.</p>
+<p><strong>SQL equivalent:</strong></p>
+<div class="algo-box">
+<span class="algo-line">select * from R, S;</span>
+</div>
+</div>
+
+<div class="formula-box">
+<p><strong>Natural join:</strong> $R \bowtie S$ is the Cartesian product restricted to tuples that agree on every shared attribute, and duplicate shared columns are folded into one.</p>
+<p><strong>SQL (explicit form):</strong></p>
+<div class="algo-box">
+<span class="algo-line">select * from R, S where R.shared = S.shared;</span>
+</div>
+<p><strong>SQL (keyword form):</strong></p>
+<div class="algo-box">
+<span class="algo-line">select * from R natural join S;</span>
+</div>
+</div>
+
+<div class="note">
+<p><strong>Shared-attribute gotcha.</strong> If $R$ and $S$ share attributes <code>a</code> and <code>b</code>, the explicit form needs both equalities: <code>where R.a = S.a and R.b = S.b</code>. A missing equality silently degrades the join back to a partial Cartesian product (usually wrong, but valid SQL).</p>
+</div>
+
+<div class="hand-calc">
+<h3>Example: natural join Instructor with Department</h3>
+<div class="step">
+<div class="step-label">RA expression</div>
+<p>$\text{Instructor} \bowtie \text{Department}$, sharing attribute <code>dept_name</code>.</p>
+</div>
+<div class="step">
+<div class="step-label">SQL (explicit)</div>
+<div class="algo-box">
+<span class="algo-line">select *</span>
+<span class="algo-line">from   instructor as i, department as d</span>
+<span class="algo-line">where  i.dept_name = d.dept_name;</span>
+</div>
+</div>
+<div class="step">
+<div class="step-label">SQL (keyword)</div>
+<div class="algo-box">
+<span class="algo-line">select * from instructor natural join department;</span>
+</div>
+</div>
+<p class="result">Both produce the same rows; the keyword form is shorter but hides which attribute is the join key.</p>
+</div>
+
+<h2>Part C: Set Operations</h2>
+
+<span class="tag">PART C</span>
+
+<div class="analogy">
+<p>Set operations are Venn-diagram shading. Union ($\cup$) shades both circles; intersection ($\cap$) shades only the overlap; difference ($-$) shades one circle minus the overlap. In SQL these become <code>union</code>, <code>intersect</code>, <code>except</code>, and they require both inputs to have the same columns in the same order (union-compatibility).</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Union:</strong> $R \cup S$ keeps every tuple in either relation (duplicates removed).</p>
+<div class="algo-box">
+<span class="algo-line">(select ... from R) union (select ... from S);</span>
+</div>
+<p><strong>Difference:</strong> $R - S$ keeps every tuple in $R$ that is not in $S$.</p>
+<div class="algo-box">
+<span class="algo-line">(select ... from R) except (select ... from S);</span>
+</div>
+<p><strong>Intersection:</strong> $R \cap S$ keeps every tuple in both.</p>
+<div class="algo-box">
+<span class="algo-line">(select ... from R) intersect (select ... from S);</span>
+</div>
+</div>
+
+<div class="note">
+<p><strong>union vs union all.</strong> Plain <code>union</code> removes duplicates (matches RA). <code>union all</code> keeps duplicates. Same story for <code>intersect all</code> and <code>except all</code>. If the exam says "relational algebra style," use the plain forms.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Example: customers who have either a loan or an account</h3>
+<div class="step">
+<div class="step-label">RA expression</div>
+<p>$\pi_{\text{cust\_id}}(\text{Loan}) \cup \pi_{\text{cust\_id}}(\text{Account})$</p>
+</div>
+<div class="step">
+<div class="step-label">SQL</div>
+<div class="algo-box">
+<span class="algo-line">(select distinct cust_id from loan)</span>
+<span class="algo-line">union</span>
+<span class="algo-line">(select distinct cust_id from account);</span>
+</div>
+</div>
+<p class="result">The <code>distinct</code> inside each branch is technically redundant because <code>union</code> already removes duplicates, but it mirrors the RA expression literally.</p>
+</div>
+
+<h2>Part D: Division (the hard one)</h2>
+
+<span class="tag">PART D</span>
+
+<div class="analogy">
+<p>Division ($\div$) answers universal questions: "which students have taken every required course?" Imagine a list of required courses $S$ and a big table $R$ of <code>(student, course)</code> enrollments. Division asks for each student $s$ whether the set of courses $s$ has taken is a <em>superset</em> of $S$; if yes, keep $s$. It is the "for all" quantifier of relational algebra.</p>
+<p>SQL has no <code>divide</code> keyword. Instead we simulate the "for all" using the identity: "for every $x$ in $S$, property $P$ holds" is equivalent to "there does not exist an $x$ in $S$ such that $P$ fails." That double negation is what the <code>not exists</code> + <code>except</code> pattern captures.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Division:</strong> Let $R$ have attributes $(\alpha, \beta)$ and $S$ have attributes $\beta$. Then $R \div S$ returns the set of $\alpha$-values $r$ such that for every $s \in S$, the tuple $(r, s)$ appears in $R$.</p>
+<dl class="breakdown">
+<dt>$R$</dt><dd>the big relation, schema $(\alpha, \beta)$</dd>
+<dt>$S$</dt><dd>the divisor, schema $\beta$ (a subset of $R$'s attributes)</dd>
+<dt>$\alpha$</dt><dd>the attributes unique to $R$ (the "result" attributes)</dd>
+<dt>$\beta$</dt><dd>the attributes shared between $R$ and $S$</dd>
+</dl>
+</div>
+
+<div class="formula-box">
+<p><strong>SQL pattern (A2 Q5):</strong> using a correlated subquery with <code>not exists</code> and <code>except</code>.</p>
+<div class="algo-box">
+<span class="algo-line">select r.A from r as onetuple</span>
+<span class="algo-line">where not exists (</span>
+<span class="algo-line">&nbsp;&nbsp;(select * from s)</span>
+<span class="algo-line">&nbsp;&nbsp;except</span>
+<span class="algo-line">&nbsp;&nbsp;(select r.B, r.C from r where r.A = onetuple.A)</span>
+<span class="algo-line">);</span>
+</div>
+<p>Read the <code>except</code> as "the set of <code>s</code>-values not yet taken by this student." The outer <code>not exists</code> says "this set is empty," which is exactly "the student has taken every <code>s</code>-value." Double negation, done.</p>
+</div>
+
+<div class="hand-calc">
+<h3>A2 Q5 pattern: students who took every required course</h3>
+<p>Schema: <code>enrollment(student_id, course_id)</code> and <code>required(course_id)</code>. Goal: list every student who has taken every course in <code>required</code>.</p>
+<div class="step">
+<div class="step-label">Step 1: RA expression</div>
+<p>$\pi_{\text{student\_id}}(\text{Enrollment}) \div \text{Required}$</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: restate in English using double negation</div>
+<p>"Every student $s$ such that there does not exist a required course $c$ where $(s, c)$ is missing from Enrollment."</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: translate to SQL</div>
+<div class="algo-box">
+<span class="algo-line">select distinct e.student_id</span>
+<span class="algo-line">from   enrollment as e</span>
+<span class="algo-line">where  not exists (</span>
+<span class="algo-line">&nbsp;&nbsp;(select course_id from required)</span>
+<span class="algo-line">&nbsp;&nbsp;except</span>
+<span class="algo-line">&nbsp;&nbsp;(select course_id from enrollment</span>
+<span class="algo-line">&nbsp;&nbsp;&nbsp;where  student_id = e.student_id)</span>
+<span class="algo-line">);</span>
+</div>
+</div>
+<div class="step">
+<div class="step-label">Step 4: trace the inner except for one student</div>
+<p>Suppose required = {CPSC3660, CPSC2620}. For Alice whose enrollment rows are {(Alice, CPSC3660), (Alice, CPSC2620), (Alice, CPSC2720)}: the right-hand side of <code>except</code> produces {CPSC3660, CPSC2620, CPSC2720}. Then <code>{CPSC3660, CPSC2620} except {CPSC3660, CPSC2620, CPSC2720} = {}</code>. Empty, so <code>not exists</code> is true, so Alice is kept.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 5: trace for a student missing a course</div>
+<p>For Bob whose rows are {(Bob, CPSC3660)}: the right-hand side produces {CPSC3660}. Then <code>{CPSC3660, CPSC2620} except {CPSC3660} = {CPSC2620}</code>. Non-empty, so <code>not exists</code> is false, so Bob is dropped.</p>
+</div>
+<p class="result">The <code>not exists</code> + <code>except</code> sandwich is the workhorse of every "every/all/for all" question in SQL.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>A2 Q3-Q5 established this pattern for CPSC 3660, and the final almost always has one division-style question. Memorize the five-line skeleton verbatim and only fill in the attribute names. If you see words like "every," "all," "for each required," reach for this pattern first; do not try to write it as a join or <code>group by</code> with <code>count</code> unless the question explicitly asks for aggregation.</p>
+</div>
+
+<h2>Part E: Full Translation Reference Table</h2>
+
+<span class="tag">PART E</span>
+
+<div class="analogy">
+<p>Keep this table on the cheat sheet at the back of your brain. When the exam gives you an RA expression, find the row, copy the SQL template, substitute your attribute and table names, done. Reverse direction works the same: given SQL, match the shape, read off the RA.</p>
+</div>
+
+<table class="step-table">
+<thead>
+<tr><th>Operator</th><th>RA Notation</th><th>SQL Equivalent</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>Selection</td><td>$\sigma_P(R)$</td><td><code>select * from R where P</code></td><td>row filter</td></tr>
+<tr><td>Projection</td><td>$\pi_A(R)$</td><td><code>select distinct A from R</code></td><td><code>distinct</code> for set semantics</td></tr>
+<tr><td>Cartesian</td><td>$R \times S$</td><td><code>select * from R, S</code></td><td>all pairings</td></tr>
+<tr><td>Natural join</td><td>$R \bowtie S$</td><td><code>select * from R natural join S</code></td><td>or explicit <code>where R.x = S.x</code></td></tr>
+<tr><td>Theta join</td><td>$R \bowtie_{\theta} S$</td><td><code>select * from R join S on &theta;</code></td><td>arbitrary predicate</td></tr>
+<tr><td>Union</td><td>$R \cup S$</td><td><code>(...) union (...)</code></td><td>union-compatible schemas</td></tr>
+<tr><td>Difference</td><td>$R - S$</td><td><code>(...) except (...)</code></td><td>union-compatible</td></tr>
+<tr><td>Intersection</td><td>$R \cap S$</td><td><code>(...) intersect (...)</code></td><td>union-compatible</td></tr>
+<tr><td>Rename</td><td>$\rho_{X}(R)$</td><td><code>R as X</code></td><td>alias in <code>from</code> clause</td></tr>
+<tr><td>Division</td><td>$R \div S$</td><td><code>not exists</code> + <code>except</code></td><td>see Part D</td></tr>
+<tr><td>Aggregate</td><td>$_{A}\gamma_{F(B)}(R)$</td><td><code>select A, F(B) from R group by A</code></td><td>$F$ is sum, count, avg, min, max</td></tr>
+</tbody>
+</table>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>Every SQL query can be rewritten as an RA expression, and every RA expression can be rewritten as SQL. Knowing the translation both ways is the point of this course; it is the scaffolding under every database engine. The optimizer inside Postgres or Oracle does exactly what you are doing by hand: it reads your SQL, converts it to a relational-algebra tree, shuffles the tree for efficiency, then emits an execution plan. Part A of the final almost always asks for one translation in each direction.</p>
+</div>
+
+<h2>Part F: Translation Checklist</h2>
+
+<span class="tag">PART F</span>
+
+<div class="algo-box">
+<div class="algo-title">RA-to-SQL checklist</div>
+<span class="algo-line">1. read RA right-to-left: inner operators happen first</span>
+<span class="algo-line">2. every $\pi$ gets a <code>distinct</code></span>
+<span class="algo-line">3. every $\sigma$ becomes a <code>where</code> clause</span>
+<span class="algo-line">4. $\times$ becomes a comma in <code>from</code></span>
+<span class="algo-line">5. $\bowtie$ becomes <code>natural join</code> or an equality in <code>where</code></span>
+<span class="algo-line">6. $\cup, -, \cap$ become <code>union</code>, <code>except</code>, <code>intersect</code></span>
+<span class="algo-line">7. $\div$ becomes <code>not exists</code> + <code>except</code> (Part D)</span>
+<span class="algo-line">8. $\gamma$ becomes <code>group by</code> + aggregate function</span>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>When the final shows an RA tree and asks for SQL, label the operators and translate them one at a time. Do not try to write the whole query in one pass; you will forget a <code>distinct</code> or a join key. Write the innermost piece first as a subquery, then wrap it.</p>
+</div>
+
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Union-compatible</dt><dd>Two relations have the same number of attributes, in the same order, with compatible data types. Required for $\cup$, $\cap$, $-$.</dd>
+<dt>Correlated subquery</dt><dd>An inner SQL query that references a column from the outer query (like <code>onetuple.A</code> above). Re-evaluated for every outer row.</dd>
+<dt>Double negation trick</dt><dd>Rewriting "for all $x$, $P(x)$" as "there does not exist $x$ such that $\neg P(x)$." The foundation of the division-in-SQL pattern.</dd>
+<dt>Division ($\div$)</dt><dd>RA operator that answers "which $\alpha$-values are paired with every $\beta$-value in the divisor $S$." No direct SQL keyword; simulated with <code>not exists</code> and <code>except</code>.</dd>
+<dt>Natural join ($\bowtie$)</dt><dd>Equi-join on every shared attribute, with duplicate shared columns collapsed.</dd>
+<dt>Theta join</dt><dd>Cartesian product followed by an arbitrary predicate filter; written $R \bowtie_{\theta} S$.</dd>
+</dl>
+</div>
+
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-06-sql-advanced.html">&larr; 06. SQL Advanced</a>
+<a class="bottom-nav-btn next" href="cg-08-fd-theory.html">08. FD Theory &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

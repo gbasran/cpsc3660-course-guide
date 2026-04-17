@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 19 : Practice Final Exam | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Page-specific styles for practice exam question cards */
+  .qcard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-medium);
+    border-top: 3px solid var(--accent-blue);
+    border-radius: var(--radius-sm);
+    padding: 24px 28px;
+    margin: 28px 0;
+  }
+  .qcard h3 {
+    color: var(--accent-warm);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.1rem;
+    margin: 0 0 10px 0;
+  }
+  .qcard .qmeta {
+    display: inline-block;
+    background: var(--bg-raised);
+    color: var(--text-muted);
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+  .qcard pre {
+    background: var(--bg-raised);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .qcard .subq {
+    margin: 14px 0 6px 0;
+    padding: 6px 0 2px 0;
+    color: var(--accent-gold);
+    font-weight: 600;
+    font-size: 0.96rem;
+    font-family: 'Inter', sans-serif;
+    border-top: 1px dashed var(--border-subtle);
+  }
+  .qcard .subq:first-of-type { border-top: none; padding-top: 0; }
+
+  details.reveal {
+    margin: 10px 0 4px 0;
+  }
+  details.reveal > summary {
+    cursor: pointer;
+    color: var(--accent-gold);
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 10px 14px;
+    background: var(--bg-raised);
+    border: 1px solid var(--accent-gold);
+    border-radius: var(--radius-sm);
+    list-style: none;
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    user-select: none;
+  }
+  details.reveal > summary::before {
+    content: "\25B6  ";
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.15s;
+  }
+  details.reveal[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  details.reveal > summary:hover {
+    background: var(--bg-hover);
+  }
+  details.reveal[open] > summary {
+    margin-bottom: 8px;
+  }
+
+  .solution-body {
+    background: var(--bg-raised);
+    border: 1px solid var(--accent-gold);
+    border-radius: var(--radius-sm);
+    padding: 22px 26px;
+    margin: 0;
+  }
+  .solution-body .mirrors {
+    color: var(--accent-lilac);
+    font-size: 0.86rem;
+    font-style: italic;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border-medium);
+    margin-bottom: 12px;
+  }
+  .solution-body h4 {
+    color: var(--accent-sage);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 18px 0 8px 0;
+  }
+  .solution-body h4:first-of-type { margin-top: 4px; }
+  .solution-body pre {
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .solution-body ul, .solution-body ol { margin: 8px 0 8px 22px; }
+  .solution-body li { margin: 3px 0; color: var(--text-secondary); }
+  .solution-body table { margin: 10px 0; border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+  .solution-body table th {
+    background: var(--bg-surface);
+    color: var(--accent-warm);
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 2px solid var(--border-medium);
+    font-weight: 600;
+  }
+  .solution-body table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+  }
+
+  .download-box {
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    padding: 22px 24px;
+    margin: 28px 0 36px;
+    border: 1px solid var(--accent-warm);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .download-box .dl-link {
+    display: block;
+    padding: 14px 18px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent-warm);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .download-box .dl-link:hover {
+    background: var(--bg-hover);
+    color: var(--accent-warm);
+  }
+  .download-box .dl-link .dl-desc {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 400;
+    font-style: italic;
+    margin-top: 3px;
+  }
+  @media (max-width: 700px) {
+    .download-box { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 19; PRACTICE FINAL</span>
+<h1>Predicted Practice Final Exam</h1>
+<p class="subtitle">120 marks; 16 questions; 180 minutes; designed to mirror the professor's construction signature across four assignments and the midterm.</p>
+
+<div class="analogy">
+<strong>Physical analogy; the flight simulator before a solo check-ride.</strong><br><br>
+You do not learn to fly in the air. You learn it in the simulator, on the ground, where the panel looks identical, the controls feel the same, and every emergency you will ever face has already been pre-loaded by an instructor who has watched a thousand pilots fail in exactly the same spots. This practice final is that simulator. The schemas have been changed (hospital instead of bank; airline instead of library; music streaming instead of online bookstore) because rote memorization of the prof's original tables is the trap you must avoid; but the shape of every question, the staircase of every SQL problem, the exact position of the BCNF showpiece at Q15, is a mirror of his recurring pattern. Fly this simulator twice and the real cockpit on exam day will feel familiar.
+</div>
+
+<div class="info-box" style="text-align:left;">
+<p><strong>How to use this page.</strong> Treat it as a timed simulation. Read each question, work the solution on paper, then click <em>Reveal Solution</em> to check. Resist peeking; the Reveal is a grading tool, not a hint tool.</p>
+<p><strong>Time budget.</strong> Roughly 1.5 minutes per mark. Budget around 25 minutes for Q15 (BCNF decomposition showpiece) and 20 minutes for Q12 (ER with ISA). The concept openers Q1-Q6 should take no more than 12 minutes combined.</p>
+<p><strong>Difficulty is hidden on the question itself</strong> so you get an honest read; difficulty tags live inside the Reveal blocks.</p>
+</div>
+
+<div class="download-box">
+<a class="dl-link" href="pdfs/3660-practice-final.pdf" target="_blank">
+Practice Exam PDF (no solutions)
+<span class="dl-desc">Print this; work through it on paper as a 180-minute simulation.</span>
+</a>
+<a class="dl-link" href="pdfs/3660-practice-final-solutions.pdf" target="_blank">
+Full Solutions PDF
+<span class="dl-desc">Complete worked solutions with "mirrors" references and per-question understanding.</span>
+</a>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part A: Concept Openers (Q1 to Q6; 12 marks)</h2>
+
+<!-- Q1 -->
+<div class="qcard">
+<h3>Question 1 <span class="qmeta">2 marks</span></h3>
+<p>Explain the difference between <strong>DML</strong> and <strong>DDL</strong>. Give one example of each.</p>
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: Midterm Q1, A1 Q1 (recurring opener). Difficulty: Basic.</div>
+<h4>Your Answer</h4>
+<p><strong>DDL</strong> (Data Definition Language) modifies the database schema. Examples: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>, <code>TRUNCATE</code>.</p>
+<p><strong>DML</strong> (Data Manipulation Language) modifies the data inside existing tables. Examples: <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>SELECT</code>.</p>
+<h4>Understanding</h4>
+<p>DDL answers "what is the shape of the container?" and DML answers "what is inside the container?". The prof always wants one word on the distinction (schema vs data) plus at least one concrete keyword on each side.</p>
+</div>
+</details>
+</div>
+
+<!-- Q2 -->
+<div class="qcard">
+<h3>Question 2 <span class="qmeta">2 marks</span></h3>
+<p>What is the difference between a <strong>superkey</strong>, a <strong>candidate key</strong>, and a <strong>primary key</strong>? Can a relation have more than one candidate key?</p>
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: Midterm Q2, A1 Q3. Difficulty: Basic.</div>
+<h4>Your Answer</h4>
+<p><strong>Superkey:</strong> any set of attributes whose values uniquely identify each tuple. <strong>Candidate key:</strong> a minimal superkey (no proper subset is also a superkey). <strong>Primary key:</strong> the candidate key the designer chooses as the main identifier.</p>
+<p>Yes, a relation can have several candidate keys. Example: in <code>employee(SIN, emp_id, name)</code>, both {SIN} and {emp_id} are candidate keys; one is chosen as the PK.</p>
+<h4>Understanding</h4>
+<p>Hierarchy: superkey $\supseteq$ candidate key $\supseteq$ primary key. Every candidate key is a superkey; not every superkey is a candidate key.</p>
+</div>
+</details>
+</div>
+
+<!-- Q3 -->
+<div class="qcard">
+<h3>Question 3 <span class="qmeta">2 marks</span></h3>
+<p>In an E-R diagram, what distinguishes a <strong>strong entity set</strong> from a <strong>weak entity set</strong>? Give one example of each.</p>
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A3 Q5, A3 Q7 (loan/payment). Difficulty: Basic.</div>
+<h4>Your Answer</h4>
+<p>A <strong>strong entity</strong> has its own primary key and exists independently. Example: <code>loan(loan_number, amount)</code>; the PK is <code>loan_number</code>.</p>
+<p>A <strong>weak entity</strong> has no primary key of its own; its identifier is the owner PK plus a discriminator unique within that owner. Example: <code>payment(payment_no, date, amt)</code> depends on loan; (loan_number, payment_no) together identify a payment.</p>
+<h4>Understanding</h4>
+<p>Visual: strong = single rectangle, weak = double rectangle; identifying relationship is a double diamond; weak entity has total participation (double line) in that relationship.</p>
+</div>
+</details>
+</div>
+
+<!-- Q4 -->
+<div class="qcard">
+<h3>Question 4 <span class="qmeta">2 marks</span></h3>
+<p>Using only the basic relational algebra operations ($\sigma, \pi, \times, \cup, -$), express the intersection $r \cap s$.</p>
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A1 Q4, Midterm Q6. Difficulty: Basic.</div>
+<h4>Your Answer</h4>
+<p>$$r \cap s = r - (r - s).$$</p>
+<h4>Understanding</h4>
+<p>$r - s$ is "everything in $r$ but not in $s$". Subtracting that from $r$ leaves exactly the tuples $r$ shares with $s$, which is the intersection. The operator $\cap$ is derived, not primitive. The six primitives are $\sigma, \pi, \times, \cup, -, \rho$.</p>
+</div>
+</details>
+</div>
+
+<!-- Q5 -->
+<div class="qcard">
+<h3>Question 5 <span class="qmeta">2 marks</span></h3>
+<p>Define <strong>BCNF</strong>. Why do we aim for BCNF in database design?</p>
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A4 Q2, expanded for final scope. Difficulty: Basic.</div>
+<h4>Your Answer</h4>
+<p>A relation $R$ is in <strong>Boyce-Codd Normal Form</strong> iff for every non-trivial FD $\alpha \to \beta$ in $F^+$, $\alpha$ is a <strong>superkey</strong> of $R$.</p>
+<p>We aim for BCNF because any FD whose LHS is not a superkey causes redundancy (the RHS repeats), which creates update, insert, and delete anomalies. BCNF eliminates those anomalies structurally.</p>
+<h4>Understanding</h4>
+<p>One-liner the prof wants: "For every non-trivial FD, the LHS must be a superkey." Trivial means $\beta \subseteq \alpha$; those are exempt.</p>
+</div>
+</details>
+</div>
+
+<!-- Q6 -->
+<div class="qcard">
+<h3>Question 6 <span class="qmeta">2 marks</span></h3>
+<p>What does the functional dependency $\alpha \to \beta$ mean? Give a counterexample showing that $\alpha \to \beta$ does NOT imply $\beta \to \alpha$.</p>
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A4 Q1, expanded for final scope. Difficulty: Basic.</div>
+<h4>Your Answer</h4>
+<p>$\alpha \to \beta$ means: for any two tuples $t_1, t_2$, if $t_1[\alpha] = t_2[\alpha]$ then $t_1[\beta] = t_2[\beta]$. The value of $\beta$ is a function of the value of $\alpha$.</p>
+<p><strong>Counterexample.</strong> In <code>student(student_id, student_name)</code>: <code>student_id $\to$ student_name</code> holds (IDs are unique). But <code>student_name $\to$ student_id</code> fails: two students can share a name ("John Smith" could map to 1001 or 2003).</p>
+<h4>Understanding</h4>
+<p>FDs are directional, not symmetric. The reverse arrow needs an independent check.</p>
+</div>
+</details>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: SQL Graduation (Q7 to Q9; 32 marks)</h2>
+
+<!-- Q7 -->
+<div class="qcard">
+<h3>Question 7 <span class="qmeta">10 marks</span> <span class="qmeta">SQL</span></h3>
+<p><strong>Hospital schema.</strong></p>
+<pre>patient(patient_id, patient_name, patient_city, age)
+doctor(doctor_id, doctor_name, specialty)
+appointment(patient_id, doctor_id, appt_date, fee)</pre>
+
+<div class="subq">(a) (3 marks) Find the names of patients who have had an appointment with a doctor whose specialty is 'Cardiology'.</div>
+
+<div class="subq">(b) (3 marks) List each specialty and the average fee for appointments in that specialty. Include only specialties with average fee > 200.</div>
+
+<div class="subq">(c) (4 marks) Find the names of patients who have had more appointments than the overall average number of appointments per patient.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A2 Q7 + Midterm Q6-Q7. Hospital is structurally analogous to the Employee-Works-Company trio. Difficulty: Medium.</div>
+
+<h4>(a) Your Answer</h4>
+<pre>select distinct p.patient_name
+from patient as p, doctor as d, appointment as a
+where p.patient_id = a.patient_id
+  and a.doctor_id = d.doctor_id
+  and d.specialty = 'Cardiology';</pre>
+<p><em>Understanding.</em> Three-table join across patient, appointment, doctor. <code>distinct</code> deduplicates patients with multiple cardiology appointments.</p>
+
+<h4>(b) Your Answer</h4>
+<pre>select d.specialty, avg(a.fee) as avg_fee
+from doctor as d, appointment as a
+where d.doctor_id = a.doctor_id
+group by d.specialty
+having avg(a.fee) &gt; 200;</pre>
+<p><em>Understanding.</em> The signature GROUP BY with threshold pattern. Aggregate <code>avg(a.fee)</code> must go in <code>having</code>, not <code>where</code> (<code>where</code> filters rows before grouping; <code>having</code> filters groups after).</p>
+
+<h4>(c) Your Answer</h4>
+<pre>select p.patient_name
+from patient as p, appointment as a
+where p.patient_id = a.patient_id
+group by p.patient_id, p.patient_name
+having count(*) &gt; (
+    select count(*) * 1.0 / count(distinct patient_id)
+    from appointment
+);</pre>
+<p><em>Understanding.</em> Two aggregates. Outer counts this patient's appointments. Inner computes global average (total appointments divided by distinct patients). The <code>* 1.0</code> forces floating-point division so integer truncation does not bite.</p>
+</div>
+</details>
+</div>
+
+<!-- Q8 -->
+<div class="qcard">
+<h3>Question 8 <span class="qmeta">12 marks</span> <span class="qmeta">SQL</span></h3>
+<p><strong>Airline schema.</strong></p>
+<pre>staff(staff_id, staff_name, staff_city)
+airport(airport_code, airport_city)
+route(staff_id, airport_code, flights_assigned)
+supervises(staff_id, supervisor_id)</pre>
+
+<div class="subq">(a) (3 marks) Find staff who live in the same city as their supervisor.</div>
+
+<div class="subq">(b) (4 marks) Create a VIEW named <code>busy_staff</code> listing staff_id, staff_name, and total flights_assigned across all airports for staff with total flights $\geq 50$.</div>
+
+<div class="subq">(c) (5 marks) Find staff whose flights_assigned at every airport is strictly greater than that of staff with staff_id = 100. Use ALL or NOT EXISTS.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A2 Q7 + A3 Q3 + Midterm Q9. Supervises mirrors the manages relation; part (c) mirrors the ">= ALL" pattern. Difficulty: Medium-Hard.</div>
+
+<h4>(a) Your Answer</h4>
+<pre>select s1.staff_name
+from staff as s1, supervises as sp, staff as s2
+where s1.staff_id = sp.staff_id
+  and sp.supervisor_id = s2.staff_id
+  and s1.staff_city = s2.staff_city;</pre>
+<p><em>Understanding.</em> Self-join trick: alias <code>staff</code> twice. <code>s1</code> is the subordinate; <code>s2</code> is the supervisor; <code>supervises</code> connects them.</p>
+
+<h4>(b) Your Answer</h4>
+<pre>create view busy_staff as
+select s.staff_id, s.staff_name, sum(r.flights_assigned) as total_flights
+from staff as s, route as r
+where s.staff_id = r.staff_id
+group by s.staff_id, s.staff_name
+having sum(r.flights_assigned) &gt;= 50;</pre>
+<p><em>Understanding.</em> Any <code>select</code> can be wrapped in <code>create view</code>. Sum flights across airports (group by the staff key), then restrict totals with <code>having</code>.</p>
+
+<h4>(c) Your Answer</h4>
+<pre>select s.staff_name
+from staff as s
+where s.staff_id &lt;&gt; 100
+  and not exists (
+      select *
+      from route as r100
+      where r100.staff_id = 100
+        and not exists (
+            select *
+            from route as r
+            where r.staff_id = s.staff_id
+              and r.airport_code = r100.airport_code
+              and r.flights_assigned &gt; r100.flights_assigned
+        )
+  );</pre>
+<p><em>Understanding.</em> Universal quantification: "for every airport where 100 has an assignment, this staff has strictly more" translates to a double-nested NOT EXISTS. Pattern: "for all $x$ in $B$, $P(x)$" $\equiv$ "NOT EXISTS $x$ in $B$ where NOT $P(x)$".</p>
+</div>
+</details>
+</div>
+
+<!-- Q9 -->
+<div class="qcard">
+<h3>Question 9 <span class="qmeta">10 marks</span> <span class="qmeta">Division</span></h3>
+<p><strong>Supplier schema.</strong></p>
+<pre>supplier(supplier_id, supplier_name, supplier_city)
+department(dept_id, dept_name, dept_city)
+supplies(supplier_id, dept_id, item_count)</pre>
+
+<div class="subq">(a) (4 marks) Find suppliers who supply items to at least one department in 'Calgary'.</div>
+
+<div class="subq">(b) (6 marks) Find suppliers who supply to every department (universal quantification). Use NOT EXISTS with EXCEPT.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A3 Q3(b) (companies in every city where IBM is). Difficulty: Hard.</div>
+
+<h4>(a) Your Answer</h4>
+<pre>select distinct s.supplier_name
+from supplier as s, supplies as sup, department as d
+where s.supplier_id = sup.supplier_id
+  and sup.dept_id = d.dept_id
+  and d.dept_city = 'Calgary';</pre>
+<p><em>Understanding.</em> Existential quantifier = three-table join + city filter. Dedupe with <code>distinct</code> because one supplier can serve many Calgary departments.</p>
+
+<h4>(b) Your Answer</h4>
+<pre>select s.supplier_name
+from supplier as s
+where not exists (
+    (select dept_id from department)
+    except
+    (select sup.dept_id
+     from supplies as sup
+     where sup.supplier_id = s.supplier_id)
+);</pre>
+<p><em>Understanding.</em> Canonical "$A$ contains $B \equiv$ NOT EXISTS ($B$ EXCEPT $A$)" template. $B$ = all department ids; $A$ = department ids this supplier serves. If $B - A$ is empty, the supplier covers every department.</p>
+</div>
+</details>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: Relational Algebra (Q10 to Q11; 18 marks)</h2>
+
+<!-- Q10 -->
+<div class="qcard">
+<h3>Question 10 <span class="qmeta">12 marks</span> <span class="qmeta">RA + DDL</span></h3>
+<p><strong>Researcher-Papers schema.</strong></p>
+<pre>researcher(rid, name, affiliation, years_active)
+paper(pid, title, authors, venue)
+cites(rid, pid, citation_date)</pre>
+
+<div class="subq">(a) (2 marks) RA: researchers who cited a paper published in venue 'Nature'.</div>
+
+<div class="subq">(b) (3 marks) RA: researchers who cited every 'Nature' paper (use division).</div>
+
+<div class="subq">(c) (4 marks) RA: for each venue, researchers who cited more than 5 papers from that venue (grouping + count).</div>
+
+<div class="subq">(d) (3 marks) SQL DDL: CREATE TABLE for the <code>cites</code> relation with PK and FK constraints.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A1 Q7 + A2 Q1 + Midterm Q8 (Library-analog). Difficulty: Medium-Hard.</div>
+
+<h4>(a) Your Answer</h4>
+<p>$$\pi_{\text{name}}\left( \text{researcher} \bowtie \text{cites} \bowtie \sigma_{\text{venue} = \text{'Nature'}}(\text{paper}) \right).$$</p>
+<p><em>Understanding.</em> Natural joins line up on shared attributes (<code>rid</code> between researcher and cites; <code>pid</code> between cites and paper). Filter paper to Nature before joining to shrink intermediate results.</p>
+
+<h4>(b) Your Answer</h4>
+<p>$$T = \pi_{\text{rid}, \text{pid}}(\text{cites}) \div \pi_{\text{pid}}\!\left(\sigma_{\text{venue} = \text{'Nature'}}(\text{paper})\right),$$
+$$\text{result} = \pi_{\text{name}}(\text{researcher} \bowtie T).$$</p>
+<p><em>Understanding.</em> Division returns rids that appear paired with every Nature pid. Join back with researcher to translate rid into name.</p>
+
+<h4>(c) Your Answer</h4>
+<p>Let $J = \text{cites} \bowtie \text{paper}$. Then
+$$G = {}_{\text{venue, rid}}\gamma_{\text{count-distinct}(\text{pid}) \to \text{cnt}}(J),$$
+$$\text{result} = \pi_{\text{name}, \text{venue}}\!\left( \text{researcher} \bowtie \sigma_{\text{cnt} \gt 5}(G) \right).$$</p>
+<p><em>Understanding.</em> Group by (venue, rid) so the count is per researcher per venue. Filter counts > 5. Join back for name.</p>
+
+<h4>(d) Your Answer</h4>
+<pre>create table cites (
+    rid             integer not null,
+    pid             integer not null,
+    citation_date   date,
+    primary key (rid, pid),
+    foreign key (rid) references researcher(rid) on delete cascade,
+    foreign key (pid) references paper(pid) on delete cascade
+);</pre>
+<p><em>Understanding.</em> PK of an M:N relation is the composite of the two side PKs. Cascade on delete because a citation has no meaning without its researcher or paper.</p>
+</div>
+</details>
+</div>
+
+<!-- Q11 -->
+<div class="qcard">
+<h3>Question 11 <span class="qmeta">6 marks</span> <span class="qmeta">RA $\to$ SQL</span></h3>
+<p>Given $R(A, B, C)$ and $S(B, C, D)$, translate each RA expression to SQL.</p>
+<div class="subq">(a) (2 marks) $\pi_{A, D}\!\left(\sigma_{A = \text{'x'}}(R \bowtie S)\right)$</div>
+<div class="subq">(b) (2 marks) $\pi_A(R) - \pi_A\!\left(\sigma_{D = \text{'y'}}(S)\right)$</div>
+<div class="subq">(c) (2 marks) $R \cap S$</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A2 Q3-Q5. Standard RA-to-SQL translation drill. Difficulty: Medium.</div>
+
+<h4>(a) Your Answer</h4>
+<pre>select r.A, s.D
+from R as r, S as s
+where r.A = 'x'
+  and r.B = s.B
+  and r.C = s.C;</pre>
+<p><em>Understanding.</em> Natural join on the shared attributes (B, C). Selection becomes <code>where</code>; projection becomes the <code>select</code> list.</p>
+
+<h4>(b) Your Answer</h4>
+<pre>(select A from R)
+except
+(select R.A from R, S where R.B = S.B and R.C = S.C and S.D = 'y');</pre>
+<p><em>Understanding.</em> Set difference in SQL is <code>except</code>. The right side must identify which $R$-rows are linked to a $D = $ 'y' row of $S$, then remove those $A$-values from $\pi_A(R)$.</p>
+
+<h4>(c) Your Answer</h4>
+<p><strong>Note:</strong> $R(A, B, C)$ and $S(B, C, D)$ have different schemas; $R \cap S$ requires union-compatible operands (same arity and compatible columns). The intended reading is intersection on the shared attributes $(B, C)$:</p>
+<pre>(select B, C from R)
+intersect
+(select B, C from S);</pre>
+<p><em>Understanding.</em> Set operators $\cup, \cap, -$ require union-compatible schemas. Flagging this mismatch is part of the answer; the prof wants you to catch it explicitly.</p>
+</div>
+</details>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: E-R Design (Q12 to Q13; 23 marks)</h2>
+
+<!-- Q12 -->
+<div class="qcard">
+<h3>Question 12 <span class="qmeta">15 marks</span> <span class="qmeta">ER + ISA</span></h3>
+<p><strong>Music streaming service.</strong> Design requirements:</p>
+<ul>
+  <li><strong>users</strong>: user_id, email, join_date, country.</li>
+  <li><strong>artists</strong>: artist_id, name, country_of_origin.</li>
+  <li><strong>songs</strong>: song_id, title, duration, release_year.</li>
+  <li>Users create <strong>playlists</strong> (playlist_id, name, created_date) and add songs.</li>
+  <li>Users can subscribe to artists (notifications).</li>
+  <li>Each song has exactly one primary artist and may have multiple featured artists.</li>
+  <li>Each user has exactly one subscription plan: Free (ad_frequency), Premium (billing_cycle), or Family (family_size).</li>
+</ul>
+<div class="subq">(a) (5 marks) Construct an E-R diagram: entities, relationships (cardinality + participation), PK attributes.</div>
+<div class="subq">(b) (5 marks) Handle the multi-valued "featured artists" attribute properly. Explain your design choice.</div>
+<div class="subq">(c) (5 marks) Add the subscription plans using generalization / ISA. Show the ISA and list shared vs specific attributes.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A3 Q4 + A3 Q8(c) (generalization with multiple subtypes). Difficulty: Medium-Hard.</div>
+
+<h4>(a) Your Answer</h4>
+<p><strong>Entity sets and PKs:</strong></p>
+<ul>
+<li><code>user</code>: <u>user_id</u>, email, join_date, country.</li>
+<li><code>artist</code>: <u>artist_id</u>, name, country_of_origin.</li>
+<li><code>song</code>: <u>song_id</u>, title, duration, release_year.</li>
+<li><code>playlist</code>: <u>playlist_id</u>, name, created_date.</li>
+</ul>
+<p><strong>Relationships (cardinality; participation):</strong></p>
+<ul>
+<li><code>creates</code> (user $\to$ playlist): 1:N; playlist has total participation.</li>
+<li><code>contains</code> (playlist $\leftrightarrow$ song): M:N; partial on both.</li>
+<li><code>subscribes_to</code> (user $\leftrightarrow$ artist): M:N; partial.</li>
+<li><code>performs</code> (artist $\to$ song, primary): 1:N; song total (every song has exactly one primary artist).</li>
+<li><code>features</code> (artist $\leftrightarrow$ song, featured): M:N; partial.</li>
+</ul>
+<p><em>Understanding.</em> Separate "performs" (primary, 1:N) from "features" (featured, M:N) because they have different cardinalities.</p>
+
+<h4>(b) Your Answer</h4>
+<p><strong>Design choice: model featured artists as a separate M:N relationship <code>features</code>(song_id, artist_id).</strong></p>
+<p>When mapped to relational, this becomes a junction table <code>song_featured(song_id, artist_id)</code> with composite PK {song_id, artist_id} and foreign keys to song and artist.</p>
+<p><em>Rationale.</em> Featured artists are multi-valued, and each value is an entity (not a simple attribute). Storing as a relationship (i) captures M:N cardinality cleanly, (ii) avoids a non-atomic comma-separated string column (which would violate 1NF), (iii) avoids a double-ellipse multi-valued attribute bubble that would still need flattening on conversion.</p>
+<p><em>Understanding.</em> Multi-valued attributes whose values are themselves entities are always best modeled as relationships.</p>
+
+<h4>(c) Your Answer</h4>
+<p>Introduce a supertype <code>subscription</code> with shared attribute <u>subscription_id</u> (PK) and discriminator <code>plan_type</code>. Each user has a 1:1 <code>has</code> relationship to subscription (total on user side).</p>
+<p>ISA triangle to three subtypes:</p>
+<ul>
+<li><code>Free</code>: specific attribute ad_frequency.</li>
+<li><code>Premium</code>: specific attribute billing_cycle.</li>
+<li><code>Family</code>: specific attribute family_size.</li>
+</ul>
+<p><strong>Constraints:</strong> disjoint (a subscription is in exactly one subtype) and total (every subscription must be in some subtype).</p>
+<p><em>Understanding.</em> Exactly the pattern from A3 Q8(c) with three children instead of two. When mapped to relational form, you can use (i) one table per subtype with supertype attributes repeated, or (ii) one table per entity with a discriminator column. The prof does not require you to pick a mapping style unless asked.</p>
+</div>
+</details>
+</div>
+
+<!-- Q13 -->
+<div class="qcard">
+<h3>Question 13 <span class="qmeta">8 marks</span> <span class="qmeta">ER to Relational</span></h3>
+<p><strong>Given E-R description.</strong> E-commerce: Customer(customer_id, email); Order(order_id, date); Product(sku, price); <code>places</code> (1:N from Customer to Order); <code>contains</code> (M:N between Order and Product with <code>quantity</code>).</p>
+<div class="subq">(a) (4 marks) Convert this ER to a relational schema. List all tables with PKs underlined.</div>
+<div class="subq">(b) (4 marks) Identify all foreign keys and referential constraints. State an ON DELETE action for each.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A3 Q8(a) (entity sets + relationship FKs table). Difficulty: Basic-Medium.</div>
+
+<h4>(a) Your Answer</h4>
+<table>
+<tr><th>Table</th><th>Schema (PK underlined)</th></tr>
+<tr><td><code>customer</code></td><td>(<u>customer_id</u>, email)</td></tr>
+<tr><td><code>orders</code></td><td>(<u>order_id</u>, date, customer_id)</td></tr>
+<tr><td><code>product</code></td><td>(<u>sku</u>, price)</td></tr>
+<tr><td><code>contains</code></td><td>(<u>order_id, sku</u>, quantity)</td></tr>
+</table>
+<p><em>Understanding.</em> The 1:N <code>places</code> relationship is absorbed into the many side (<code>orders</code>) by adding <code>customer_id</code> as a FK; no separate table needed. The M:N <code>contains</code> relationship becomes its own table with composite PK. Named <code>orders</code> (plural) because <code>ORDER</code> is a reserved SQL word.</p>
+
+<h4>(b) Your Answer</h4>
+<table>
+<tr><th>Table</th><th>FK</th><th>References</th><th>ON DELETE</th></tr>
+<tr><td>orders</td><td>customer_id</td><td>customer(customer_id)</td><td>RESTRICT</td></tr>
+<tr><td>contains</td><td>order_id</td><td>orders(order_id)</td><td>CASCADE</td></tr>
+<tr><td>contains</td><td>sku</td><td>product(sku)</td><td>RESTRICT</td></tr>
+</table>
+<ul>
+<li>orders.customer_id RESTRICT: don't delete a customer with active orders.</li>
+<li>contains.order_id CASCADE: line items are dependent; remove with parent order.</li>
+<li>contains.sku RESTRICT: don't delete a product that was sold; preserve history.</li>
+</ul>
+<p><em>Understanding.</em> The ON DELETE choice depends on business semantics, not syntax. The prof accepts any action with reasonable justification.</p>
+</div>
+</details>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: FD Theory, BCNF, Integration (Q14 to Q16; 35 marks)</h2>
+
+<!-- Q14 -->
+<div class="qcard">
+<h3>Question 14 <span class="qmeta">10 marks</span> <span class="qmeta">FD Theory</span></h3>
+<p>Given $R = (A, B, C, D, E, F)$ with $F = \{A \to B,\ B \to CD,\ D \to E,\ AF \to B\}$.</p>
+<div class="subq">(a) (3 marks) Compute $(AF)^+$.</div>
+<div class="subq">(b) (3 marks) List all candidate keys of $R$.</div>
+<div class="subq">(c) (4 marks) Prove pseudo-transitivity using Armstrong's axioms: if $\alpha \to \beta$ and $\beta\gamma \to \delta$, then $\alpha\gamma \to \delta$. Number every step and cite the axiom.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A4 Q3 + Q4 + Q6(a) (closure + candidate key + Armstrong proof). Difficulty: Medium.</div>
+
+<h4>(a) Your Answer</h4>
+<table>
+<tr><th>Step</th><th>Closure so far</th></tr>
+<tr><td>Start</td><td>{A, F}</td></tr>
+<tr><td>Apply $A \to B$</td><td>{A, B, F}</td></tr>
+<tr><td>Apply $B \to CD$</td><td>{A, B, C, D, F}</td></tr>
+<tr><td>Apply $D \to E$</td><td>{A, B, C, D, E, F}</td></tr>
+</table>
+<p>$$(AF)^+ = \{A, B, C, D, E, F\} = R.$$</p>
+
+<h4>(b) Your Answer</h4>
+<p>{A, F} is a superkey since $(AF)^+ = R$. Check minimality:</p>
+<ul>
+<li>$A^+ = \{A, B, C, D, E\}$ (missing $F$); not a superkey.</li>
+<li>$F^+ = \{F\}$; not a superkey.</li>
+</ul>
+<p>So {A, F} is minimal. Since $F$ never appears on any RHS, $F$ must be in every candidate key. Testing {B, F}, {C, F}, {D, F}, {E, F} individually none reach $R$ (all miss $A$, $B$, or similar).</p>
+<p><strong>The only candidate key is {A, F}.</strong></p>
+<p><em>Understanding.</em> Rule of thumb: attributes that never appear on the RHS of any FD must be in every candidate key.</p>
+
+<h4>(c) Your Answer</h4>
+<p><strong>Claim.</strong> If $\alpha \to \beta$ and $\beta\gamma \to \delta$, then $\alpha\gamma \to \delta$.</p>
+<table>
+<tr><th>Step</th><th>Assertion</th><th>Justification</th></tr>
+<tr><td>1.</td><td>$\alpha \to \beta$</td><td>given</td></tr>
+<tr><td>2.</td><td>$\alpha\gamma \to \beta\gamma$</td><td>augmentation of step 1 with $\gamma$</td></tr>
+<tr><td>3.</td><td>$\beta\gamma \to \delta$</td><td>given</td></tr>
+<tr><td>4.</td><td>$\alpha\gamma \to \delta$</td><td>transitivity of steps 2 and 3</td></tr>
+</table>
+<p>$\blacksquare$</p>
+<p><em>Understanding.</em> Pseudo-transitivity is a derived rule, so we assemble it from the three primitives (reflexivity, augmentation, transitivity). Augmentation bridges from $\alpha \to \beta$ to $\alpha\gamma \to \beta\gamma$; transitivity chains into $\delta$.</p>
+</div>
+</details>
+</div>
+
+<!-- Q15 -->
+<div class="qcard">
+<h3>Question 15 <span class="qmeta">15 marks</span> <span class="qmeta">BCNF Showpiece</span></h3>
+<p>Given $R = (A, B, C, D, E)$ with $F = \{AB \to C,\ C \to D,\ D \to E,\ E \to A\}$.</p>
+<div class="subq">(a) (4 marks) Compute the candidate keys. Justify by attribute closure.</div>
+<div class="subq">(b) (4 marks) Identify every BCNF violation. Justify each.</div>
+<div class="subq">(c) (5 marks) Losslessly decompose $R$ into BCNF. Show each step.</div>
+<div class="subq">(d) (2 marks) Is your decomposition dependency-preserving? Justify.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A4 Q5 + Q6 (full BCNF decomposition with lossless + dependency-preserving check). Difficulty: Hard.</div>
+
+<h4>(a) Your Answer</h4>
+<p>$B$ appears on no RHS, so $B$ is in every candidate key.</p>
+<ul>
+<li>$(AB)^+$: $\{A, B\} \xrightarrow{AB \to C} \{A,B,C\} \xrightarrow{C \to D} \{A,B,C,D\} \xrightarrow{D \to E} R$. $AB$ is a CK.</li>
+<li>$(BC)^+$: $\{B,C\} \xrightarrow{C \to D} \{B,C,D\} \xrightarrow{D \to E} \{B,C,D,E\} \xrightarrow{E \to A} R$. $BC$ is a CK.</li>
+<li>$(BD)^+$: $\{B,D\} \xrightarrow{D \to E} \{B,D,E\} \xrightarrow{E \to A} \{A,B,D,E\} \xrightarrow{AB \to C} R$. $BD$ is a CK.</li>
+<li>$(BE)^+$: $\{B,E\} \xrightarrow{E \to A} \{A,B,E\} \xrightarrow{AB \to C} \{A,B,C,E\} \xrightarrow{C \to D} R$. $BE$ is a CK.</li>
+</ul>
+<p><strong>Candidate keys: {AB, BC, BD, BE}.</strong></p>
+<p><em>Understanding.</em> The chain $C \to D \to E \to A$ loops back through $AB \to C$, so each of $A, C, D, E$ can reach the others once paired with $B$.</p>
+
+<h4>(b) Your Answer</h4>
+<ul>
+<li>$AB \to C$: $AB$ is a CK. No violation.</li>
+<li>$C \to D$: $C^+$ in $R$ = $\{A, C, D, E\}$, missing $B$; $C$ is NOT a superkey. <strong>Violation.</strong></li>
+<li>$D \to E$: $D^+$ = $\{A, D, E\}$, missing $B, C$; NOT a superkey. <strong>Violation.</strong></li>
+<li>$E \to A$: $E^+$ = $\{A, E\}$, missing $B, C, D$; NOT a superkey. <strong>Violation.</strong></li>
+</ul>
+
+<h4>(c) Your Answer</h4>
+<p><strong>Step 1: decompose on $C \to D$.</strong> $C^+_R = \{A, C, D, E\}$.</p>
+<pre>R_1 = (A, C, D, E)
+R_2 = (B, C)</pre>
+<p>Check $R_1$. FDs on $R_1$: $C \to D$, $D \to E$, $E \to A$ (plus derived $C \to E$, $C \to A$, $D \to A$). Unique CK of $R_1$ is $\{C\}$ ($C^+ = ACDE$). Test BCNF:</p>
+<ul>
+<li>$C \to D$: $C$ is CK. OK.</li>
+<li>$D \to E$: $D^+ = \{A, D, E\}$, missing $C$; NOT a superkey. <strong>Violation.</strong></li>
+</ul>
+<p><strong>Step 2: decompose $R_1$ on $D \to E$.</strong> $D^+_{R_1} = \{A, D, E\}$.</p>
+<pre>R_1a = (A, D, E)
+R_1b = (C, D)</pre>
+<p>Check $R_{1a}$. FDs: $D \to E$, $E \to A$, derived $D \to A$. Unique CK = $\{D\}$. Test: $D \to E$ OK; $E \to A$: $E^+ = \{A, E\}$, missing $D$; NOT a superkey. <strong>Violation.</strong></p>
+<p><strong>Step 3: decompose $R_{1a}$ on $E \to A$.</strong></p>
+<pre>R_1a_alpha = (A, E)
+R_1a_beta  = (D, E)</pre>
+<p>Check all leaves:</p>
+<ul>
+<li>$R_{1a\alpha} = (A, E)$: $E \to A$; $E$ is CK. BCNF.</li>
+<li>$R_{1a\beta} = (D, E)$: $D \to E$; $D$ is CK. BCNF.</li>
+<li>$R_{1b} = (C, D)$: $C \to D$; $C$ is CK. BCNF.</li>
+<li>$R_2 = (B, C)$: no non-trivial FDs. BCNF trivially.</li>
+</ul>
+<p><strong>Final decomposition:</strong> $\{(A, E),\ (D, E),\ (C, D),\ (B, C)\}$.</p>
+<p><em>Understanding.</em> At each decomposition the intersection of the two fragments contains the LHS of the violator, which guarantees lossless join by the standard BCNF theorem.</p>
+
+<h4>(d) Your Answer</h4>
+<ul>
+<li>$C \to D$: $C, D$ in $(C, D)$. Preserved.</li>
+<li>$D \to E$: $D, E$ in $(D, E)$. Preserved.</li>
+<li>$E \to A$: $E, A$ in $(A, E)$. Preserved.</li>
+<li>$AB \to C$: $A \in (A, E)$, $B \in (B, C)$, $C \in (C, D)$. No single fragment has all three; <strong>NOT preserved.</strong></li>
+</ul>
+<p><strong>The decomposition is NOT dependency-preserving.</strong></p>
+<p><em>Understanding.</em> Classic BCNF trade-off: BCNF always gives lossless join but may sacrifice dependency preservation. The alternative is 3NF (always dependency-preserving but may keep some transitive dependencies).</p>
+</div>
+</details>
+</div>
+
+<!-- Q16 -->
+<div class="qcard">
+<h3>Question 16 <span class="qmeta">10 marks</span> <span class="qmeta">Integration</span></h3>
+<p><strong>Course registration.</strong> Students (student_id, name, major) enroll in courses (course_id, course_title, credits). Enrollments track grade. Each course has one instructor (instructor_id, name, department).</p>
+<div class="subq">(a) (4 marks) Draw a brief ER diagram.</div>
+<div class="subq">(b) (3 marks) Give a reasonable set of FDs.</div>
+<div class="subq">(c) (3 marks) Check whether your schema is in BCNF. If not, decompose.</div>
+
+<details class="reveal"><summary>Reveal Solution</summary>
+<div class="solution-body">
+<div class="mirrors">Mirrors: A3 Q4 + A4 Q6 combined. Difficulty: Medium.</div>
+
+<h4>(a) Your Answer</h4>
+<p>Entities: <code>student</code>(<u>student_id</u>, name, major); <code>course</code>(<u>course_id</u>, course_title, credits); <code>instructor</code>(<u>instructor_id</u>, name, department).</p>
+<p>Relationships:</p>
+<ul>
+<li><code>enrolls</code> student $\leftrightarrow$ course, M:N, descriptive attribute grade. Partial on both sides.</li>
+<li><code>teaches</code> instructor $\to$ course, 1:N (one instructor per course; instructor teaches many courses). Total on course (every course has an instructor).</li>
+</ul>
+
+<h4>(b) Your Answer</h4>
+<ul>
+<li>student_id $\to$ name, major.</li>
+<li>course_id $\to$ course_title, credits, instructor_id.</li>
+<li>instructor_id $\to$ name, department.</li>
+<li>student_id, course_id $\to$ grade.</li>
+</ul>
+
+<h4>(c) Your Answer</h4>
+<p>Mapped tables and BCNF check:</p>
+<ul>
+<li><code>student</code>(<u>student_id</u>, name, major). FD LHS is CK. BCNF.</li>
+<li><code>course</code>(<u>course_id</u>, course_title, credits, instructor_id). FD LHS is CK. BCNF.</li>
+<li><code>instructor</code>(<u>instructor_id</u>, name, department). FD LHS is CK. BCNF.</li>
+<li><code>enrollment</code>(<u>student_id, course_id</u>, grade). FD LHS is CK. BCNF.</li>
+</ul>
+<p><strong>All four tables are already in BCNF; no decomposition is required.</strong></p>
+<p><em>Understanding.</em> The "happy-path" closing question. A clean ER design with one-attribute-determines-the-rest FDs maps naturally to BCNF. The only way to trip up is to lump student, course, and instructor into a single relation; then <code>course_id $\to$ instructor_id</code> would cause a BCNF violation because course_id is not the CK of the combined relation.</p>
+</div>
+</details>
+</div>
+
+<!-- ============================================================ -->
+<h2>Scoring the Simulation</h2>
+
+<div class="why-box">
+<h3>After you finish</h3>
+<p>Tally your marks out of 120. Then compare to this diagnostic:</p>
+<ul style="margin-left:24px; color:var(--text-secondary);">
+<li><strong>100+</strong>: strong A territory; final-week prep should be review-only (formula sheet, Professor's Signature page, and a skim of Part F walkthroughs).</li>
+<li><strong>85-99</strong>: solid B; identify which category you lost marks in (SQL, RA, ER, BCNF) and hit the corresponding walkthrough page once more.</li>
+<li><strong>70-84</strong>: you have all the pieces but the recall is slow or the details are sloppy. Timed retries of this practice exam plus drilling the formula sheet is the right move.</li>
+<li><strong>Below 70</strong>: go back to Part C (walkthroughs) with the specific category page and re-do the examples by hand.</li>
+</ul>
+<p>Do not calibrate to an easier practice; calibrate to the prof's style. The real final will feel familiar if you have worked this page all the way through, including the Reveals, at least twice.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Remember: paper-based</h4>
+<p>On exam day you cannot copy-paste. Practice writing every SQL query by hand on lined paper. The muscle memory of correctly punctuating <code>;</code> and getting <code>from table as alias</code> aliases right takes repetition, not recognition.</p>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-18-paper-exam-techniques.html">&larr; 18. Paper Exam Techniques</a>
+<a class="bottom-nav-btn next disabled" href="#">(Final page)</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

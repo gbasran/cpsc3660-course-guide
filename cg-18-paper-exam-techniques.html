@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 18 : Paper Exam Techniques | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 18; EXAM PREP</span>
+<h1>Paper Exam Techniques</h1>
+<p class="subtitle">How to physically write RA, SQL, ER, and FD work on paper. Symbols by hand, layout conventions, and a 180-minute time budget.</p>
+
+<div class="analogy">
+<strong>Physical analogy; a surgeon laying out instruments before the cut.</strong><br><br>
+A surgeon does not start the operation and then reach blindly for tools; the tray is laid out in a fixed order before the patient even comes in. The paper exam is the same operating table; the margin, the symbol conventions, the clause layout, the FD-proof numbering, all have to be decided before you sit down. When the clock starts, you should be writing answers, not deciding where to put them.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part A: Drawing RA Symbols by Hand</h2>
+
+<div class="formula-box">
+<strong>The six symbols you will write most often.</strong>
+<dl class="breakdown">
+<dt>$\sigma$ (sigma)</dt>
+<dd>Cursive lowercase sigma. Draw like a curled-up backwards "e" with a small tail trailing down-right. The tail is what distinguishes it from an "o".</dd>
+<dt>$\pi$ (pi)</dt>
+<dd>Two vertical strokes under a flat horizontal roof; like a tiny capital-Pi but lowercase. Keep both legs the same length.</dd>
+<dt>$\bowtie$ (bowtie / natural join)</dt>
+<dd>Two triangles meeting point-to-point, like a bow tie. Draw the left triangle first (point right), then the right triangle (point left), touching at a single vertex in the middle. Do not leave a gap.</dd>
+<dt>$\div$ (division)</dt>
+<dd>The regular arithmetic division sign; a horizontal line with one dot above and one dot below.</dd>
+<dt>$\rho$ (rho)</dt>
+<dd>Cursive lowercase rho; a small "p" with a curl at the top that opens to the left. Sometimes students confuse it with "p"; add the curl distinctly.</dd>
+<dt>$\gamma$ (gamma)</dt>
+<dd>Lowercase gamma; like a lowercase "y" whose tail does not loop. Two slanted strokes meeting near the top, the right leg descending below the line.</dd>
+</dl>
+</div>
+
+<div class="note">
+<strong>Set operators.</strong> $\cup$ (union) is a lowercase "u" with rounded bottom. $\cap$ (intersection) is $\cup$ flipped upside-down. $-$ (difference) is a plain minus sign. $\times$ (Cartesian product) is a multiplication sign; do not confuse with "x" letter.
+</div>
+
+<div class="hand-calc">
+<h3>Writing subscripts cleanly</h3>
+
+<div class="step">
+<div class="step-label">The rule</div>
+<p>Write the operator at full size; drop the subscript to about 60% size and push it slightly below the baseline. Do not shrink the operator to fit the subscript; shrink the subscript to fit under the operator.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Example; selection with a compound predicate</div>
+<pre style="font-family:'JetBrains Mono',monospace; font-size:0.95rem; line-height:1.8; color:var(--text-primary); background:var(--bg-raised); padding:16px; border-radius:4px;">
+      σ                           <-- full-size
+       age &gt; 30 AND name='Ada'    <-- small, below baseline
+
+      (employee)                  <-- argument in parens
+
+    π
+     name, age
+
+    (employee ⋈ borrow)
+</pre>
+</div>
+
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Writing the subscript the same size as the operator, then running out of room on the line. Leave generous vertical spacing between rows; 1.5x line height is not too much.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: SQL Layout on Paper</h2>
+
+<div class="formula-box">
+<strong>Layout rules.</strong>
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>Lowercase keywords</strong>; matches the prof's style, and lowercase letters are faster to write.</li>
+<li><strong>One clause per line</strong>; <code>select</code>, <code>from</code>, <code>where</code>, <code>group by</code>, <code>having</code>, <code>order by</code>. Each starts at the left margin.</li>
+<li><strong>Indent subqueries</strong> one level (about 2 characters).</li>
+<li><strong>Align AS aliases</strong> in a column when you have several.</li>
+<li><strong>Explicit aliases</strong> (E1, E2, etc.) for every self-join.</li>
+</ol>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Canonical paper SQL layout</div>
+select e.name, avg(w.employee_salary) as avg_sal<br>
+from employee e, works w<br>
+where e.employee_name = w.employee_name<br>
+&nbsp;&nbsp;and w.company_name in (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select company_name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from company<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where company_city = 'Lethbridge'<br>
+&nbsp;&nbsp;)<br>
+group by e.name<br>
+having avg(w.employee_salary) &gt; 50000;
+</div>
+
+<div class="hand-calc">
+<h3>What marks get lost when the layout is sloppy</h3>
+<div class="step">
+<div class="step-label">Compressed into one line</div>
+<p>The grader misses your WHERE joining predicates; easy to undercount. Lose 0.5-1 marks.</p>
+</div>
+<div class="step">
+<div class="step-label">Mixed-case keywords</div>
+<p>Some lowercase, some uppercase. Visually inconsistent; not wrong, but suggests rushed work.</p>
+</div>
+<div class="step">
+<div class="step-label">Missing subquery indent</div>
+<p>Hard to see where the subquery ends; grader may mistake the wrong clause for an outer clause. Clarity lost; marks lost.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: ER Notation Conventions</h2>
+
+<div class="formula-box">
+<strong>Shape grammar.</strong>
+<dl class="breakdown">
+<dt>Rectangle</dt>
+<dd>Entity. Single border for strong entity; double border for weak entity.</dd>
+<dt>Oval</dt>
+<dd>Attribute. Single border for simple. Double border for multi-valued. Dashed border for derived. Branching sub-ovals for composite.</dd>
+<dt>Diamond</dt>
+<dd>Relationship. Single border for normal; double border for identifying relationship (the one that identifies a weak entity).</dd>
+<dt>Underline</dt>
+<dd>Primary key attributes; solid underline for strong entity's PK; dashed underline for weak entity's discriminator.</dd>
+<dt>Edge label</dt>
+<dd>Cardinality. Write <strong>1</strong>, <strong>N</strong>, <strong>M</strong> on each edge; or use arrowheads (single arrow = "one"; double arrow = "many").</dd>
+<dt>ISA triangle</dt>
+<dd>Triangle pointing up from subtype to supertype; the word "ISA" written inside or next to it.</dd>
+<dt>Double line</dt>
+<dd>Total participation; every entity instance must participate in the relationship.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>A mini ER drawn with ASCII (use real shapes on paper)</h3>
+<pre style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; line-height:1.4; color:var(--text-secondary); background:var(--bg-raised); padding:16px; border-radius:4px;">
+           (name)   (age)          (isbn)   (title)
+              \     /                \      /
+               \   /                  \    /
+             +----+                +-------+
+             |Emp |                | Books |
+             +----+                +-------+
+                \                       /
+                 \    1          M     /
+                  \____&lt;&gt;_borrow&lt;&gt;____/
+                       N          1
+                           |
+                        (date)     <-- attribute on relationship
+</pre>
+<p>Primary keys: empid on Emp (underlined), isbn on Books (underlined). Cardinality 1:N between Emp and borrow (each employee has N borrows; each borrow has 1 employee). Here we model borrow as a relationship with attribute date.</p>
+</div>
+
+<div class="note">
+<strong>Paper order.</strong> Pencil first; place entities at the top and spread them out. Draw relationships (diamonds) between them. Add attributes last. Once everything fits, ink over in pen. Never start in pen.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: FD Proof Layout</h2>
+
+<div class="formula-box">
+<strong>The rules (Armstrong's axioms plus derived rules).</strong>
+<dl class="breakdown">
+<dt>Reflexivity</dt><dd>If $\beta \subseteq \alpha$, then $\alpha \to \beta$.</dd>
+<dt>Augmentation</dt><dd>If $\alpha \to \beta$, then $\alpha\gamma \to \beta\gamma$.</dd>
+<dt>Transitivity</dt><dd>If $\alpha \to \beta$ and $\beta \to \gamma$, then $\alpha \to \gamma$.</dd>
+<dt>Union (derived)</dt><dd>If $\alpha \to \beta$ and $\alpha \to \gamma$, then $\alpha \to \beta\gamma$.</dd>
+<dt>Decomposition (derived)</dt><dd>If $\alpha \to \beta\gamma$, then $\alpha \to \beta$ and $\alpha \to \gamma$.</dd>
+<dt>Pseudo-transitivity (derived)</dt><dd>If $\alpha \to \beta$ and $\gamma\beta \to \delta$, then $\alpha\gamma \to \delta$.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Canonical proof layout; prove pseudo-transitivity</h3>
+
+<p>Given: $\alpha \to \beta$ and $\gamma\beta \to \delta$. To prove: $\alpha\gamma \to \delta$.</p>
+
+<div class="algo-box">
+<div class="algo-title">Numbered proof</div>
+1.  α → β                    (given)<br>
+2.  αγ → βγ                  (augmentation with γ, from 1)<br>
+3.  γβ → δ                   (given)<br>
+4.  βγ → δ                   (commutativity of set, from 3)<br>
+5.  αγ → δ                   (transitivity, from 2 and 4)  ∎
+</div>
+
+<p>Notice: each step numbered on the left, FD in the middle, justification in parentheses on the right naming the rule and which prior steps were used. Close with $\blacksquare$ (or "QED" or "$\square$").</p>
+</div>
+
+<div class="note">
+<strong>Grading tip.</strong> Even if the final FD you derive is wrong, partial marks are awarded for each correctly cited rule. Always name the rule and list the antecedent step numbers. "By augmentation, from step 2" is worth half a mark even on a failed proof.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: BCNF Decomposition Tree on Paper</h2>
+
+<div class="analogy">
+<strong>Draw it like a family tree.</strong> The original relation $R$ is the root at the top. Each BCNF violation splits it into two children; label the arrow with the violating FD. If a child is still not in BCNF, it splits again. Boxed leaves are in BCNF; branch everything else.
+</div>
+
+<div class="hand-calc">
+<h3>Decomposition tree for A4 Q6</h3>
+
+<pre style="font-family:'JetBrains Mono',monospace; font-size:0.9rem; line-height:1.5; color:var(--text-primary); background:var(--bg-raised); padding:20px; border-radius:4px;">
+                  R = (A, B, C, D, E)
+                  F = {A→BC, CD→E, B→D, E→A}
+                  CKs: {A}, {BC}, {CD}, {E}
+                  Violation: B → D (B not super key)
+                         |
+                         | split via B → D
+                         v
+              +-----------------+
+              |                 |
+              v                 v
+       [R1 = (B, D)]     R2 = (A, B, C, E)
+       FDs: {B → D}      FDs: {A → BC, E → A, BC → E}
+       CK: {B}           CKs: {A}, {BC}, {E}
+       ✓ BCNF            ✓ BCNF
+</pre>
+
+<p>Both leaves are boxed (marked with ✓ BCNF); no further decomposition needed. The arrow is annotated with the violating FD that caused the split.</p>
+</div>
+
+<div class="why-box">
+<h3>Why the tree diagram earns marks</h3>
+<p>The tree makes the decomposition <em>visible</em>; the grader can trace every step without squinting. It also forces you to label the violating FD at each split, which is explicitly required for full marks. Students who just write "R &rarr; R1 and R2" without the FD label lose 1-2 marks.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part F: Time Budget for 120 Marks in 180 Minutes</h2>
+
+<div class="formula-box">
+<strong>Base rate: ~1.5 minutes per mark.</strong>
+<p>Some blocks are faster (concept questions: 3 min per 2-mark question) and some slower (BCNF showpiece: ~1.7 min/mark).</p>
+</div>
+
+<table class="step-table">
+<tr><th>Block</th><th>Marks</th><th>Time</th><th>Cumulative</th></tr>
+<tr><td style="text-align:left;">Concept questions (6 × 2m)</td><td>12</td><td>18 min</td><td>18</td></tr>
+<tr><td style="text-align:left;">Basic SQL (simple SELECT + WHERE)</td><td>10-12</td><td>18 min</td><td>36</td></tr>
+<tr><td style="text-align:left;">Medium SQL (GROUP BY, HAVING)</td><td>10-12</td><td>18 min</td><td>54</td></tr>
+<tr><td style="text-align:left;">Hard SQL (NOT EXISTS, correlated)</td><td>10</td><td>18 min</td><td>72</td></tr>
+<tr><td style="text-align:left;">RA multi-part</td><td>10-12</td><td>18 min</td><td>90</td></tr>
+<tr><td style="text-align:left;">RA-to-SQL translation</td><td>6</td><td>10 min</td><td>100</td></tr>
+<tr><td style="text-align:left;">ER design (draw diagram)</td><td>15</td><td>22 min</td><td>122</td></tr>
+<tr><td style="text-align:left;">ER mapping to schema</td><td>8</td><td>12 min</td><td>134</td></tr>
+<tr><td style="text-align:left;">FD theory (closure, keys, proof)</td><td>10</td><td>15 min</td><td>149</td></tr>
+<tr><td style="text-align:left;"><strong>BCNF showpiece</strong></td><td>15</td><td><strong>25 min</strong></td><td>174</td></tr>
+<tr><td style="text-align:left;">Review / revisit skipped</td><td>&mdash;</td><td>6-15 min</td><td>180</td></tr>
+</table>
+
+<div class="exam-flag">
+<h4>The BCNF showpiece is the time sink</h4>
+<p>That 25-minute block looks long, but it contains five sub-tasks: find candidate keys, identify violation, decompose, check lossless, check dependency preservation. Each takes 4-6 minutes. If you start this at the 150-minute mark with only 10 minutes left, you cannot finish. Schedule it so it ends by the 175-minute mark. Leave at least 5 minutes true buffer for review.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part G: Exam Day Tactical Tips</h2>
+
+<div class="why-box">
+<h3>Before you start writing</h3>
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>Read every question twice.</strong> Underline the key verbs: find, list, decompose, prove, draw, map.</li>
+<li><strong>Note the mark value next to each question.</strong> 3-mark questions get 4-5 minutes max; anything longer means you are overthinking.</li>
+<li><strong>Flip through the whole exam first</strong> (30 seconds). Spot any surprise topics and mentally allocate time.</li>
+</ol>
+</div>
+
+<div class="why-box">
+<h3>While writing</h3>
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>Attempt every question.</strong> Partial credit is real; even one correct line earns marks. A blank earns zero.</li>
+<li><strong>Normalization questions:</strong> at the top of your answer space, write out candidate keys and FDs before doing anything else; you will refer to them constantly.</li>
+<li><strong>ER questions:</strong> pencil first, ink last. Never start in pen. Leave space between entities; crowded diagrams lose marks.</li>
+<li><strong>Show work on FD proofs and closures;</strong> wrong answers with correct reasoning still earn marks.</li>
+<li><strong>Don't over-join in SQL.</strong> If a question does not need the <code>company</code> table, do not include it. Over-joining is a common reason to lose 0.5-1 marks.</li>
+<li><strong>Use basic RA operators</strong> ($\sigma, \pi, \bowtie, \cup, -, \div$) unless the question explicitly allows extended operators ($\gamma$ for aggregation, outer joins). The prof's grading key uses the basic set.</li>
+</ol>
+</div>
+
+<div class="why-box">
+<h3>At the end</h3>
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>Never leave 10 minutes on the clock unused.</strong> Use them to revisit the hardest question.</li>
+<li><strong>Re-read every SQL query you wrote.</strong> Check: DISTINCT where needed? HAVING not WHERE for aggregates? Both join predicates present?</li>
+<li><strong>Re-read your BCNF decomposition.</strong> Lossless check cited with the specific FD. Dependency check done FD-by-FD.</li>
+<li><strong>Verify ER diagrams.</strong> Every relationship has a cardinality. Every entity has a PK underlined. Weak entities have double borders.</li>
+</ol>
+</div>
+
+<!-- ============================================================ -->
+<h2>The 10-commandment cheat-card (memorize)</h2>
+
+<div class="formula-box">
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li>Lowercase SQL keywords; one clause per line.</li>
+<li>Two negations (NOT EXISTS ... NOT EXISTS) for "every" / universal quantification.</li>
+<li>HAVING filters groups; WHERE filters rows.</li>
+<li>Division $\div$ when the question says "all" or "every" across two sets.</li>
+<li>Rename $\rho$ before any self-join.</li>
+<li>Candidate keys via attribute closure; no guessing.</li>
+<li>BCNF violation = non-super-key determinant; decompose on the violation.</li>
+<li>Lossless check: shared attributes determine a fragment.</li>
+<li>Dependency-preservation check: every FD lives entirely in some fragment.</li>
+<li>ER: pencil first, ink last; label every cardinality.</li>
+</ol>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Armstrong's axioms</dt><dd>Reflexivity, augmentation, transitivity; the three sound-and-complete rules for inferring FDs.</dd>
+<dt>Decomposition tree</dt><dd>Family-tree sketch of BCNF splits; leaves boxed when in BCNF.</dd>
+<dt>Over-join</dt><dd>Including a table that is not needed for the query; costs marks for imprecision.</dd>
+<dt>Partial credit</dt><dd>Marks awarded for correct sub-steps even when the final answer is wrong.</dd>
+<dt>Total participation</dt><dd>Drawn with a double line; every entity instance must participate.</dd>
+<dt>Discriminator</dt><dd>Local attribute that distinguishes instances of a weak entity within its owner group.</dd>
+<dt>Showpiece question</dt><dd>The 15-mark BCNF decomposition; the biggest single-question mark cluster on the final.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-17-normalization-walkthrough.html">&larr; 17. Normalization Walkthrough</a>
+<a class="bottom-nav-btn next" href="cg-19-practice-final.html">19. Practice Final &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

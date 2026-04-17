@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 05 : SQL DDL + Basics | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 05</span>
+<h1>SQL: DDL and Basics</h1>
+<p class="subtitle">CREATE TABLE, INSERT, and the SELECT/FROM/WHERE skeleton that handles 80 percent of queries.</p>
+
+<!-- ============================================================ -->
+<h2>Part A: CREATE TABLE; Declaring the Schema</h2>
+
+<div class="analogy">
+<strong>Physical analogy; setting up a filing cabinet's drawer dividers and label rules.</strong><br><br>
+Before anyone can file a single paper, someone has to go to the empty cabinet and set up the drawers: print the labels, insert the dividers, write down the rules ("every intake form must have a client ID; no two clients may share an ID; the phone field is optional but must contain digits only"). CREATE TABLE is exactly that setup step. You name the relation, list the columns with their domains, and attach every constraint you want enforced. After this runs, the table exists but is empty; you can INSERT rows into it.
+</div>
+
+<div class="formula-box">
+<strong>Skeleton: CREATE TABLE.</strong>
+<div class="algo-box">
+create table &lt;name&gt; (<br>
+&nbsp;&nbsp;&lt;col1&gt; &lt;type&gt; [not null] [default ...] [check (...)],<br>
+&nbsp;&nbsp;&lt;col2&gt; &lt;type&gt; ...,<br>
+&nbsp;&nbsp;primary key (&lt;col&gt; [, &lt;col&gt;]),<br>
+&nbsp;&nbsp;foreign key (&lt;col&gt;) references &lt;other_table&gt;(&lt;col&gt;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[on delete cascade | on delete set null | on delete restrict],<br>
+&nbsp;&nbsp;check (&lt;condition&gt;)<br>
+);
+</div>
+<dl class="breakdown">
+<dt>types</dt>
+<dd><code>integer</code>, <code>numeric(p, s)</code>, <code>char(n)</code>, <code>varchar(n)</code>, <code>date</code>, <code>boolean</code>.</dd>
+<dt>not null</dt>
+<dd>Column cannot be NULL in any row.</dd>
+<dt>primary key</dt>
+<dd>Auto-implies NOT NULL and UNIQUE. Can span multiple columns (composite PK).</dd>
+<dt>foreign key</dt>
+<dd>Values must appear as the PK of the referenced table, or be NULL.</dd>
+<dt>check</dt>
+<dd>User-defined predicate; DBMS rejects rows that violate it.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Full library schema in SQL</h3>
+
+<div class="step">
+<div class="step-label">Step 1: employee (standalone, no FKs)</div>
+<div class="algo-box">
+create table employee (<br>
+&nbsp;&nbsp;empid&nbsp;&nbsp;&nbsp;&nbsp;char(5) primary key,<br>
+&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;varchar(40) not null,<br>
+&nbsp;&nbsp;office&nbsp;&nbsp;&nbsp;varchar(10),<br>
+&nbsp;&nbsp;age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;integer check (age &gt;= 0 and age &lt; 120)<br>
+);
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: books (also standalone)</div>
+<div class="algo-box">
+create table books (<br>
+&nbsp;&nbsp;isbn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char(13) primary key,<br>
+&nbsp;&nbsp;title&nbsp;&nbsp;&nbsp;&nbsp;varchar(100) not null,<br>
+&nbsp;&nbsp;authors&nbsp;&nbsp;varchar(200),<br>
+&nbsp;&nbsp;publisher varchar(50) not null<br>
+);
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: borrow (two FKs, order matters)</div>
+<p>You must create the two parent tables first; borrow references them.</p>
+<div class="algo-box">
+create table borrow (<br>
+&nbsp;&nbsp;empid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char(5),<br>
+&nbsp;&nbsp;isbn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char(13),<br>
+&nbsp;&nbsp;borrow_date date not null,<br>
+&nbsp;&nbsp;primary key (empid, isbn),<br>
+&nbsp;&nbsp;foreign key (empid) references employee(empid) on delete cascade,<br>
+&nbsp;&nbsp;foreign key (isbn)&nbsp;&nbsp;references books(isbn)&nbsp;&nbsp;&nbsp;&nbsp;on delete restrict<br>
+);
+</div>
+<p class="result">Deleting an employee auto-cleans their borrow rows; deleting a book is blocked if anyone has borrowed it.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (A2 Q6(a), Midterm Q8(d))</h4>
+<p>CREATE TABLE questions almost always include at least one FK with a cascade rule and one CHECK. Forgetting the <code>on delete</code> clause is partial credit at best. The prof also tests whether you order the CREATE statements correctly (parents before children). When in doubt, list all standalone tables first, then relationship tables.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: INSERT</h2>
+
+<div class="analogy">
+<strong>Physical analogy; dropping one form into a drawer.</strong><br><br>
+INSERT writes one row at a time (or a batch) into the table. The DBMS checks every constraint on the way down: the PK must not already exist, every NOT NULL column must have a value, every FK must resolve, every CHECK must pass. If any check fails, the entire insert is aborted; no partial row is left behind.
+</div>
+
+<div class="formula-box">
+<strong>Syntax: INSERT.</strong>
+<div class="algo-box">
+insert into &lt;table&gt; [(&lt;col1&gt;, &lt;col2&gt;, ...)]<br>
+&nbsp;&nbsp;values (&lt;v1&gt;, &lt;v2&gt;, ...);<br><br>
+insert into &lt;table&gt; (&lt;col-list&gt;)<br>
+&nbsp;&nbsp;select ... from ...;&nbsp;&nbsp;&nbsp;-- bulk insert from a query
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>Populating the library</h3>
+<div class="algo-box">
+insert into employee values ('E01','Ada','D-210',34);<br>
+insert into employee values ('E02','Boris','D-214',29);<br><br>
+insert into books values ('9781','Intro to DB','Silberschatz','Penguin');<br>
+insert into books values ('9782','ER Modeling','Chen','MIT');<br><br>
+insert into borrow values ('E01','9781','2026-03-01');<br>
+insert into borrow values ('E02','9782','2026-03-02');
+</div>
+<p class="check">Notice all string literals use single quotes. Dates as 'YYYY-MM-DD' strings.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: SELECT / FROM / WHERE; the Core Query</h2>
+
+<div class="analogy">
+<strong>Physical analogy; a form letter asking the librarian for specific books.</strong><br><br>
+SELECT ... FROM ... WHERE ... is a three-part question. FROM names which cabinet to look in. WHERE is the condition ("books published before 1950"). SELECT is what to hand back ("just the titles and ISBNs"). The DBMS reads WHERE first (filters rows), then FROM is already locked in, then SELECT picks columns. The order you <em>write</em> is SELECT-FROM-WHERE; the order the DBMS <em>executes</em> is FROM → WHERE → SELECT.
+</div>
+
+<div class="formula-box">
+<strong>Skeleton: basic SELECT.</strong>
+<div class="algo-box">
+select &lt;col-list&gt; | *<br>
+from &lt;table-list&gt;<br>
+where &lt;predicate&gt;;
+</div>
+<dl class="breakdown">
+<dt>col-list</dt>
+<dd>Comma-separated columns, or <code>*</code> for all.</dd>
+<dt>table-list</dt>
+<dd>One or more tables; if more than one, their rows are Cartesian-combined unless WHERE restricts.</dd>
+<dt>predicate</dt>
+<dd>Boolean condition using <code>=, &lt;&gt;, &lt;, &lt;=, &gt;, &gt;=, and, or, not, between, in, like, is null</code>.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Three basic queries</h3>
+
+<div class="step">
+<div class="step-label">Query 1: all columns of young employees</div>
+<div class="algo-box">
+select *<br>
+from employee<br>
+where age &lt; 35;
+</div>
+<p>Equivalent to $\sigma_{\text{age} \lt 35}(\text{employee})$.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Query 2: just names of employees in D-210</div>
+<div class="algo-box">
+select name<br>
+from employee<br>
+where office = 'D-210';
+</div>
+<p>Equivalent to $\pi_{\text{name}}(\sigma_{\text{office}=\text{'D-210'}}(\text{employee}))$.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Query 3: distinct offices</div>
+<div class="algo-box">
+select distinct office<br>
+from employee;
+</div>
+<p class="result">Without DISTINCT you get duplicates; SQL's SELECT keeps bag semantics by default.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: Multi-Table Queries (Joins)</h2>
+
+<div class="analogy">
+<strong>Physical analogy; flipping back and forth between two open folders on your desk.</strong><br><br>
+A single table rarely has everything. If you want "names of employees who borrowed a book," you start in <code>borrow</code> to see who borrowed what, then flip to <code>employee</code> to turn the empid into a name. SQL does this with a join. There are two syntactic flavors: the <em>implicit join</em> writes all tables in the FROM clause and puts the join condition in WHERE; the <em>explicit join</em> uses <code>JOIN ... ON</code>. Both produce the same result; the explicit form is clearer for humans.
+</div>
+
+<div class="formula-box">
+<strong>Two ways to write a join.</strong>
+<div class="algo-box">
+-- implicit<br>
+select e.name, b.isbn<br>
+from employee e, borrow b<br>
+where e.empid = b.empid;<br><br>
+-- explicit (preferred)<br>
+select e.name, b.isbn<br>
+from employee e<br>
+join borrow b on e.empid = b.empid;
+</div>
+<dl class="breakdown">
+<dt>e, b</dt>
+<dd>Table aliases; shorthand for the full names inside the query.</dd>
+<dt>ON</dt>
+<dd>Join condition; typically the FK = PK equality.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Three-table join: name, title, borrow_date</h3>
+
+<div class="step">
+<div class="step-label">What we want</div>
+<p>For every borrow event, show the employee's name, the book's title, and the borrow date.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Implicit form</div>
+<div class="algo-box">
+select e.name, bk.title, br.borrow_date<br>
+from employee e, borrow br, books bk<br>
+where e.empid = br.empid<br>
+&nbsp;&nbsp;and br.isbn = bk.isbn;
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Explicit form</div>
+<div class="algo-box">
+select e.name, bk.title, br.borrow_date<br>
+from employee e<br>
+join borrow br on e.empid = br.empid<br>
+join books bk on br.isbn = bk.isbn;
+</div>
+<p class="result">Both return the same tuples; the explicit form highlights each join predicate on its own line.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (A2 Q7, Midterm Q7)</h4>
+<p>The prof writes both implicit and explicit forms in handouts; either is accepted on the exam as long as the join conditions are correct. For readability and partial credit, prefer the explicit JOIN ... ON form; the marker can see your join logic immediately.</p>
+</div>
+
+<!-- ====== the "don't over-join" callout ====== -->
+<div class="exam-flag">
+<h4>Don't Over-Join</h4>
+<p>A common mistake: joining tables you do not need. If the question is "find the names of employees in D-210," do <em>not</em> join <code>borrow</code> and <code>books</code>; you only need <code>employee</code>. Every extra join adds tuples (and sometimes wrong duplicates) and hurts clarity. Rule of thumb: list the columns you need in the SELECT, then trace each one back to its source table, then include only those tables. If a table contributes neither a selection predicate nor an output column, it does not belong in FROM.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: ORDER BY, DISTINCT, BETWEEN, LIKE, IN</h2>
+
+<div class="analogy">
+<strong>Physical analogy; extra filters you add to a search.</strong><br><br>
+These are the small operators you sprinkle into queries to shape the output. ORDER BY sorts; DISTINCT deduplicates; BETWEEN is shorthand for a range check; LIKE does pattern matching on strings; IN tests membership in a list. None of them change <em>which</em> tuples you conceptually want; they change how you write the predicate or how the result is presented.
+</div>
+
+<div class="formula-box">
+<strong>Quick reference.</strong>
+<dl class="breakdown">
+<dt>order by</dt>
+<dd><code>order by col [asc|desc], col2 ...</code>. Default is asc. Appears <em>after</em> WHERE, before any LIMIT.</dd>
+<dt>distinct</dt>
+<dd><code>select distinct col, ...</code>. Removes duplicate rows from the result.</dd>
+<dt>between</dt>
+<dd><code>x between a and b</code> is shorthand for <code>x &gt;= a and x &lt;= b</code>. Inclusive on both ends.</dd>
+<dt>like</dt>
+<dd><code>name like 'A%'</code> matches names starting with A. <code>%</code> = any string, <code>_</code> = any single char.</dd>
+<dt>in</dt>
+<dd><code>office in ('D-210','D-214','D-300')</code> is shorthand for a disjunction of equalities.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Five small queries</h3>
+
+<div class="step">
+<div class="step-label">Employees sorted by age descending</div>
+<div class="algo-box">
+select name, age<br>
+from employee<br>
+order by age desc;
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Employees aged 30 to 40 inclusive</div>
+<div class="algo-box">
+select name<br>
+from employee<br>
+where age between 30 and 40;
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Books whose title contains "data" (case-sensitive in most DBMSs)</div>
+<div class="algo-box">
+select title<br>
+from books<br>
+where title like '%data%';
+</div>
+<p>Anchored forms: <code>'data%'</code> = starts with data; <code>'%data'</code> = ends with data.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Employees in one of three offices</div>
+<div class="algo-box">
+select name<br>
+from employee<br>
+where office in ('D-210','D-214','D-300');
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Distinct publishers in alphabetical order</div>
+<div class="algo-box">
+select distinct publisher<br>
+from books<br>
+order by publisher;
+</div>
+<p class="result">These five constructs cover 90 percent of the syntax you need on the exam.</p>
+</div>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>The exam's early SQL questions are judged on precision of syntax. Miss a comma, swap AND for OR, use <code>=</code> where <code>IS NULL</code> was needed, and you lose marks. Practice writing these operators from memory: BETWEEN is inclusive, LIKE uses <code>%</code> and <code>_</code>, IN requires parentheses around the list, ORDER BY comes last. These tiny details cost points.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>DDL</dt><dd>Data Definition Language; CREATE TABLE, ALTER TABLE, DROP TABLE.</dd>
+<dt>DML</dt><dd>Data Manipulation Language; INSERT, UPDATE, DELETE, SELECT.</dd>
+<dt>NOT NULL</dt><dd>Column constraint rejecting NULL values.</dd>
+<dt>PRIMARY KEY</dt><dd>Implies UNIQUE and NOT NULL; one per table.</dd>
+<dt>FOREIGN KEY ... REFERENCES</dt><dd>Declares referential integrity and cascade behavior.</dd>
+<dt>CHECK</dt><dd>User-defined predicate the DBMS enforces on every insert/update.</dd>
+<dt>Implicit join</dt><dd>Multiple tables in FROM plus the join predicate in WHERE.</dd>
+<dt>Explicit join</dt><dd><code>JOIN ... ON</code>; clearer, preferred.</dd>
+<dt>Table alias</dt><dd>Short name after the table in FROM; used throughout the query (<code>employee e</code>).</dd>
+<dt>DISTINCT</dt><dd>Removes duplicate rows from the result.</dd>
+<dt>BETWEEN</dt><dd>Inclusive range shorthand: <code>x BETWEEN a AND b</code>.</dd>
+<dt>LIKE</dt><dd>Pattern match with <code>%</code> (any string) and <code>_</code> (any char).</dd>
+<dt>IN</dt><dd>Membership in a list: <code>col IN (...)</code>.</dd>
+<dt>ORDER BY</dt><dd>Sort the output; ASC default or DESC.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-04-relational-algebra.html">&larr; 04. Relational Algebra</a>
+<a class="bottom-nav-btn next" href="cg-06-sql-advanced.html">06. SQL: Advanced &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

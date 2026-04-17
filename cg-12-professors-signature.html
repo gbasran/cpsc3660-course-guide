@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 12 : The Professor's Signature | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 12; EXAM PREP</span>
+<h1>The Professor's Signature</h1>
+<p class="subtitle">A forensic reading of four assignments and one midterm; what keeps coming back, what is coming next, and how the final is almost certainly going to be built.</p>
+
+<div class="analogy">
+<strong>Physical analogy; a tennis coach watching the rival's serve.</strong><br><br>
+Before any match, a good coach does not just drill; he pulls up three years of footage of the opponent. He watches the toss, the stance, the placement of every serve, and he notices that this opponent hits the T-slot 78% of the time on deuce-side second serves under pressure. That knowledge changes practice the next day; the player drills returning that exact shot. The final exam works the same way. The prof is not random; he has a toolbox of four or five question archetypes that he reaches for every single time. The assignments and midterm are three years of game footage. This page reads them back to you so that when you sit down at 9 AM on exam day, you already know where the ball is going.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part A: The Opening 5-6 Concept Questions</h2>
+
+<p>Every assessment opens with a short block of conceptual definitions; each worth exactly 2 marks, expected to fit on 2 lines. The prof uses these as warm-ups and as grade buoys (everyone who studied can earn 10-12 marks before breaking a sweat). On the final, expect this block to expand to <strong>6-8 questions (12-16 marks)</strong> because it must now include post-midterm territory.</p>
+
+<div class="formula-box">
+<strong>The five recurring themes.</strong>
+<dl class="breakdown">
+<dt>Theme 1</dt>
+<dd><strong>DML vs DDL.</strong> "Define DML and DDL and give one example of each." Appears in A1 Q1 and on the midterm.</dd>
+<dt>Theme 2</dt>
+<dd><strong>Key type distinction.</strong> Define super key, candidate key, primary key; give example. A1 Q3, Midterm Q2.</dd>
+<dt>Theme 3</dt>
+<dd><strong>DBMS components.</strong> Name the three subsystems and what each does (storage manager, query processor, data dictionary). Recurring.</dd>
+<dt>Theme 4</dt>
+<dd><strong>RA set-op transformations.</strong> Show that $r \cap s = r - (r - s)$. A1 Q4, Midterm Q6.</dd>
+<dt>Theme 5</dt>
+<dd><strong>Integrity / cascading.</strong> "What happens if we delete E01 with ON DELETE CASCADE?" Midterm Q7.</dd>
+</dl>
+</div>
+
+<div class="exam-flag">
+<h4>Final-Exam Expansion</h4>
+<p>The midterm had zero marks on ER, FDs, or normalization. The final cannot ignore half the syllabus, so this opening block will grow to include:</p>
+<ul style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>BCNF definition</strong> (2 marks) paired with "when is a decomposition in BCNF?"; mirrors A4 Q2.</li>
+<li><strong>FD definition</strong> (2 marks); "define a functional dependency"; mirrors A4 Q1.</li>
+<li><strong>Strong vs weak entity</strong> (2 marks) plus one example. Mirrors A3 Q5.</li>
+</ul>
+<p>Budget: 18 minutes total on this block. These are gift marks; do not overthink them.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: SQL Graduation Pattern</h2>
+
+<p>Every SQL question the prof writes has the same staircase. Part (a) is a gift, part (d) is a discriminator, and parts (b) and (c) are the GROUP BY exercises that separate B-students from A-students.</p>
+
+<div class="formula-box">
+<strong>The graduation, with example difficulty.</strong>
+<dl class="breakdown">
+<dt>(a) Basic</dt>
+<dd><strong>Simple SELECT + WHERE</strong>; 2 marks; "find employees with age &gt; 30". Gift tier; never missed by a prepared student.</dd>
+<dt>(b) Medium</dt>
+<dd><strong>GROUP BY with an aggregate</strong>; 2-3 marks; "count books per publisher". Requires <code>group by publisher</code> and <code>count(*)</code>.</dd>
+<dt>(c) Medium</dt>
+<dd><strong>GROUP BY + HAVING + threshold</strong>; 3 marks; "branches where avg balance &gt; 10000". Requires HAVING not WHERE.</dd>
+<dt>(d) Hard</dt>
+<dd><strong>Correlated subquery or NOT EXISTS</strong>; 3-4 marks; "employees earning more than avg in their own company"; or "employees who borrowed ALL books by Springer".</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Why (c) is guaranteed to appear</h3>
+<p>GROUP BY + HAVING with an average threshold has been on <strong>every</strong> SQL-based assessment:</p>
+<div class="step">
+<div class="step-label">A1</div>
+<p>Q5: "branches with average account balance above 10000" (Bank schema).</p>
+</div>
+<div class="step">
+<div class="step-label">A2</div>
+<p>Q4: "publishers whose books have average borrow count over 5" (Library schema, group-having variant).</p>
+</div>
+<div class="step">
+<div class="step-label">A3</div>
+<p>Q1(c): "for every company, find cities where avg salary exceeds a threshold" (Employee-Works schema).</p>
+</div>
+<div class="step">
+<div class="step-label">Midterm</div>
+<p>Q5(b): "publishers with average borrows &gt; 3" (Library).</p>
+</div>
+<p class="result">Probability on the final: <span class="hl">95%</span>. Practice the template until it is muscle memory.</p>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">The GROUP BY + HAVING template</div>
+select &lt;group-attr&gt;, avg(&lt;num-attr&gt;)<br>
+from &lt;table&gt;<br>
+group by &lt;group-attr&gt;<br>
+having avg(&lt;num-attr&gt;) &gt; &lt;threshold&gt;;
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: RA Multi-Part Question Anatomy</h2>
+
+<p>Every assessment has one dedicated relational-algebra question, always 9-12 marks, always split into 3-4 parts. The structure is extraordinarily stable.</p>
+
+<div class="formula-box">
+<strong>RA question skeleton.</strong>
+<dl class="breakdown">
+<dt>Part (a)</dt>
+<dd><strong>Selection + projection + natural join</strong>; 2 marks medium. "Find names of employees who borrowed a book." $\pi_{name}(employee \bowtie borrow)$.</dd>
+<dt>Part (b)</dt>
+<dd><strong>Aggregation in RA</strong>; 3 marks hard. Uses $\gamma$ (or the $\mathcal{G}$ calligraphic form in the slides). "For each publisher, count the number of books."</dd>
+<dt>Part (c)</dt>
+<dd><strong>Division / universal quantification</strong>; 3 marks hard. The classic "borrowed ALL books from publisher X" phrasing. Uses $\div$.</dd>
+<dt>Part (d)</dt>
+<dd><strong>CREATE TABLE DDL</strong>; 2 marks medium. Often paired with the same schema, asking you to write the CREATE with keys, FKs, and constraints.</dd>
+</dl>
+</div>
+
+<div class="exam-flag">
+<h4>Division is the discriminator</h4>
+<p>On every RA question the prof writes, there is one "for all" or "every" clue word that tells you division is in play. "Employees who borrowed <em>every</em> book by Springer." "Customers who have an account at <em>all</em> branches in Brooklyn." If you see those words and you do not reach for $\div$, you are guessing. See <a href="cg-15-ra-walkthrough.html">Page 15</a> for worked division problems.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: Schema Recycling Matrix</h2>
+
+<p>The prof has four or five go-to schemas and he rotates through them every assessment. When you see one on the final, you can almost predict which operations he will ask you to do, because he has already done them on earlier assignments.</p>
+
+<table class="step-table">
+<tr><th>Schema</th><th>A1</th><th>A2</th><th>A3</th><th>A4</th><th>Midterm</th><th>Final Prob.</th></tr>
+<tr><td style="text-align:left;">Library (employee, books, borrow)</td><td>Q7</td><td>Q1-2</td><td>&mdash;</td><td>&mdash;</td><td>Q8</td><td><span class="hl">85%</span></td></tr>
+<tr><td style="text-align:left;">Employee-Works-Company-Manages</td><td>&mdash;</td><td>Q7</td><td>Q3, Q7</td><td>&mdash;</td><td>Q9</td><td><span class="hl">80%</span></td></tr>
+<tr><td style="text-align:left;">Bank (customer, account, depositor, loan, borrower)</td><td>&mdash;</td><td>&mdash;</td><td>Q1-2</td><td>&mdash;</td><td>&mdash;</td><td>70% (new)</td></tr>
+<tr><td style="text-align:left;">University (student, course)</td><td>&mdash;</td><td>Q6</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>60%</td></tr>
+<tr><td style="text-align:left;">Online Bookstore</td><td>&mdash;</td><td>&mdash;</td><td>Q8</td><td>&mdash;</td><td>&mdash;</td><td>55%</td></tr>
+</table>
+
+<div class="why-box">
+<h3>Why the Bank schema is "new" on the final</h3>
+<p>The Bank schema appeared in A3 but not the midterm. The prof likes parity between midterm and final, so he will pull it back for SQL and RA on the final; probably as the vehicle for the GROUP BY + HAVING + avg balance question in Part B. Memorize the six Bank tables cold; the attribute names are the tricky part.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: Post-Midterm Territory</h2>
+
+<p>The midterm had <strong>zero</strong> marks on ER diagrams, functional dependencies, or normalization. That means the final carries the full weight of those topics: expect 40-45% of the paper to cover them.</p>
+
+<div class="formula-box">
+<strong>Predicted post-midterm question set (total ~48-52 marks).</strong>
+<dl class="breakdown">
+<dt>ER construction</dt>
+<dd><strong>12-15 marks.</strong> Full ER design from a natural-language prompt; include entities, relationships, cardinalities, multi-valued attributes, and at least one ISA/generalization. Mirrors A3 Q4 (car insurance) and A3 Q8 (online bookstore with ISA).</dd>
+<dt>Attribute closure</dt>
+<dd><strong>3-4 marks.</strong> Given a relation $R$ and a set of FDs $F$, compute $A^+$ under $F$. Also "enumerate all candidate keys of $R$". Mirrors A4 Q3 and A4 Q6(a-b).</dd>
+<dt>Decomposition properties</dt>
+<dd><strong>5-8 marks.</strong> Given a proposed decomposition, check lossless-join and dependency preservation. Mirrors A4 Q5.</dd>
+<dt>BCNF decomposition</dt>
+<dd><strong>5-7 marks.</strong> Given $R$ and $F$, find the BCNF decomposition using the violation algorithm. Mirrors A4 Q6(c); the "showpiece" question.</dd>
+</dl>
+</div>
+
+<div class="exam-flag">
+<h4>The showpiece; A4 Q6 almost certainly returns</h4>
+<p>A4 Q6 is the only place the prof walked through the full pipeline: candidate keys → BCNF violation → decomposition → lossless check → dependency-preservation check. This entire pipeline is worth 15+ marks when bundled. The final almost certainly features a near-verbatim version; study <a href="cg-17-normalization-walkthrough.html">Page 17</a> until the algorithm is automatic.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part F: Predicted Final Exam Scale</h2>
+
+<div class="formula-box">
+<strong>Parameters.</strong>
+<dl class="breakdown">
+<dt>Duration</dt>
+<dd>180 minutes (3 hours), paper-based.</dd>
+<dt>Total marks</dt>
+<dd>120 marks.</dd>
+<dt>Question count</dt>
+<dd>15-16 numbered questions; some multi-part.</dd>
+<dt>Time per mark</dt>
+<dd>~1.5 min/mark; some questions (BCNF showpiece, ER design) take more; concept questions take less.</dd>
+</dl>
+</div>
+
+<table class="step-table">
+<tr><th>Difficulty</th><th>Mark Range</th><th>Share</th><th>Examples</th></tr>
+<tr><td>Basic</td><td>60 marks</td><td>50%</td><td>Concept definitions, simple SELECT+WHERE, simple CREATE TABLE</td></tr>
+<tr><td>Medium</td><td>40 marks</td><td>33%</td><td>GROUP BY + HAVING, joins, multi-part RA, ER mapping</td></tr>
+<tr><td>Hard</td><td>20 marks</td><td>17%</td><td>Division in RA, NOT EXISTS, BCNF decomposition, FD proofs</td></tr>
+</table>
+
+<div class="note">
+<strong>Grade target reading.</strong> If you can nail all 60 basic marks and half the medium marks, you are at 80. Grabbing even a third of the hard marks pushes you to 85+. The hard marks are where A's become A+'s.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part G: The Prof's Freebies</h2>
+
+<p>Every exam has a predictable set of questions that are <em>free</em> if you did the assignments. Make sure you bank every single one.</p>
+
+<div class="formula-box">
+<strong>Guaranteed easy marks.</strong>
+<dl class="breakdown">
+<dt>Concept definitions</dt>
+<dd><strong>10-16 marks</strong> (5-8 Qs at 2m each). Two-line answers. See <a href="cg-13-concept-questions.html">Page 13</a> for all 15 phrased and answered.</dd>
+<dt>Simple SELECT + WHERE</dt>
+<dd><strong>2-3 marks.</strong> "Find names of employees with age &gt; 30." Three-line query; always the first sub-part of the SQL question.</dd>
+<dt>Simple CREATE TABLE with FK</dt>
+<dd><strong>2-3 marks.</strong> Write the CREATE TABLE for one of the recycled schemas. PK, NOT NULL, FK with ON DELETE CASCADE.</dd>
+<dt>Simple GROUP BY</dt>
+<dd><strong>2-3 marks.</strong> "Count books per publisher." One <code>group by</code>, one aggregate, no HAVING.</dd>
+</dl>
+</div>
+
+<div class="why-box">
+<h3>Freebie discipline</h3>
+<p>These 4 categories together are ~18-25 marks of easy points. If you walk out having lost any of them, you left letter grades on the table. Do every concept question first; the brain is freshest, and you have 12-16 marks in 15 minutes.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part H: The Prof's Differentiators</h2>
+
+<p>These are the questions that sort B's from A's. They are always present, always worth 3-7 marks each, and always the place where prepared students separate themselves.</p>
+
+<div class="formula-box">
+<strong>Hard question archetypes.</strong>
+<dl class="breakdown">
+<dt>Division in RA</dt>
+<dd><strong>3-4 marks.</strong> "Employees who borrowed ALL books by Springer." Express as $\pi_{name,isbn}(\sigma \ldots) \div \pi_{isbn}(\ldots)$. See <a href="cg-15-ra-walkthrough.html">Page 15 Problem 3</a>.</dd>
+<dt>NOT EXISTS for universal quantification</dt>
+<dd><strong>3-4 marks.</strong> SQL equivalent of division; "there does not exist a Springer book that this employee has not borrowed." See <a href="cg-14-sql-walkthrough.html">Page 14 Problem 6</a>.</dd>
+<dt>BCNF decomposition (full pipeline)</dt>
+<dd><strong>5-7 marks.</strong> Find candidate keys, identify violation, decompose, check lossless, check dependency preservation. See <a href="cg-17-normalization-walkthrough.html">Page 17 Walkthrough 1</a>.</dd>
+<dt>Armstrong's inference (proof)</dt>
+<dd><strong>3 marks.</strong> "Prove pseudo-transitivity from reflexivity, augmentation, transitivity." Line-by-line numbered proof with rule justifications.</dd>
+</dl>
+</div>
+
+<div class="exam-flag">
+<h4>The division-trap</h4>
+<p>Students who confuse division with "set difference" lose full marks on RA Q(c). The tell: if the question mentions "every" or "all" across two sets, use $\div$; if it mentions "except" or "not in," use $-$. The prof has never once tested "except" on a final; he always tests "all".</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Putting it together; the one-page mental model of the final</h2>
+
+<div class="hand-calc">
+<h3>Predicted final exam blueprint (120 marks, 180 minutes)</h3>
+
+<table class="step-table">
+<tr><th>Block</th><th>Mark Range</th><th>Time Budget</th><th>Source pages</th></tr>
+<tr><td style="text-align:left;">Concept questions (6-8)</td><td>12-16</td><td>18 min</td><td><a href="cg-13-concept-questions.html">P13</a></td></tr>
+<tr><td style="text-align:left;">SQL multi-part (a-d graduation)</td><td>12-15</td><td>22 min</td><td><a href="cg-14-sql-walkthrough.html">P14</a></td></tr>
+<tr><td style="text-align:left;">RA multi-part</td><td>9-12</td><td>18 min</td><td><a href="cg-15-ra-walkthrough.html">P15</a></td></tr>
+<tr><td style="text-align:left;">RA-to-SQL translation</td><td>4-6</td><td>10 min</td><td><a href="cg-07-ra-to-sql.html">P07</a></td></tr>
+<tr><td style="text-align:left;">CREATE TABLE DDL</td><td>4-6</td><td>8 min</td><td><a href="cg-01-db-concepts.html">P01</a></td></tr>
+<tr><td style="text-align:left;">ER diagram construction</td><td>12-15</td><td>22 min</td><td><a href="cg-16-er-walkthrough.html">P16</a></td></tr>
+<tr><td style="text-align:left;">ER-to-relational mapping</td><td>6-8</td><td>12 min</td><td><a href="cg-16-er-walkthrough.html">P16</a></td></tr>
+<tr><td style="text-align:left;">FD theory (closure, keys, proof)</td><td>8-10</td><td>15 min</td><td><a href="cg-17-normalization-walkthrough.html">P17</a></td></tr>
+<tr><td style="text-align:left;">BCNF showpiece (decompose + check)</td><td>12-15</td><td>25 min</td><td><a href="cg-17-normalization-walkthrough.html">P17</a></td></tr>
+<tr><td style="text-align:left;">Integration / mixed</td><td>8-10</td><td>15 min</td><td>mixed</td></tr>
+<tr><td style="text-align:left;"><strong>Review buffer</strong></td><td>&mdash;</td><td>15 min</td><td>&mdash;</td></tr>
+</table>
+
+<p class="result">Total: 120 marks, ~180 minutes. Leave 15 min for review. If you run out of time, it is almost always the BCNF showpiece that ate it; manage that block tightly.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Graduation pattern</dt><dd>The prof's habit of asking (a) basic, (b)-(c) medium, (d) hard sub-parts within a single SQL or RA question.</dd>
+<dt>Discriminator</dt><dd>A hard question designed to separate top grades from average grades. Worth 3-7 marks.</dd>
+<dt>Freebie</dt><dd>An easy question that every prepared student should bank (concept defs, simple SELECT, simple CREATE TABLE).</dd>
+<dt>Recycled schema</dt><dd>A schema (Library, Bank, Employee-Works-Company, University, Online Bookstore) that the prof uses across multiple assessments.</dd>
+<dt>Post-midterm territory</dt><dd>ER model, functional dependencies, normalization. Absent from the midterm; expected ~40% of the final.</dd>
+<dt>Showpiece</dt><dd>The BCNF decomposition + lossless + dependency-preservation question; the biggest mark cluster on the final.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-11-formula-sheet.html">&larr; 11. Formula Sheet</a>
+<a class="bottom-nav-btn next" href="cg-13-concept-questions.html">13. Concept Questions &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

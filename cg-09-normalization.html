@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 09 : Normalization and BCNF | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 09</span>
+<h1>Normalization and BCNF</h1>
+<p class="subtitle">The craft of slicing a schema so that every fact lives in exactly one place: 1NF through BCNF, lossless-join, dependency preservation.</p>
+
+<div class="analogy">
+<p>Normalization is the art of un-mixing your laundry. A bad schema throws socks, shirts, and pants into one pile; you cannot update a shirt's color without risking staining a sock, and deleting the last pair of pants might also delete the knowledge that pants exist as a concept. Normalization separates the pile into three drawers (socks, shirts, pants) so each garment has a home and redundancy disappears.</p>
+<p>The normal forms are progressively stricter standards for how clean the separation must be. 1NF is the bare minimum (no nested lists inside a cell). 2NF adds "nothing about a piece of a key should live with the key." 3NF adds "nothing non-key should depend on another non-key." BCNF is the gold standard: every determinant is a superkey. You aim for BCNF and sometimes settle for 3NF when BCNF would cost you a dependency.</p>
+</div>
+
+<h2>Part A: The Normal Forms (1NF, 2NF, 3NF, BCNF)</h2>
+
+<span class="tag">PART A</span>
+
+<div class="analogy">
+<p>Each normal form fixes a specific kind of redundancy. 1NF bans nested structure, 2NF bans key-piece dependencies, 3NF bans transitive dependencies, BCNF bans every non-superkey determinant. The higher you go, the fewer update anomalies you can suffer.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>1NF (first normal form).</strong> Every attribute is atomic; no cell contains a list, set, or nested record.</p>
+<p>Example violation: a <code>Student(id, name, courses)</code> row where <code>courses = {CPSC3660, MATH1410}</code>. Fix: move courses to a separate <code>Enrollment(student_id, course_id)</code> table.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>2NF.</strong> The schema is in 1NF and no non-prime attribute is partially dependent on a candidate key. "Partial dependency" means it depends on only part of a composite key.</p>
+<p>Example violation: <code>Enrollment(student_id, course_id, student_name)</code> with key $\{student\_id, course\_id\}$. The FD $student\_id \to student\_name$ is partial because it uses only half the key. Fix: move <code>student_name</code> to a <code>Student</code> table.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>3NF.</strong> For every non-trivial FD $\alpha \to \beta$ in $F^+$, at least one of these holds:</p>
+<ol style="margin-left: 24px; margin: 8px 0;">
+<li>$\alpha$ is a superkey, or</li>
+<li>every attribute in $\beta - \alpha$ is part of some candidate key (i.e., is "prime").</li>
+</ol>
+<p>3NF forbids transitive dependencies on non-prime attributes but allows prime-attribute transitives, which is the escape hatch that sometimes lets 3NF preserve dependencies when BCNF cannot.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>BCNF (Boyce-Codd Normal Form).</strong> For every non-trivial FD $\alpha \to \beta$ in $F^+$, $\alpha$ is a superkey of $R$.</p>
+<p>In plain English: the only way an attribute set can determine another is if it can determine the entire row. No "side channels" of information.</p>
+</div>
+
+<div class="note">
+<p><strong>Hierarchy.</strong> BCNF $\subseteq$ 3NF $\subseteq$ 2NF $\subseteq$ 1NF. Every BCNF schema is automatically 3NF, 2NF, 1NF. The reverse is not true.</p>
+</div>
+
+<h2>Part B: Candidate Key Enumeration</h2>
+
+<span class="tag">PART B</span>
+
+<div class="analogy">
+<p>A candidate key is a minimal subset of attributes that acts as a unique identifier. To find all of them, you compute closures for progressively larger attribute sets until you find every minimal set whose closure covers the whole schema. It is a treasure hunt: start small, grow until you strike gold (cover $R$), back off any redundant attribute, record the minimal set.</p>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Algorithm: enumerate candidate keys of $(R, F)$</div>
+<span class="algo-line">1. for each subset $\alpha \subseteq R$ (increasing size):</span>
+<span class="algo-line">2. &nbsp;&nbsp;compute $\alpha^+$</span>
+<span class="algo-line">3. &nbsp;&nbsp;if $\alpha^+ = R$ and no proper subset of $\alpha$ is a key:</span>
+<span class="algo-line">4. &nbsp;&nbsp;&nbsp;&nbsp;record $\alpha$ as a candidate key</span>
+<span class="algo-line">5. return list of candidate keys</span>
+</div>
+
+<div class="note">
+<p><strong>Shortcut.</strong> Any attribute that appears on no RHS of any FD must be in every candidate key (nothing can derive it). Any attribute on no LHS and only on a RHS is never in a candidate key by itself. Use these to prune the search.</p>
+</div>
+
+<div class="hand-calc">
+<h3>A4 Q6 setup: $R = (A, B, C, D, E)$, $F = \{A \to BC, CD \to E, B \to D, E \to A\}$</h3>
+<p>Let us find every candidate key by computing closures.</p>
+<div class="step">
+<div class="step-label">Check single attributes</div>
+<p>$A^+ = \{A, B, C, D, E\}$ (via $A \to BC$, $B \to D$, $CD \to E$). Covers $R$. So $\{A\}$ is a superkey; minimal (only one attribute), so candidate key.</p>
+<p>$B^+ = \{B, D\}$. Not a superkey.</p>
+<p>$C^+ = \{C\}$. Not a superkey.</p>
+<p>$D^+ = \{D\}$. Not a superkey.</p>
+<p>$E^+ = \{A, B, C, D, E\}$ (via $E \to A$ then chain). Covers $R$. Candidate key $\{E\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Check pairs (skip pairs containing $A$ or $E$: not minimal)</div>
+<p>$BC^+$: start $\{B, C\}$, $B \to D$ adds $D$ ($\{B, C, D\}$), $CD \to E$ adds $E$ ($\{B, C, D, E\}$), $E \to A$ adds $A$ (all). Candidate key $\{BC\}$.</p>
+<p>$BD^+ = \{B, D\}$, not a superkey.</p>
+<p>$CD^+$: start $\{C, D\}$, $CD \to E$ adds $E$, $E \to A$ adds $A$, $A \to BC$ adds $B$ (all). Candidate key $\{CD\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Larger sets</div>
+<p>Anything strictly larger than a candidate key is a superkey but not minimal. Stop.</p>
+</div>
+<p class="result">Candidate keys = $\{A\}, \{BC\}, \{CD\}, \{E\}$.</p>
+</div>
+
+<h2>Part C: BCNF Violation Detection</h2>
+
+<span class="tag">PART C</span>
+
+<div class="formula-box">
+<p><strong>Violation test.</strong> Scan every non-trivial FD $\alpha \to \beta$ in $F$. For each, compute $\alpha^+$. If $\alpha^+ \neq R$, then $\alpha$ is not a superkey and the FD is a BCNF violation.</p>
+</div>
+
+<div class="hand-calc">
+<h3>A4 Q6: check each FD</h3>
+<div class="step">
+<div class="step-label">$A \to BC$</div>
+<p>$A^+ = R$. $A$ is a superkey. OK.</p>
+</div>
+<div class="step">
+<div class="step-label">$CD \to E$</div>
+<p>$CD^+ = R$. $CD$ is a superkey. OK.</p>
+</div>
+<div class="step">
+<div class="step-label">$B \to D$</div>
+<p>$B^+ = \{B, D\}$. Not a superkey. <span class="red">VIOLATION.</span></p>
+</div>
+<div class="step">
+<div class="step-label">$E \to A$</div>
+<p>$E^+ = R$. $E$ is a superkey. OK.</p>
+</div>
+<p class="result">Exactly one BCNF violation: $B \to D$. We decompose on this FD next.</p>
+</div>
+
+<h2>Part D: BCNF Decomposition Algorithm (A4 Q6 walkthrough)</h2>
+
+<span class="tag">PART D</span>
+
+<div class="analogy">
+<p>When you find a BCNF violation $\alpha \to \beta$, you split the bad relation into two pieces: one piece holds the offending dependency $(\alpha, \beta)$ as its own table so that $\alpha$ becomes a key there, and the other piece holds everything else plus $\alpha$ (so the two halves can still be joined back together by matching on $\alpha$). Then you recursively check each half for further violations. You stop when every fragment is in BCNF.</p>
+<p>It is like splitting a noisy apartment building: move the loud tenants to a separate unit next door, keep the shared hallway (the $\alpha$ attribute) so visitors can still find both groups.</p>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Algorithm: decomposeBCNF($R, F$)</div>
+<span class="algo-line">1. result := $\{R\}$</span>
+<span class="algo-line">2. while some $R_i \in$ result has a BCNF violation $\alpha \to \beta$ with $\alpha, \beta \subseteq R_i$:</span>
+<span class="algo-line">3. &nbsp;&nbsp;$R_a := \alpha \cup \beta$ &nbsp;(the violating FD lives here)</span>
+<span class="algo-line">4. &nbsp;&nbsp;$R_b := R_i - (\beta - \alpha)$ &nbsp;(everything else, keep $\alpha$ as the link)</span>
+<span class="algo-line">5. &nbsp;&nbsp;replace $R_i$ in result with $R_a, R_b$</span>
+<span class="algo-line">6. return result</span>
+</div>
+
+<div class="hand-calc">
+<h3>Full A4 Q6 decomposition</h3>
+<p>Starting point: $R = (A, B, C, D, E)$, $F = \{A \to BC, CD \to E, B \to D, E \to A\}$.</p>
+<p>Violation: $B \to D$.</p>
+<div class="step">
+<div class="step-label">Step 1: split on $B \to D$</div>
+<p>$R_1 = \{B\} \cup \{D\} = (B, D)$.</p>
+<p>$R_2 = R - (\{D\} - \{B\}) = (A, B, C, E)$.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: check $R_1 = (B, D)$ for BCNF</div>
+<p>FDs restricted to $R_1$: only $B \to D$. Compute $B^+$ within the full $F$: $\{B, D\}$, which equals $R_1$. So $B$ is a superkey of $R_1$. <span class="hl">BCNF.</span></p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: check $R_2 = (A, B, C, E)$ for BCNF</div>
+<p>FDs restricted to $R_2$ (drop anything mentioning $D$): $A \to BC$, $E \to A$. Also $CD \to E$ and $B \to D$ are lost because $D \notin R_2$.</p>
+<p>Candidate keys of $R_2$: compute closures under $F$ within $R_2$.</p>
+<p>$A^+_{R_2} = \{A, B, C\} \cup \ldots$: we can still use $A \to BC$ (all attributes in $R_2$) so $\{A, B, C\}$, then $E \to A$ does nothing new. Need $E$? $A$ does not determine $E$ in $R_2$'s restricted FD set. But under the full $F$, $A^+ = R$, which includes $E$. Within $R_2$ projection: $A \to B, A \to C$. Chain: does $A \to E$ hold in $F^+$? Yes, via $A \to BC$, $B \to D$, $CD \to E$; but $D$ is outside $R_2$ so this path uses a missing attribute. Still, $F^+$ is a global concept; $A \to E$ is in $F^+$ even though its derivation passes through $D$. So $A^+_{R_2}$ using $F^+$ restricted to $R_2$ attributes is $\{A, B, C, E\}$. Candidate key $\{A\}$.</p>
+<p>$E^+_{R_2}$: $E \to A$, $A \to BC$, all in $R_2$. $E^+_{R_2} = \{A, B, C, E\} = R_2$. Candidate key $\{E\}$.</p>
+<p>$B^+_{R_2}$: $B$ determines $D$ in full $F$, but $D \notin R_2$. Does $B$ determine anything in $R_2$? Not through any projected FD. $B^+_{R_2} = \{B\}$. Not a key.</p>
+<p>Check each FD in $R_2$ against the "$\alpha$ is superkey" rule:</p>
+<p>$A \to BC$: $A$ is candidate key of $R_2$. OK.</p>
+<p>$E \to A$: $E$ is candidate key of $R_2$. OK.</p>
+<p class="result">$R_2$ is in BCNF.</p>
+</div>
+<div class="step">
+<div class="step-label">Final decomposition</div>
+<p>$\{R_1, R_2\} = \{(B, D), (A, B, C, E)\}$. Both BCNF.</p>
+</div>
+</div>
+
+<h2>Part E: Lossless Decomposition Test</h2>
+
+<span class="tag">PART E</span>
+
+<div class="analogy">
+<p>Lossless means you can always put Humpty Dumpty back together. Take the original relation, split it into two fragments, natural-join the fragments; if you get back exactly the original tuples (no extras, no missing), the decomposition is lossless. If extra spurious tuples appear, the decomposition is lossy and you have corrupted your data.</p>
+<p>Jigsaw puzzle analogy: a lossless split is like cutting a jigsaw along its natural edges; you can reassemble it uniquely. A lossy split is like cutting through the middle of pieces; when you try to reassemble, multiple fits are possible and extra ghost pieces appear.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Lossless-join test.</strong> A decomposition of $R$ into $R_1$ and $R_2$ is lossless iff at least one of the following FDs is in $F^+$:</p>
+<ol style="margin-left: 24px; margin: 8px 0;">
+<li>$(R_1 \cap R_2) \to R_1$, or</li>
+<li>$(R_1 \cap R_2) \to R_2$.</li>
+</ol>
+<p>Equivalently: the shared attributes between the two fragments must form a superkey of at least one of them.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Lossless example (Week 14): Borrow-loan</h3>
+<p>$R = (\text{customerID}, \text{loan\_number}, \text{amount})$, FDs: $\text{loan\_number} \to \text{amount}$.</p>
+<div class="step">
+<div class="step-label">Decompose</div>
+<p>$R_1 = (\text{customerID}, \text{loan\_number})$, $R_2 = (\text{loan\_number}, \text{amount})$.</p>
+</div>
+<div class="step">
+<div class="step-label">Shared attributes</div>
+<p>$R_1 \cap R_2 = \{\text{loan\_number}\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Check superkey</div>
+<p>Does $\text{loan\_number} \to R_2$? $\text{loan\_number}^+ = \{\text{loan\_number}, \text{amount}\} = R_2$. Yes.</p>
+</div>
+<p class="result">Lossless. Two customers can share a loan; you can still rejoin uniquely.</p>
+</div>
+
+<h2>Part F: Lossy Counter-Example</h2>
+
+<span class="tag">PART F</span>
+
+<div class="hand-calc">
+<h3>Lossy example (Week 14): Employee-Project-Branch</h3>
+<p>$R = (\text{EmployeeID}, \text{Project}, \text{Branch})$. FDs: $\text{EmployeeID} \to \text{Branch}$, $\text{Project} \to \text{Branch}$.</p>
+<div class="step">
+<div class="step-label">Starting instance</div>
+<table class="step-table">
+<thead><tr><th>EmployeeID</th><th>Project</th><th>Branch</th></tr></thead>
+<tbody>
+<tr><td>E1</td><td>P1</td><td>B1</td></tr>
+<tr><td>E2</td><td>P2</td><td>B1</td></tr>
+</tbody>
+</table>
+</div>
+<div class="step">
+<div class="step-label">Decompose into $R_1 = (\text{EmployeeID}, \text{Branch})$ and $R_2 = (\text{Project}, \text{Branch})$</div>
+<p>$R_1$:</p>
+<table class="step-table">
+<thead><tr><th>EmployeeID</th><th>Branch</th></tr></thead>
+<tbody><tr><td>E1</td><td>B1</td></tr><tr><td>E2</td><td>B1</td></tr></tbody>
+</table>
+<p>$R_2$:</p>
+<table class="step-table">
+<thead><tr><th>Project</th><th>Branch</th></tr></thead>
+<tbody><tr><td>P1</td><td>B1</td></tr><tr><td>P2</td><td>B1</td></tr></tbody>
+</table>
+</div>
+<div class="step">
+<div class="step-label">Natural join $R_1 \bowtie R_2$ on shared attribute Branch</div>
+<table class="step-table">
+<thead><tr><th>EmployeeID</th><th>Project</th><th>Branch</th></tr></thead>
+<tbody>
+<tr><td>E1</td><td>P1</td><td>B1</td></tr>
+<tr><td>E1</td><td>P2</td><td>B1</td></tr>
+<tr><td>E2</td><td>P1</td><td>B1</td></tr>
+<tr><td>E2</td><td>P2</td><td>B1</td></tr>
+</tbody>
+</table>
+<p class="red">Two spurious tuples appeared: (E1, P2, B1) and (E2, P1, B1). The original had no such facts.</p>
+</div>
+<div class="step">
+<div class="step-label">Why it failed</div>
+<p>$R_1 \cap R_2 = \{\text{Branch}\}$. But $\text{Branch}$ does not determine $\text{EmployeeID}$ and does not determine $\text{Project}$. Neither $\text{Branch} \to R_1$ nor $\text{Branch} \to R_2$ holds.</p>
+</div>
+<p class="result">Lossy. Broken-mirror analogy: once you shatter along the wrong fault line, you cannot reconstruct the original reflection without ghosts.</p>
+</div>
+
+<div class="note">
+<p><strong>BCNF decomposition is always lossless</strong> when you split on a violating FD $\alpha \to \beta$ with $R_1 = \alpha \cup \beta$ and $R_2 = R - (\beta - \alpha)$, because then $R_1 \cap R_2 = \alpha$ and $\alpha \to \beta$ (the FD we split on) means $\alpha \to R_1$. Lossless by construction.</p>
+</div>
+
+<h2>Part G: Dependency Preservation Test</h2>
+
+<span class="tag">PART G</span>
+
+<div class="analogy">
+<p>Dependency preservation asks whether every FD that was enforceable on the original schema can still be enforced locally on the fragments. If a BCNF decomposition scatters the LHS and RHS of some FD across two different fragments, checking that FD requires a join, which is expensive and often needs a trigger. The schema is "weaker" than the original in a practical sense.</p>
+<p>Think of it like splitting a contract between two lawyers: if every clause is fully contained in one lawyer's half, either lawyer can enforce it independently. If a clause spans both halves, enforcement requires both to meet and compare notes (a join); the clause is "preserved" only in the abstract.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>FD restricted to $R_i$.</strong> $F_i = \{\alpha \to \beta \in F^+ : \alpha\beta \subseteq R_i\}$. Only FDs whose both sides live entirely inside $R_i$.</p>
+<p><strong>Dependency preservation test.</strong> Let $F' = F_1 \cup F_2 \cup \ldots \cup F_n$. The decomposition is dependency-preserving iff $(F')^+ = F^+$.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Preserved example (Week 14)</h3>
+<p>$R = (A, B, C)$, $F = \{A \to B, B \to C, C \to B\}$.</p>
+<div class="step">
+<div class="step-label">Decomposition</div>
+<p>$R_1 = (A, C)$, $R_2 = (B, C)$.</p>
+</div>
+<div class="step">
+<div class="step-label">Restrict $F$ to each fragment</div>
+<p>$F_1$ on $R_1 = (A, C)$: do any FDs (or derivable FDs) have both sides in $\{A, C\}$? $A \to B$ no. $B \to C$ no. $C \to B$ no. But derivable: $A \to C$ (via $A \to B \to C$). So $F_1 = \{A \to C\}$.</p>
+<p>$F_2$ on $R_2 = (B, C)$: $B \to C$ yes. $C \to B$ yes. $F_2 = \{B \to C, C \to B\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Check $(F')^+ = F^+$</div>
+<p>$F' = \{A \to C, B \to C, C \to B\}$. Can we derive $A \to B$ from $F'$? $A \to C$ and $C \to B$ chain to give $A \to B$. Yes. So $F'$ implies everything $F$ implies.</p>
+</div>
+<p class="result">Dependency-preserving.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Not-preserved example (Week 14)</h3>
+<p>$R = (A, B, C)$, $F = \{C \to B, AB \to C\}$.</p>
+<div class="step">
+<div class="step-label">Decomposition</div>
+<p>$R_1 = (A, C)$, $R_2 = (B, C)$.</p>
+</div>
+<div class="step">
+<div class="step-label">Restrict</div>
+<p>$F_1$ on $R_1 = (A, C)$: $C \to B$ no ($B \notin R_1$). $AB \to C$ no ($B \notin R_1$). Any derivable FD with both sides in $\{A, C\}$? No. $F_1 = \emptyset$.</p>
+<p>$F_2$ on $R_2 = (B, C)$: $C \to B$ yes. $AB \to C$ no. $F_2 = \{C \to B\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Check</div>
+<p>$F' = \{C \to B\}$. Can we derive $AB \to C$ from $F'$? No; $C$ is never on the RHS of any rule except its own trivial reflexive ones. $(F')^+ \subsetneq F^+$.</p>
+</div>
+<p class="result">Not dependency-preserving. To enforce $AB \to C$ you would need to join $R_1$ and $R_2$.</p>
+</div>
+
+<h2>Part H: Back to A4 Q6 — Is It Dependency-Preserving?</h2>
+
+<span class="tag">PART H</span>
+
+<div class="hand-calc">
+<h3>Check A4 Q6 decomposition for dependency preservation</h3>
+<p>Decomposition: $R_1 = (B, D)$, $R_2 = (A, B, C, E)$. Original $F = \{A \to BC, CD \to E, B \to D, E \to A\}$.</p>
+<div class="step">
+<div class="step-label">Restrict to $R_1 = (B, D)$</div>
+<p>$B \to D$ has both sides in $R_1$. Keep. $F_1 = \{B \to D\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Restrict to $R_2 = (A, B, C, E)$</div>
+<p>$A \to BC$: both sides in $R_2$. Keep.</p>
+<p>$CD \to E$: $D \notin R_2$. Drop.</p>
+<p>$B \to D$: $D \notin R_2$. Drop.</p>
+<p>$E \to A$: both sides in $R_2$. Keep.</p>
+<p>$F_2 = \{A \to BC, E \to A\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Compute $F' = F_1 \cup F_2$</div>
+<p>$F' = \{B \to D, A \to BC, E \to A\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Is $CD \to E$ in $(F')^+$?</div>
+<p>Compute $CD^+$ under $F'$: start $\{C, D\}$. Is any FD LHS a subset? $B \to D$: no. $A \to BC$: no. $E \to A$: no. No FDs fire. $CD^+_{F'} = \{C, D\}$.</p>
+<p>Under the original $F$, $CD^+ = R$, so $CD \to E \in F^+$. But $E \notin CD^+_{F'}$, so $CD \to E \notin (F')^+$.</p>
+</div>
+<p class="result" style="color: var(--accent-rose);">Not dependency-preserving. The FD $CD \to E$ spans both fragments and cannot be enforced locally.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>A4 Q5-Q6 is the archetype: "given this schema and FDs, find candidate keys, check BCNF, decompose if needed, verify lossless, verify dependency preservation." Expect the final to have this exact shape with different letters. Memorize the four checks: (1) enumerate CKs, (2) find BCNF violations, (3) decompose, (4) classify each piece as BCNF/lossless/dep-preserving. Always state which FD you decomposed on.</p>
+</div>
+
+<h2>Part I: Trade-Off — BCNF vs 3NF</h2>
+
+<span class="tag">PART I</span>
+
+<div class="analogy">
+<p>Sometimes a schema cannot simultaneously be BCNF, lossless, and dependency-preserving. You can always achieve any two, but occasionally the third must be sacrificed. 3NF is the consolation prize: it is weaker than BCNF but always achievable along with lossless and dependency-preserving. The rule of thumb: if a BCNF decomposition would lose dependencies, fall back to 3NF.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Design goal.</strong> Aim for:</p>
+<ol style="margin-left: 24px; margin: 8px 0;">
+<li>BCNF (no redundancy from FDs)</li>
+<li>Lossless-join (data can be reconstructed)</li>
+<li>Dependency-preserving (FDs can be enforced locally)</li>
+</ol>
+<p>If all three are possible, take them. If not, settle for 3NF + lossless + dependency-preserving, which is always achievable via the 3NF synthesis algorithm.</p>
+</div>
+
+<div class="note">
+<p><strong>3NF synthesis (for reference).</strong> Compute the canonical cover $F_c$ of $F$. For each FD $\alpha \to \beta$ in $F_c$, create a fragment $\alpha\beta$. If no fragment contains a candidate key of $R$, add one fragment that is a candidate key. The result is 3NF, lossless, and dependency-preserving by construction.</p>
+</div>
+
+<h2>Part J: Full Normalization Checklist</h2>
+
+<span class="tag">PART J</span>
+
+<div class="algo-box">
+<div class="algo-title">Normalization workflow for the exam</div>
+<span class="algo-line">1. list $R$'s attributes and all given FDs $F$</span>
+<span class="algo-line">2. enumerate candidate keys by computing closures</span>
+<span class="algo-line">3. for each FD $\alpha \to \beta$ in $F$: check if $\alpha$ is a superkey</span>
+<span class="algo-line">4. &nbsp;&nbsp;if not, mark as BCNF violation</span>
+<span class="algo-line">5. pick one violation $\alpha \to \beta$; split:</span>
+<span class="algo-line">&nbsp;&nbsp;&nbsp;&nbsp;$R_1 := \alpha \cup \beta$</span>
+<span class="algo-line">&nbsp;&nbsp;&nbsp;&nbsp;$R_2 := R - (\beta - \alpha)$</span>
+<span class="algo-line">6. recurse on $R_1$ and $R_2$ with restricted FDs</span>
+<span class="algo-line">7. verify lossless: $R_1 \cap R_2 \to R_1$ or $\to R_2$</span>
+<span class="algo-line">8. verify dependency preservation: $(\cup F_i)^+ = F^+$?</span>
+<span class="algo-line">9. if dep-preservation fails, note it; optionally fall back to 3NF</span>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>Redundancy breeds anomalies. Update anomalies (forgetting to update one copy of a fact leaves the database inconsistent), insertion anomalies (cannot insert a course unless someone enrolls in it), deletion anomalies (deleting the last enrollment in a course also deletes the course itself). BCNF is the strongest protection against all three, achieved by ensuring every determinant is a superkey; every fact lives in exactly one place. The whole point of Chapters 7-8 of the textbook, and likely 30-40% of the final exam, is teaching you to spot and remove these hazards.</p>
+</div>
+
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>1NF</dt><dd>Atomic attributes; no nested collections.</dd>
+<dt>2NF</dt><dd>1NF plus no non-prime attribute is partially dependent on a candidate key.</dd>
+<dt>3NF</dt><dd>For every non-trivial $\alpha \to \beta \in F^+$: $\alpha$ is a superkey, or $\beta - \alpha$ is all prime.</dd>
+<dt>BCNF</dt><dd>For every non-trivial $\alpha \to \beta \in F^+$: $\alpha$ is a superkey. The gold standard.</dd>
+<dt>Prime attribute</dt><dd>Any attribute that appears in some candidate key.</dd>
+<dt>Lossless decomposition</dt><dd>$R_1 \bowtie R_2 = R$; no spurious tuples on rejoin. Test: $R_1 \cap R_2$ is a superkey of at least one fragment.</dd>
+<dt>Dependency preservation</dt><dd>Every FD in $F^+$ can be derived from FDs localized to single fragments.</dd>
+<dt>Update anomaly</dt><dd>Redundant copies of a fact fall out of sync when one is updated.</dd>
+<dt>Insertion anomaly</dt><dd>Cannot represent a fact because its required key partner is missing.</dd>
+<dt>Deletion anomaly</dt><dd>Deleting one tuple accidentally removes an unrelated fact.</dd>
+<dt>Canonical cover $F_c$</dt><dd>A minimal equivalent of $F$: no redundant FDs, no redundant attributes on any LHS.</dd>
+</dl>
+</div>
+
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-08-fd-theory.html">&larr; 08. FD Theory</a>
+<a class="bottom-nav-btn next" href="cg-10-oodb-nosql.html">10. OO-DB &amp; NoSQL &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

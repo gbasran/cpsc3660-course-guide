@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 01 : Database Concepts | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 01</span>
+<h1>Database Concepts</h1>
+<p class="subtitle">Schemas, DBMS internals, keys, and integrity; the vocabulary every later page leans on.</p>
+
+<!-- ============================================================ -->
+<h2>Part A: Schema vs Instance</h2>
+
+<div class="analogy">
+<strong>Physical analogy; a filing cabinet.</strong><br><br>
+Picture a metal filing cabinet in a law office. The <em>labels</em> on each drawer (CLIENTS, CASES, INVOICES), the dividers inside, and the blank pre-printed forms that everyone fills out; that entire structure is the <strong>schema</strong>. It rarely changes; maybe once a year someone adds a new drawer or a new field to the intake form. The <em>actual papers</em> stuffed into the folders right now, the specific clients and case numbers and dollar amounts, that is the <strong>instance</strong>. It changes constantly: papers get added, shredded, refiled, updated. Two months from now the cabinet will hold a completely different instance, but the schema will be almost identical.<br><br>
+So when we talk about a database "design," we mean the schema. When we talk about the "data," we mean the current instance. Relational algebra queries and SQL queries are all written against the schema; they return whatever instance happens to be there when you run them.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Schema and Instance.</strong>
+<dl class="breakdown">
+<dt>Schema</dt>
+<dd>The logical structure of the database. Tables, attributes (columns), domains (data types), and constraints. Written once, changes rarely. Also called the <em>intension</em>.</dd>
+<dt>Instance</dt>
+<dd>The actual set of tuples (rows) sitting in the tables at a particular moment. Changes with every INSERT, UPDATE, DELETE. Also called the <em>extension</em>.</dd>
+<dt>Three levels</dt>
+<dd><strong>Physical</strong> (bytes on disk, indexes, blocks) → <strong>Logical</strong> (tables and columns) → <strong>View</strong> (what a particular user sees). Each level is a schema of its own.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Schema vs Instance for the library database</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Write the schema</div>
+<p>Three tables, written in the standard "relation-name(attr1, attr2, ...)" form with the primary key underlined conceptually:</p>
+<div class="algo-box">
+employee(<u>empid</u>, name, office, age)<br>
+books(<u>isbn</u>, title, authors, publisher)<br>
+borrow(<u>empid, isbn</u>, borrow_date)
+</div>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Show one possible instance</div>
+<table class="step-table">
+<tr><th colspan="4">employee (instance on April 17, 2026)</th></tr>
+<tr><th>empid</th><th>name</th><th>office</th><th>age</th></tr>
+<tr><td>E01</td><td>Ada</td><td>D-210</td><td>34</td></tr>
+<tr><td>E02</td><td>Boris</td><td>D-214</td><td>29</td></tr>
+</table>
+<p class="check">Tomorrow Ada might leave and a new row might appear; the <span class="hl">schema stays identical</span>, only the instance changes.</p>
+</div>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>Every exam question that says "consider the relation $R(A,B,C)$ with the following tuples" is asking you to reason about <em>both</em>. Constraints live in the schema; they must be checked against every instance. When you write a relational algebra expression or an SQL query, you are describing a computation on the schema; the DBMS runs it on whatever instance is current.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: Inside the DBMS</h2>
+
+<div class="analogy">
+<strong>Physical analogy; a restaurant kitchen.</strong><br><br>
+A customer (the user) hands a server a written order (an SQL query). The server does not cook; she passes the slip to the <strong>expeditor</strong> who reads it, checks whether the kitchen can actually make that dish, plans which stations need to do what, and in which order. That is the <strong>query processor</strong>. The cooks who actually grab ingredients from the walk-in fridge are the <strong>storage manager</strong>; they deal with raw materials, not recipes. Pinned to the wall is a <strong>menu</strong> listing every dish the kitchen knows how to make, every ingredient in stock, and every allergy note; that is the <strong>data dictionary</strong>. The whole system works because each specialist only talks to the layers above and below.
+</div>
+
+<div class="formula-box">
+<strong>Definition: The three main DBMS subsystems.</strong>
+<dl class="breakdown">
+<dt>Storage Manager</dt>
+<dd>Handles the physical side: file I/O, buffer pool (memory pages), indexes, transactions, locks, logging for recovery. Knows about disk blocks, never about SELECT statements.</dd>
+<dt>Query Processor</dt>
+<dd>Parses SQL, validates it against the dictionary, builds a query plan, optimizes the plan (picks join order, index usage), and executes it by calling into the storage manager. This is the compiler + runtime for queries.</dd>
+<dt>Data Dictionary</dt>
+<dd>Also called the <em>system catalog</em>. A set of tables that describe every other table: relation names, attribute names and domains, primary keys, foreign keys, constraints, views, user privileges. The DBMS uses it to validate queries before running them.</dd>
+</dl>
+</div>
+
+<div class="note">
+<strong>Terminology.</strong> Different textbooks split these further; the DDL compiler, DML compiler, authorization manager, and transaction manager are all sub-components. For CPSC 3660 the storage manager / query processor / data dictionary split is the level of detail the prof tests.
+</div>
+
+<div class="hand-calc">
+<h3>Tracing a SELECT through the DBMS</h3>
+
+<p>A user submits: <code>select name from employee where age &gt; 30;</code></p>
+
+<div class="step">
+<div class="step-label">Step 1: Parser</div>
+<p>The query processor's parser tokenizes the SQL and builds a parse tree. "Is this syntactically a valid SELECT?" Yes.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Dictionary lookup</div>
+<p>The parser asks the <strong>data dictionary</strong>: "Does a relation called <code>employee</code> exist? Does it have an attribute <code>name</code>? Does it have an attribute <code>age</code>? What are their domains?" The dictionary confirms: yes, <code>age</code> is an integer; comparing it to 30 is legal.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Optimizer</div>
+<p>The optimizer reads statistics from the dictionary (how many rows, whether <code>age</code> is indexed) and picks a plan. With no index, the plan is "sequentially scan employee, filter rows with age &gt; 30, project name."</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 4: Executor calls storage manager</div>
+<p>The executor asks the <strong>storage manager</strong> for pages of the employee file. The storage manager fetches blocks from disk (or from the buffer pool if cached), hands them back. The executor applies the filter, projects, streams results to the user.</p>
+<p class="result">Result: two specialists, one catalog, one query answered.</p>
+</div>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>Knowing these three pieces lets you reason about performance and errors. "Table not found" is a dictionary error. "Disk I/O is slow" is a storage manager problem. "My query is slow even though the table is small" is usually a query processor problem (bad plan). The exam sometimes asks you to name the component responsible for a given task; keep the split clear.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: The Data Dictionary, Up Close</h2>
+
+<div class="analogy">
+<strong>Physical analogy; the card catalog in an old library.</strong><br><br>
+Walk into a pre-1990 library and you find a wooden cabinet full of index cards. Each card describes one book: title, author, call number, where it sits on the shelves, what subjects it covers. The cabinet is not the books; it is a <em>description</em> of the books. The librarian never walks the stacks blindly; she opens the card catalog first, locates the call number, then goes. Without the catalog, finding anything would require scanning every shelf. The data dictionary is the same idea, but for tables and columns; the DBMS checks the catalog before every query, and keeps it up to date whenever the schema changes.
+</div>
+
+<div class="formula-box">
+<strong>What the dictionary stores (typical contents).</strong>
+<dl class="breakdown">
+<dt>Relations</dt>
+<dd>Name of each table, its owner, its storage location on disk.</dd>
+<dt>Attributes</dt>
+<dd>For every column: name, domain (data type), length, NULL allowed?, default value.</dd>
+<dt>Keys</dt>
+<dd>Which attribute(s) form the primary key; which candidate keys exist.</dd>
+<dt>Foreign keys</dt>
+<dd>Which attribute in relation $R$ references which key in relation $S$; what to do on delete/update (cascade, restrict, set null).</dd>
+<dt>Constraints</dt>
+<dd>CHECK conditions, NOT NULL flags, UNIQUE declarations.</dd>
+<dt>Views</dt>
+<dd>Definitions of virtual tables (the SQL that defines them).</dd>
+<dt>Statistics</dt>
+<dd>Row counts, value distributions, histogram buckets, index selectivity; used by the optimizer.</dd>
+<dt>Privileges</dt>
+<dd>Which users can SELECT/INSERT/UPDATE/DELETE on which relations.</dd>
+</dl>
+</div>
+
+<div class="note">
+<strong>Self-describing property.</strong> The dictionary is itself stored in relations. In PostgreSQL you can literally write <code>select * from pg_tables;</code> and get back rows describing every table, including the <code>pg_tables</code> table itself. This is called a <em>meta-database</em>.
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>Expect a short-answer question like "What is the data dictionary and why does the DBMS need it?" A good answer names three uses: (1) validating queries (does the table exist? is this column an integer?), (2) enforcing constraints (is this FK target still there?), (3) feeding the optimizer statistics. Do not just say "it stores metadata"; show that you know what the DBMS <em>does</em> with it.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: Keys; Super, Candidate, Primary</h2>
+
+<div class="analogy">
+<strong>Physical analogy; pieces of ID in your wallet.</strong><br><br>
+You have several things that can uniquely identify you: your driver's licence, your passport, your SIN, your student card plus date-of-birth combo. Any of these, alone or bundled, can pick you out of a crowd of a billion; each one is a <strong>candidate key</strong>. If I hand you your driver's licence AND your coffee cup, the combination still identifies you uniquely, but the coffee cup is superfluous; that bundle is a <strong>super key</strong> (identifies uniquely but contains extras). From among the candidate keys, the government picks ONE as the official identifier; for Canadians it is often the SIN. That chosen one is the <strong>primary key</strong>. The rejected candidates (passport, driver's licence) become <em>alternate keys</em>; still unique, still enforced, but not the designated one.
+</div>
+
+<div class="formula-box">
+<strong>Definition: the three flavors of key.</strong>
+<dl class="breakdown">
+<dt>Super key</dt>
+<dd>Any set of attributes $K \subseteq R$ such that no two tuples of $R$ can agree on all of $K$ at the same time. May contain unnecessary attributes.</dd>
+<dt>Candidate key</dt>
+<dd>A super key that is <em>minimal</em>: remove any attribute and it stops being a super key. No redundant columns.</dd>
+<dt>Primary key</dt>
+<dd>The one candidate key chosen by the designer as the official row identifier. Must be NOT NULL and must be unique. Every relation has exactly one.</dd>
+<dt>Foreign key</dt>
+<dd>An attribute (or set) in relation $R$ whose values must appear as the primary key of some row in relation $S$. Enforces cross-table consistency.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Finding every super key and candidate key of employee(empid, name, office, age)</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Identify the uniqueness guarantee</div>
+<p>The university assigns each employee a unique empid. So <code>{empid}</code> uniquely identifies a tuple. That is our starting point.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Build super keys by adding anything</div>
+<p>Any superset of a super key is still a super key. So:</p>
+<div class="algo-box">
+{empid}, {empid, name}, {empid, office}, {empid, age},<br>
+{empid, name, office}, {empid, name, age}, ..., {empid, name, office, age}
+</div>
+<p>All of these are super keys because they all contain <code>empid</code>.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Prune down to candidate keys</div>
+<p>A candidate key must be minimal. <code>{empid}</code> alone already works, so any super key containing it AND something else fails the minimality test. Only <code>{empid}</code> survives as a candidate key.</p>
+<p class="result">Candidate keys: <span class="hl">{empid}</span>. Primary key: <span class="hl">empid</span>.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 4: What if names were also unique?</div>
+<p>If the problem stated "no two employees share a name," then <code>{name}</code> would also be a candidate key. We would then have TWO candidate keys: <code>{empid}</code> and <code>{name}</code>. The designer picks one (usually <code>empid</code>) as the primary key; the other becomes an alternate key.</p>
+<p class="check">This is where exam questions like "list all candidate keys of R" come from; see Midterm Q2 and A1 Q3.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (Midterm Q2, A1 Q3)</h4>
+<p>The prof loves asking you to <strong>define each key type and give an example</strong>, then to enumerate candidate keys for a relation with stated uniqueness constraints. Always: (1) start from any guaranteed-unique attribute, (2) combine attributes when no single one is unique, (3) prune non-minimal sets. If the question says "state the primary key," pick the most stable, shortest candidate key and justify the choice in one sentence.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: Integrity Constraints</h2>
+
+<div class="analogy">
+<strong>Physical analogy; rules printed on a paper form.</strong><br><br>
+When you fill out a passport application the form itself enforces rules: the date-of-birth box refuses letters, the "emergency contact phone" field cannot be left blank, the "citizenship" field must match a code from an approved list. These rules live on the <em>form</em>, not in the person filling it out; so every applicant is forced to obey them. Integrity constraints are exactly that; they are glued to the schema and the DBMS refuses any insert or update that would break them. The database never lets invalid data in, no matter which user or application tries.
+</div>
+
+<div class="formula-box">
+<strong>The four main integrity constraint types.</strong>
+<dl class="breakdown">
+<dt>Domain</dt>
+<dd>Each attribute value must come from its declared domain. <code>age INTEGER</code> cannot hold "twelve"; <code>borrow_date DATE</code> cannot hold <code>"banana"</code>.</dd>
+<dt>Entity integrity</dt>
+<dd>The primary key of any relation must never be NULL. A row with no identifier cannot exist.</dd>
+<dt>Referential integrity</dt>
+<dd>Every foreign-key value must either be NULL or match an existing primary-key value in the referenced relation. No orphan references.</dd>
+<dt>User-defined (CHECK)</dt>
+<dd>Arbitrary conditions: <code>CHECK (age &gt;= 0)</code>, <code>CHECK (balance &gt;= 0)</code>, <code>CHECK (status IN ('active','inactive'))</code>.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Referential integrity in the library schema</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Identify the FK</div>
+<p>In <code>borrow(empid, isbn, borrow_date)</code>, the attribute <code>empid</code> is a foreign key referencing <code>employee(empid)</code>, and <code>isbn</code> is a foreign key referencing <code>books(isbn)</code>.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Attempt a bad insert</div>
+<div class="algo-box">
+insert into borrow values ('E99', '9780-XYZ', '2026-04-17');
+</div>
+<p>If <code>E99</code> does not exist in <code>employee</code>, referential integrity is violated. The DBMS <strong>rejects</strong> the insert; the row never lands in <code>borrow</code>.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Delete a referenced row</div>
+<div class="algo-box">
+delete from employee where empid = 'E01';
+</div>
+<p>If any row in <code>borrow</code> has <code>empid = 'E01'</code>, deleting the employee would leave orphans. The DBMS must do one of three things, depending on the FK's <strong>ON DELETE</strong> action:</p>
+<ul style="margin-left:24px;color:var(--text-secondary);">
+<li><strong>RESTRICT</strong> (or NO ACTION): refuse the delete; throw an error.</li>
+<li><strong>CASCADE</strong>: also delete the matching rows in <code>borrow</code>.</li>
+<li><strong>SET NULL</strong>: keep the borrow rows, but set their <code>empid</code> to NULL (only legal if the FK column permits NULLs).</li>
+</ul>
+<p class="result">CASCADE is the most aggressive option; it propagates the delete down the dependency chain.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part F: Cascading Deletes</h2>
+
+<div class="analogy">
+<strong>Physical analogy; tipping over the first domino.</strong><br><br>
+You have a chain of dominoes arranged so each one rests partially on the next. Knock down the first and the rest fall automatically in order. <strong>ON DELETE CASCADE</strong> is exactly that: when the parent row falls, every dependent row in a child table falls too, and if <em>those</em> rows are parents to a third table with another CASCADE, that falls next, and so on. It is powerful and dangerous; a single DELETE against <code>employee</code> can wipe rows from three or four tables in one statement.
+</div>
+
+<div class="formula-box">
+<strong>Rule: ON DELETE CASCADE behavior.</strong>
+<p>If <code>child.fk REFERENCES parent.pk ON DELETE CASCADE</code>, then deleting a row from <code>parent</code> automatically deletes every row in <code>child</code> whose <code>fk</code> matched. The cascade is transitive; if <code>grandchild.fk2 REFERENCES child.pk ON DELETE CASCADE</code>, those rows go too.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Tracing a cascade</h3>
+
+<p>Schema with cascading FKs:</p>
+<div class="algo-box">
+create table employee (<br>
+&nbsp;&nbsp;empid char(5) primary key, name varchar(40)<br>
+);<br><br>
+create table borrow (<br>
+&nbsp;&nbsp;empid char(5), isbn char(13), borrow_date date,<br>
+&nbsp;&nbsp;primary key (empid, isbn),<br>
+&nbsp;&nbsp;foreign key (empid) references employee(empid)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;on delete cascade<br>
+);
+</div>
+
+<div class="step">
+<div class="step-label">Initial state</div>
+<p><code>employee</code>: (E01, Ada), (E02, Boris).<br>
+<code>borrow</code>: (E01, 978-A, 2026-03-01), (E01, 978-B, 2026-03-02), (E02, 978-A, 2026-04-10).</p>
+</div>
+
+<div class="step">
+<div class="step-label">Issue the command</div>
+<div class="algo-box">delete from employee where empid = 'E01';</div>
+</div>
+
+<div class="step">
+<div class="step-label">What happens</div>
+<p>(1) Ada's row is removed from <code>employee</code>. (2) Both <code>borrow</code> rows with <code>empid='E01'</code> are automatically removed. Boris and his one borrow row are untouched.</p>
+<p class="result">Final: <code>employee</code>=[(E02,Boris)], <code>borrow</code>=[(E02, 978-A, 2026-04-10)].</p>
+</div>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>Cascades are a design decision, not a syntax detail. Choose CASCADE when child rows have no meaning without the parent (an employee's borrow history is meaningless if the employee is gone). Choose RESTRICT when the child rows are important history that should prevent casual deletes (do not cascade-delete a customer who has invoices; block the delete and force an explicit cleanup). Choose SET NULL rarely; usually only when the reference is optional.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>The prof has asked "what happens if we delete employee E01 from the schema, given the FK constraint shown?" Your answer should name the CASCADE / RESTRICT / SET NULL rule, then walk through the specific rows that disappear. Do not just say "the child rows are deleted"; name them.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Schema</dt><dd>Logical structure of the database (tables, columns, domains, constraints). Changes rarely.</dd>
+<dt>Instance</dt><dd>Current set of tuples sitting in the tables. Changes with every DML statement.</dd>
+<dt>DBMS</dt><dd>Database Management System; the software (PostgreSQL, Oracle, etc.) that implements the relational model.</dd>
+<dt>Storage manager</dt><dd>DBMS subsystem that handles disk I/O, buffer pool, locking, logging, transactions.</dd>
+<dt>Query processor</dt><dd>DBMS subsystem that parses, optimizes, and executes SQL.</dd>
+<dt>Data dictionary / system catalog</dt><dd>Tables that describe the schema; used by the DBMS for validation and optimization.</dd>
+<dt>Super key</dt><dd>Any attribute set that uniquely identifies tuples. May contain extras.</dd>
+<dt>Candidate key</dt><dd>A minimal super key; no attribute can be removed.</dd>
+<dt>Primary key</dt><dd>The chosen candidate key. NOT NULL, UNIQUE, exactly one per relation.</dd>
+<dt>Foreign key</dt><dd>Attribute(s) in one relation whose values must match a primary key in another relation.</dd>
+<dt>Entity integrity</dt><dd>Primary keys must never be NULL.</dd>
+<dt>Referential integrity</dt><dd>Foreign keys must either be NULL or point to an existing primary key.</dd>
+<dt>ON DELETE CASCADE</dt><dd>When the referenced row is deleted, all referencing rows are deleted too. Transitive.</dd>
+<dt>ON DELETE RESTRICT</dt><dd>Refuse the delete if any referencing rows exist.</dd>
+<dt>ON DELETE SET NULL</dt><dd>Set the FK columns in referencing rows to NULL.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="index.html">&larr; Home</a>
+<a class="bottom-nav-btn next" href="cg-02-er-model.html">02. E-R Model &amp; Diagrams &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

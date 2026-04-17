@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 08 : Functional Dependencies and Armstrong's Axioms | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 08</span>
+<h1>Functional Dependencies and Armstrong's Axioms</h1>
+<p class="subtitle">The rulebook of database design: how attributes imply other attributes, and how to derive every implication from three core axioms.</p>
+
+<div class="analogy">
+<p>A functional dependency is a promise the data makes about itself. Saying $\text{SIN} \to \text{Name}$ is saying "tell me the SIN, and I can tell you the name with certainty; no two people with the same SIN will ever have different names." It is a one-way lookup guarantee, like saying "a postal code fixes a province" (it does) but "a province does not fix a postal code" (it doesn't).</p>
+<p>Armstrong's axioms are the three rules of inference for these promises. Given a starting set of FDs (the ones you know from the business domain), the axioms tell you every other FD that must logically hold. They are the Euclid of database design: three postulates, an entire geometry of consequences.</p>
+</div>
+
+<h2>Part A: What a Functional Dependency Is</h2>
+
+<span class="tag">PART A</span>
+
+<div class="analogy">
+<p>Picture a phone book. The entry for each phone number lists one name; if you look up 555-1234 twice, you get the same person both times. That is $\text{Phone} \to \text{Name}$. Now flip it: the entry for each name might list several phone numbers (home, cell, work), so $\text{Name} \to \text{Phone}$ does not hold. FDs are not symmetric; direction matters.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Functional dependency.</strong> Let $R$ be a relation schema and $\alpha, \beta \subseteq R$. We write $\alpha \to \beta$ to mean: for every pair of tuples $t_1, t_2$ in any legal instance of $R$, if $t_1[\alpha] = t_2[\alpha]$ then $t_1[\beta] = t_2[\beta]$.</p>
+<dl class="breakdown">
+<dt>$\alpha \to \beta$</dt><dd>"$\alpha$ functionally determines $\beta$," or "$\beta$ is functionally dependent on $\alpha$"</dd>
+<dt>$\alpha$</dt><dd>the determinant (left-hand side, LHS), a set of attributes</dd>
+<dt>$\beta$</dt><dd>the dependent (right-hand side, RHS), a set of attributes</dd>
+<dt>$t_1[\alpha]$</dt><dd>the values of tuple $t_1$ restricted to the attributes in $\alpha$</dd>
+</dl>
+</div>
+
+<div class="note">
+<p><strong>FDs are constraints, not observations.</strong> An FD describes what must hold in every legal instance, not what happens to hold in one sample instance. If the schema allows two people to share a phone number, then $\text{Phone} \to \text{Name}$ is not a valid FD, even if your current data happens to have unique phones.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Trivial FD.</strong> $\alpha \to \beta$ is trivial when $\beta \subseteq \alpha$. Always holds, gives no information. Example: $\text{Name, Age} \to \text{Name}$.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Example: reading FDs off a small table</h3>
+<p>Consider this instance of <code>Course(course_id, title, dept, credits)</code>:</p>
+<table class="step-table">
+<thead><tr><th>course_id</th><th>title</th><th>dept</th><th>credits</th></tr></thead>
+<tbody>
+<tr><td>CPSC3660</td><td>Database Systems</td><td>CPSC</td><td>3</td></tr>
+<tr><td>CPSC2620</td><td>Fundamentals of Programming II</td><td>CPSC</td><td>3</td></tr>
+<tr><td>MATH1410</td><td>Elementary Linear Algebra</td><td>MATH</td><td>3</td></tr>
+</tbody>
+</table>
+<div class="step">
+<div class="step-label">Candidate FDs consistent with this instance</div>
+<p>$\text{course\_id} \to \text{title}$, $\text{course\_id} \to \text{dept}$, $\text{course\_id} \to \text{credits}$. Also $\text{course\_id} \to \text{title, dept, credits}$ by union.</p>
+</div>
+<div class="step">
+<div class="step-label">Does $\text{dept} \to \text{credits}$ hold?</div>
+<p>In this sample all CPSC courses are 3 credits, but the schema does not enforce that. Real-world CPSC4959 might be 6 credits. So no, not a valid FD, only a coincidence.</p>
+</div>
+<p class="result">An FD must be grounded in the business rule, not the sample data.</p>
+</div>
+
+<h2>Part B: Armstrong's Three Core Axioms</h2>
+
+<span class="tag">PART B</span>
+
+<div class="analogy">
+<p>Armstrong's axioms are like the three basic moves in algebra (add the same thing to both sides, multiply both sides, transitive equality). Every other valid move is a combination of these three. They are sound (every FD you derive is genuinely true) and complete (every true FD can be derived from the axioms plus your given FDs).</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Axiom 1 (Reflexivity).</strong> If $\beta \subseteq \alpha$, then $\alpha \to \beta$.</p>
+<p>"A set determines any of its own subsets." Gives you all trivial FDs for free.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Axiom 2 (Augmentation).</strong> If $\alpha \to \beta$, then $\alpha\gamma \to \beta\gamma$ for any $\gamma$.</p>
+<p>"You can add the same attributes to both sides." Notation note: $\alpha\gamma$ means $\alpha \cup \gamma$ (set union of attribute sets).</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Axiom 3 (Transitivity).</strong> If $\alpha \to \beta$ and $\beta \to \gamma$, then $\alpha \to \gamma$.</p>
+<p>"Chains of determinations compose." This is the workhorse; most FD proofs use it.</p>
+</div>
+
+<div class="analogy">
+<p><strong>Family-tree analogy.</strong> Think of FDs as bloodlines. Reflexivity says you are related to yourself. Augmentation says if A is related to B, then A-with-cousin is related to B-with-cousin. Transitivity says if A is your parent and B is A's parent, B is your grandparent. From three simple blood rules you can derive any genealogical connection in the whole family tree. Same with FDs: from the axioms, any derivable FD is reachable.</p>
+</div>
+
+<h2>Part C: Three Derived Rules (convenience theorems)</h2>
+
+<span class="tag">PART C</span>
+
+<div class="analogy">
+<p>The derived rules are not new axioms; they are shortcuts that package a common sequence of core axiom applications into one step. Using them on an exam is fine as long as you can prove them from the three core axioms if asked.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Union.</strong> If $\alpha \to \beta$ and $\alpha \to \gamma$, then $\alpha \to \beta\gamma$.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Decomposition.</strong> If $\alpha \to \beta\gamma$, then $\alpha \to \beta$ and $\alpha \to \gamma$.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Pseudo-transitivity.</strong> If $\alpha \to \beta$ and $\beta\gamma \to \delta$, then $\alpha\gamma \to \delta$.</p>
+</div>
+
+<h2>Part D: Proof of Pseudo-Transitivity (A4 Q4)</h2>
+
+<span class="tag">PART D</span>
+
+<div class="analogy">
+<p>This proof is worth memorizing verbatim. It is a four-line ladder: start at the bottom, climb rung by rung, end at the top. Every exam that has asked to "derive a non-trivial FD from the axioms" on this course uses augmentation + transitivity, which is exactly this pattern. If you learn the shape, you can adapt it to any variant the professor throws at you.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Claim.</strong> If $\alpha \to \beta$ and $\beta\gamma \to \delta$, then $\alpha\gamma \to \delta$.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Proof (four steps)</h3>
+<div class="step">
+<div class="step-label">Step 1</div>
+<p>$\alpha \to \beta$ (given)</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2</div>
+<p>$\alpha\gamma \to \beta\gamma$ (augmentation on step 1, add $\gamma$ to both sides)</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3</div>
+<p>$\beta\gamma \to \delta$ (given)</p>
+</div>
+<div class="step">
+<div class="step-label">Step 4</div>
+<p>$\alpha\gamma \to \delta$ (transitivity on steps 2 and 3: $\alpha\gamma \to \beta\gamma \to \delta$) $\blacksquare$</p>
+</div>
+<p class="result">Four lines, two axioms used (augmentation then transitivity). Memorize this shape.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>A4 Q4 asked for exactly this proof. A very similar variant (prove union or decomposition) is almost certain to appear on the final. Always label each line with the axiom used and the previous line number. The marker cannot give partial credit for a derivation without the justification column.</p>
+</div>
+
+<h2>Part E: Attribute Closure $\alpha^+$</h2>
+
+<span class="tag">PART E</span>
+
+<div class="analogy">
+<p>Attribute closure answers "given that I know the values of $\alpha$, what other attribute values am I guaranteed to know?" Think of $\alpha$ as a starting set of known facts; each FD in $F$ is a rule of the form "if you know the LHS, you also know the RHS." You keep firing rules until no new facts appear. The final set is $\alpha^+$.</p>
+<p>It is the "what can I compute?" closure of a starting point, just like $2, +2$ generates all even numbers by closing under repeated addition.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>$\alpha^+$ (attribute closure of $\alpha$ under $F$).</strong> The largest set of attributes that $\alpha$ functionally determines, given the FD set $F$.</p>
+<dl class="breakdown">
+<dt>$\alpha$</dt><dd>starting set of attributes</dd>
+<dt>$F$</dt><dd>the given FD set</dd>
+<dt>$\alpha^+$</dt><dd>result: every attribute reachable from $\alpha$ via FDs in $F$</dd>
+</dl>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Algorithm: computeClosure($\alpha$, $F$)</div>
+<span class="algo-line">result := $\alpha$</span>
+<span class="algo-line">repeat</span>
+<span class="algo-line">&nbsp;&nbsp;for each FD $\beta \to \gamma$ in $F$:</span>
+<span class="algo-line">&nbsp;&nbsp;&nbsp;&nbsp;if $\beta \subseteq$ result then result := result $\cup\, \gamma$</span>
+<span class="algo-line">until result does not change</span>
+<span class="algo-line">return result</span>
+</div>
+
+<div class="hand-calc">
+<h3>Worked closure: $R = (A, B, C, D, E)$, $F = \{A \to BC, CD \to E, B \to D, E \to A\}$</h3>
+<p>Compute $A^+$.</p>
+<div class="step">
+<div class="step-label">Initialize</div>
+<p>result = $\{A\}$</p>
+</div>
+<div class="step">
+<div class="step-label">Pass 1</div>
+<p>$A \to BC$: $A$ is in result, so add $B, C$. result = $\{A, B, C\}$.</p>
+<p>$CD \to E$: $CD \not\subseteq$ result (no D yet), skip.</p>
+<p>$B \to D$: $B$ is in result, add $D$. result = $\{A, B, C, D\}$.</p>
+<p>$E \to A$: $E \not\in$ result, skip.</p>
+</div>
+<div class="step">
+<div class="step-label">Pass 2</div>
+<p>$CD \to E$: $CD \subseteq$ result now, add $E$. result = $\{A, B, C, D, E\}$.</p>
+<p>All five attributes present; further passes add nothing.</p>
+</div>
+<div class="step">
+<div class="step-label">Terminate</div>
+<p class="result">$A^+ = \{A, B, C, D, E\}$</p>
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>More closures on the same $F$</h3>
+<div class="step">
+<div class="step-label">$B^+$</div>
+<p>Start $\{B\}$. $B \to D$ adds $D$. Now $\{B, D\}$. No other LHS is a subset of $\{B, D\}$ (we would need $A$ or $CD$ or $E$). Stop. $B^+ = \{B, D\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">$BC^+$</div>
+<p>Start $\{B, C\}$. $B \to D$ adds $D$: $\{B, C, D\}$. $CD \to E$ fires: $\{B, C, D, E\}$. $E \to A$ fires: $\{A, B, C, D, E\}$. Stop. $BC^+$ = all.</p>
+</div>
+<div class="step">
+<div class="step-label">$E^+$</div>
+<p>Start $\{E\}$. $E \to A$ adds $A$: $\{A, E\}$. Then $A \to BC$ adds $B, C$: $\{A, B, C, E\}$. Then $B \to D$ adds $D$: $\{A, B, C, D, E\}$. Stop. $E^+$ = all.</p>
+</div>
+<p class="result">Three superkeys spotted: $\{A\}, \{B, C\}, \{E\}$.</p>
+</div>
+
+<h2>Part F: Uses of Attribute Closure</h2>
+
+<span class="tag">PART F</span>
+
+<div class="formula-box">
+<p><strong>Use 1: test if $\alpha$ is a superkey.</strong> Compute $\alpha^+$. If $\alpha^+ = R$ (covers every attribute of the schema), then $\alpha$ is a superkey. If additionally no proper subset of $\alpha$ has this property, $\alpha$ is a <em>candidate key</em>.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Use 2: test if $\alpha \to \beta$ is implied by $F$.</strong> Compute $\alpha^+$. If $\beta \subseteq \alpha^+$, then yes, $F \models \alpha \to \beta$. Otherwise no.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>Use 3: compute $F^+$ (closure of the FD set).</strong> For every non-empty $\alpha \subseteq R$, compute $\alpha^+$. Then for every $\beta \subseteq \alpha^+$, output $\alpha \to \beta$. The collected set is $F^+$, every FD implied by $F$.</p>
+</div>
+
+<div class="note">
+<p><strong>$F^+$ is huge.</strong> For a schema with $n$ attributes, there are $2^n - 1$ possible LHS sets and up to $2^n$ possible RHS sets per LHS. So $F^+$ is typically astronomical, which is why in practice we only compute specific $\alpha^+$ values as needed. The algorithm above is a reference definition, not something you would ever run end-to-end on a real schema.</p>
+</div>
+
+<div class="hand-calc">
+<h3>Closure used to test an implication (A4 Q1 style)</h3>
+<p>Given $F = \{A \to B, B \to C\}$, does $F \models A \to C$?</p>
+<div class="step">
+<div class="step-label">Compute $A^+$</div>
+<p>Start $\{A\}$. $A \to B$ adds $B$. $B \to C$ adds $C$. Stop. $A^+ = \{A, B, C\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Check containment</div>
+<p>Is $\{C\} \subseteq \{A, B, C\}$? Yes. So $F \models A \to C$.</p>
+</div>
+<p class="result">You can also derive it directly by transitivity, but closure gives you a mechanical, always-works procedure.</p>
+</div>
+
+<h2>Part G: Subset and Symmetry Properties (A4 Q1-Q2)</h2>
+
+<span class="tag">PART G</span>
+
+<div class="analogy">
+<p>Assignment 4 started with easy warm-up questions about whether FDs behave like functions or relations on sets. The key intuitions: FDs respect subset relations on the LHS (more information never hurts, only helps) but they are one-directional (not symmetric).</p>
+</div>
+
+<div class="formula-box">
+<p><strong>LHS augmentation is free.</strong> If $\alpha \to \beta$ and $\alpha \subseteq \alpha'$, then $\alpha' \to \beta$. Proof: augmentation. Intuition: knowing more than you need is still enough to determine $\beta$.</p>
+</div>
+
+<div class="formula-box">
+<p><strong>FDs are not symmetric.</strong> $\alpha \to \beta$ does <em>not</em> imply $\beta \to \alpha$. Example: $\text{SIN} \to \text{Name}$ holds but $\text{Name} \to \text{SIN}$ fails (two people can share a name).</p>
+</div>
+
+<div class="formula-box">
+<p><strong>RHS decomposition is always valid.</strong> $\alpha \to \beta_1 \beta_2 \cdots \beta_k$ iff $\alpha \to \beta_i$ for every $i$. Proof: decomposition in one direction, union in the other.</p>
+</div>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>Everything in normalization hinges on attribute closure. BCNF violation detection is "compute $\alpha^+$ for every LHS and check whether it covers $R$." Candidate-key enumeration is "find every minimal $\alpha$ with $\alpha^+ = R$." Lossless decomposition testing reduces to a closure check. Dependency preservation testing reduces to a closure check. If you walk into the final knowing how to compute $\alpha^+$ cold, Part E-onward of this guide will feel mechanical.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>Expect three kinds of FD questions on the final: (1) compute a specific attribute closure ("find $BC^+$"), (2) prove a derived rule like pseudo-transitivity or union from the three core axioms, (3) enumerate all candidate keys of a given $(R, F)$. Parts D-F are the machinery for all three.</p>
+</div>
+
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Functional dependency (FD)</dt><dd>$\alpha \to \beta$: in every legal instance, matching $\alpha$-values force matching $\beta$-values.</dd>
+<dt>Trivial FD</dt><dd>$\alpha \to \beta$ with $\beta \subseteq \alpha$. Always holds.</dd>
+<dt>Armstrong's axioms</dt><dd>Reflexivity, Augmentation, Transitivity. Sound and complete for FD inference.</dd>
+<dt>Union rule</dt><dd>Derived: if $\alpha \to \beta$ and $\alpha \to \gamma$, then $\alpha \to \beta\gamma$.</dd>
+<dt>Decomposition rule</dt><dd>Derived: if $\alpha \to \beta\gamma$, then $\alpha \to \beta$ and $\alpha \to \gamma$.</dd>
+<dt>Pseudo-transitivity</dt><dd>Derived: if $\alpha \to \beta$ and $\beta\gamma \to \delta$, then $\alpha\gamma \to \delta$.</dd>
+<dt>Attribute closure $\alpha^+$</dt><dd>Largest set of attributes $\alpha$ functionally determines under $F$.</dd>
+<dt>$F^+$</dt><dd>Closure of the FD set $F$; every FD implied by $F$.</dd>
+<dt>Superkey</dt><dd>Attribute set $\alpha$ with $\alpha^+ = R$.</dd>
+<dt>Candidate key</dt><dd>Minimal superkey: no proper subset is a superkey.</dd>
+<dt>Sound</dt><dd>Every FD derivable from the axioms genuinely holds.</dd>
+<dt>Complete</dt><dd>Every FD that must hold can be derived from the axioms.</dd>
+</dl>
+</div>
+
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-07-ra-to-sql.html">&larr; 07. RA to SQL</a>
+<a class="bottom-nav-btn next" href="cg-09-normalization.html">09. Normalization &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

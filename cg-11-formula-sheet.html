@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 11 : Formula Sheet | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 11</span>
+<h1>Formula Sheet</h1>
+<p class="subtitle">One-page compact reference: every symbol, every skeleton, every rule. Cross-linked to the full tutorial pages.</p>
+
+<div class="analogy">
+<p>This is the cheat sheet you would bring into the exam room if you were allowed one. It does not explain anything; it just reminds. Every entry links back to the tutorial page where that concept was fully worked out, so if your memory goes blank you can jump straight to the proof or worked example.</p>
+</div>
+
+<h2>Part A: Relational Algebra Operators</h2>
+
+<span class="tag">PART A</span>
+
+<table class="step-table">
+<thead>
+<tr><th>Operator</th><th>Symbol</th><th>One-line</th><th>SQL</th></tr>
+</thead>
+<tbody>
+<tr><td>Selection</td><td>$\sigma_P(R)$</td><td>row filter</td><td><code>select * from R where P</code></td></tr>
+<tr><td>Projection</td><td>$\pi_A(R)$</td><td>column filter, dedup</td><td><code>select distinct A from R</code></td></tr>
+<tr><td>Cartesian</td><td>$R \times S$</td><td>all pairings</td><td><code>select * from R, S</code></td></tr>
+<tr><td>Natural join</td><td>$R \bowtie S$</td><td>Cartesian + match shared</td><td><code>select * from R natural join S</code></td></tr>
+<tr><td>Theta join</td><td>$R \bowtie_{\theta} S$</td><td>$\times$ + predicate</td><td><code>select * from R join S on &theta;</code></td></tr>
+<tr><td>Union</td><td>$R \cup S$</td><td>shade both</td><td><code>(...) union (...)</code></td></tr>
+<tr><td>Difference</td><td>$R - S$</td><td>shade $R$ minus overlap</td><td><code>(...) except (...)</code></td></tr>
+<tr><td>Intersection</td><td>$R \cap S$</td><td>shade overlap</td><td><code>(...) intersect (...)</code></td></tr>
+<tr><td>Rename</td><td>$\rho_X(R)$</td><td>alias</td><td><code>R as X</code></td></tr>
+<tr><td>Division</td><td>$R \div S$</td><td>"for all"</td><td><code>not exists + except</code></td></tr>
+<tr><td>Aggregate</td><td>$_{A}\gamma_{F(B)}(R)$</td><td>grouped aggregate</td><td><code>select A, F(B) from R group by A</code></td></tr>
+</tbody>
+</table>
+
+<p style="font-size: 0.85rem; color: var(--text-muted);">Full tutorials: <a href="cg-04-relational-algebra.html">Page 04 (RA)</a> and <a href="cg-07-ra-to-sql.html">Page 07 (RA to SQL)</a>.</p>
+
+<h2>Part B: SQL Skeletons</h2>
+
+<span class="tag">PART B</span>
+
+<div class="algo-box">
+<div class="algo-title">Basic select</div>
+<span class="algo-line">select [distinct] &lt;cols&gt;</span>
+<span class="algo-line">from   &lt;tables&gt;</span>
+<span class="algo-line">where  &lt;predicate&gt;</span>
+<span class="algo-line">group by &lt;cols&gt;</span>
+<span class="algo-line">having &lt;predicate&gt;</span>
+<span class="algo-line">order by &lt;cols&gt; [asc|desc];</span>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Create table</div>
+<span class="algo-line">create table &lt;name&gt; (</span>
+<span class="algo-line">&nbsp;&nbsp;&lt;col&gt; &lt;type&gt; [not null],</span>
+<span class="algo-line">&nbsp;&nbsp;primary key (&lt;cols&gt;),</span>
+<span class="algo-line">&nbsp;&nbsp;foreign key (&lt;col&gt;) references &lt;other&gt;(&lt;col&gt;)</span>
+<span class="algo-line">);</span>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">View</div>
+<span class="algo-line">create view &lt;name&gt; as</span>
+<span class="algo-line">&nbsp;&nbsp;select ... from ... where ...;</span>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Subquery in where</div>
+<span class="algo-line">select ... from R</span>
+<span class="algo-line">where col in (select col from S where ...);</span>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Group by + having</div>
+<span class="algo-line">select dept, avg(salary)</span>
+<span class="algo-line">from   employee</span>
+<span class="algo-line">group by dept</span>
+<span class="algo-line">having avg(salary) &gt; 50000;</span>
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Division pattern (not exists + except)</div>
+<span class="algo-line">select r.A from r as onetuple</span>
+<span class="algo-line">where not exists (</span>
+<span class="algo-line">&nbsp;&nbsp;(select * from s)</span>
+<span class="algo-line">&nbsp;&nbsp;except</span>
+<span class="algo-line">&nbsp;&nbsp;(select r.B, r.C from r where r.A = onetuple.A)</span>
+<span class="algo-line">);</span>
+</div>
+
+<p style="font-size: 0.85rem; color: var(--text-muted);">Full tutorial: <a href="cg-05-sql-basics.html">Page 05 (SQL Basics)</a>, <a href="cg-06-sql-advanced.html">Page 06 (SQL Advanced)</a>.</p>
+
+<h2>Part C: Armstrong's Axioms</h2>
+
+<span class="tag">PART C</span>
+
+<div class="formula-box">
+<p><strong>Core axioms (sound and complete for FD inference):</strong></p>
+<ol style="margin-left: 24px;">
+<li><strong>Reflexivity:</strong> if $\beta \subseteq \alpha$, then $\alpha \to \beta$.</li>
+<li><strong>Augmentation:</strong> if $\alpha \to \beta$, then $\alpha\gamma \to \beta\gamma$.</li>
+<li><strong>Transitivity:</strong> if $\alpha \to \beta$ and $\beta \to \gamma$, then $\alpha \to \gamma$.</li>
+</ol>
+<p><strong>Derived rules:</strong></p>
+<ol start="4" style="margin-left: 24px;">
+<li><strong>Union:</strong> if $\alpha \to \beta$ and $\alpha \to \gamma$, then $\alpha \to \beta\gamma$.</li>
+<li><strong>Decomposition:</strong> if $\alpha \to \beta\gamma$, then $\alpha \to \beta$ and $\alpha \to \gamma$.</li>
+<li><strong>Pseudo-transitivity:</strong> if $\alpha \to \beta$ and $\beta\gamma \to \delta$, then $\alpha\gamma \to \delta$.</li>
+</ol>
+</div>
+
+<p style="font-size: 0.85rem; color: var(--text-muted);">Full tutorial: <a href="cg-08-fd-theory.html">Page 08 (FD Theory)</a>.</p>
+
+<h2>Part D: Attribute Closure $\alpha^+$</h2>
+
+<span class="tag">PART D</span>
+
+<div class="algo-box">
+<div class="algo-title">computeClosure($\alpha$, $F$)</div>
+<span class="algo-line">result := $\alpha$</span>
+<span class="algo-line">repeat until no change:</span>
+<span class="algo-line">&nbsp;&nbsp;for each $\beta \to \gamma \in F$:</span>
+<span class="algo-line">&nbsp;&nbsp;&nbsp;&nbsp;if $\beta \subseteq$ result: result := result $\cup\, \gamma$</span>
+<span class="algo-line">return result</span>
+</div>
+
+<div class="formula-box">
+<p><strong>Uses:</strong></p>
+<ul style="margin-left: 24px;">
+<li>$\alpha$ is a superkey iff $\alpha^+ = R$</li>
+<li>$\alpha$ is a candidate key iff $\alpha^+ = R$ and no proper subset of $\alpha$ has this property</li>
+<li>$F \models \alpha \to \beta$ iff $\beta \subseteq \alpha^+$</li>
+</ul>
+</div>
+
+<p style="font-size: 0.85rem; color: var(--text-muted);">Full tutorial: <a href="cg-08-fd-theory.html">Page 08 (FD Theory)</a>.</p>
+
+<h2>Part E: BCNF Decomposition</h2>
+
+<span class="tag">PART E</span>
+
+<div class="algo-box">
+<div class="algo-title">decomposeBCNF($R, F$)</div>
+<span class="algo-line">result := $\{R\}$</span>
+<span class="algo-line">while some $R_i$ has BCNF violation $\alpha \to \beta$:</span>
+<span class="algo-line">&nbsp;&nbsp;$R_a := \alpha \cup \beta$</span>
+<span class="algo-line">&nbsp;&nbsp;$R_b := R_i - (\beta - \alpha)$</span>
+<span class="algo-line">&nbsp;&nbsp;replace $R_i$ with $\{R_a, R_b\}$</span>
+<span class="algo-line">return result</span>
+</div>
+
+<div class="formula-box">
+<p><strong>BCNF condition.</strong> For every non-trivial $\alpha \to \beta \in F^+$: $\alpha$ is a superkey of $R$.</p>
+<p><strong>Lossless-join test.</strong> $R_1 \cap R_2 \to R_1$ or $R_1 \cap R_2 \to R_2$ in $F^+$.</p>
+<p><strong>Dependency-preserving test.</strong> $(F_1 \cup F_2 \cup \ldots)^+ = F^+$, where $F_i = F^+$ restricted to attributes of $R_i$.</p>
+</div>
+
+<p style="font-size: 0.85rem; color: var(--text-muted);">Full tutorial: <a href="cg-09-normalization.html">Page 09 (Normalization)</a>.</p>
+
+<h2>Part F: ER to Relational Mapping</h2>
+
+<span class="tag">PART F</span>
+
+<table class="step-table">
+<thead>
+<tr><th>ER Construct</th><th>Relational Mapping</th></tr>
+</thead>
+<tbody>
+<tr><td>Strong entity</td><td>Table with entity's attributes; PK = entity's identifier</td></tr>
+<tr><td>Weak entity</td><td>Table with owner's PK + partial key as compound PK; FK to owner</td></tr>
+<tr><td>1:1 relationship</td><td>Merge into one table, or FK (with unique constraint) on either side</td></tr>
+<tr><td>1:N relationship</td><td>FK on the N (many) side referencing the 1 side</td></tr>
+<tr><td>M:N relationship</td><td>Junction table with FKs to both sides; compound PK</td></tr>
+<tr><td>Multi-valued attribute</td><td>Separate table: owner's PK + attribute; compound PK</td></tr>
+<tr><td>Composite attribute</td><td>Flatten: one column per component</td></tr>
+<tr><td>Derived attribute</td><td>Do not store; compute on demand (or store with trigger)</td></tr>
+<tr><td>ISA (inheritance)</td><td>Option A: one table per class (all cols); Option B: one table per subclass + superclass; Option C: one big table with nullable cols</td></tr>
+</tbody>
+</table>
+
+<p style="font-size: 0.85rem; color: var(--text-muted);">Full tutorial: <a href="cg-03-er-model.html">Page 03 (ER Model)</a>.</p>
+
+<h2>Part G: Normal Form Hierarchy</h2>
+
+<span class="tag">PART G</span>
+
+<div class="formula-box">
+<p>BCNF $\subseteq$ 3NF $\subseteq$ 2NF $\subseteq$ 1NF</p>
+<dl class="breakdown">
+<dt>1NF</dt><dd>atomic attributes; no nested collections</dd>
+<dt>2NF</dt><dd>1NF + no partial dependency of a non-prime attribute on any candidate key</dd>
+<dt>3NF</dt><dd>for each $\alpha \to \beta \in F^+$: $\alpha$ superkey, or $\beta - \alpha$ all prime</dd>
+<dt>BCNF</dt><dd>for each $\alpha \to \beta \in F^+$: $\alpha$ superkey</dd>
+</dl>
+</div>
+
+<h2>Part H: Design Goals</h2>
+
+<span class="tag">PART H</span>
+
+<div class="formula-box">
+<p><strong>Aim for:</strong></p>
+<ol style="margin-left: 24px;">
+<li>BCNF (no redundancy)</li>
+<li>Lossless-join (data reconstructable)</li>
+<li>Dependency-preserving (FDs locally enforceable)</li>
+</ol>
+<p>If all three cannot be achieved: fall back to 3NF + lossless + dependency-preserving (always possible via 3NF synthesis).</p>
+</div>
+
+<h2>Part I: Quick Syntax Reminders</h2>
+
+<span class="tag">PART I</span>
+
+<div class="note">
+<p><strong>SQL case.</strong> Keywords are case-insensitive (<code>SELECT</code> = <code>select</code>). Use lowercase to match the prof's style.</p>
+</div>
+
+<div class="note">
+<p><strong>Null semantics.</strong> Comparing anything to NULL produces UNKNOWN, not TRUE or FALSE. Use <code>is null</code> and <code>is not null</code>. Aggregates skip NULLs by default except <code>count(*)</code>.</p>
+</div>
+
+<div class="note">
+<p><strong>Join keyword forms.</strong> <code>inner join ON ...</code>, <code>left outer join ON ...</code>, <code>natural join</code> (on shared names), <code>cross join</code> (Cartesian).</p>
+</div>
+
+<div class="glossary">
+<h3>Glossary Cross-Reference</h3>
+<dl>
+<dt>Page 01</dt><dd>DB concepts, levels of abstraction (<a href="cg-01-db-concepts.html">cg-01</a>)</dd>
+<dt>Page 02</dt><dd>Relational model basics (<a href="cg-02-relational-model.html">cg-02</a>)</dd>
+<dt>Page 03</dt><dd>ER model and diagramming (<a href="cg-03-er-model.html">cg-03</a>)</dd>
+<dt>Page 04</dt><dd>Relational algebra (<a href="cg-04-relational-algebra.html">cg-04</a>)</dd>
+<dt>Page 05</dt><dd>SQL basics (<a href="cg-05-sql-basics.html">cg-05</a>)</dd>
+<dt>Page 06</dt><dd>SQL advanced (<a href="cg-06-sql-advanced.html">cg-06</a>)</dd>
+<dt>Page 07</dt><dd>RA to SQL translation (<a href="cg-07-ra-to-sql.html">cg-07</a>)</dd>
+<dt>Page 08</dt><dd>FD theory + Armstrong (<a href="cg-08-fd-theory.html">cg-08</a>)</dd>
+<dt>Page 09</dt><dd>Normalization + BCNF (<a href="cg-09-normalization.html">cg-09</a>)</dd>
+<dt>Page 10</dt><dd>OO-DB, NoSQL primer (<a href="cg-10-oodb-nosql.html">cg-10</a>)</dd>
+</dl>
+</div>
+
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-10-oodb-nosql.html">&larr; 10. OO-DB &amp; NoSQL</a>
+<a class="bottom-nav-btn next" href="cg-12-professors-signature.html">12. Professor's Signature &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

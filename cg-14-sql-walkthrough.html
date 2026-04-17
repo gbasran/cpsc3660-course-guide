@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 14 : SQL Walkthrough | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 14; EXAM PREP</span>
+<h1>10 SQL Problems, Walked Step-by-Step</h1>
+<p class="subtitle">Built on the three recycled schemas the prof reaches for on every exam: Library, Employee-Works-Company, Bank.</p>
+
+<div class="analogy">
+<strong>Physical analogy; following a chef through ten plating walkthroughs.</strong><br><br>
+A cooking class does not just give you the recipe; the chef stands next to you, hand on yours, walking through every motion. "Pick up the fish with this grip. Now slide the spatula under from the left, never the right." SQL problems have this same teachable muscle memory. These 10 walkthroughs step through the problem statement, the logic, the query, and the common traps, using the exact schemas the prof will put in front of you on the final.
+</div>
+
+<div class="note">
+<strong>Schemas used throughout this page.</strong><br>
+<strong>Library:</strong> <code>employee(empid, name, office, age)</code>, <code>books(isbn, title, authors, publisher)</code>, <code>borrow(empid, isbn, borrow_date)</code>.<br>
+<strong>Bank:</strong> <code>branch(branch_name, branch_city, assets)</code>, <code>customer(customer_name, customer_street, customer_city)</code>, <code>account(account_number, branch_name, balance)</code>, <code>depositor(customer_name, account_number)</code>, <code>loan(loan_number, branch_name, amount)</code>, <code>borrower(customer_name, loan_number)</code>.<br>
+<strong>Employee-Works-Company:</strong> <code>employee(employee_name, employee_street, employee_city)</code>, <code>works(employee_name, company_name, employee_salary)</code>, <code>company(company_name, company_city)</code>, <code>manages(employee_name, manager_name)</code>.
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 1: Simple SELECT + WHERE (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (2 marks; easy).</strong> Find the names of all employees over age 30.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+select name<br>
+from employee<br>
+where age &gt; 30;
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Identify the relation</div>
+<p>Only <code>employee</code> is needed; no joins. Name and age are both in <code>employee</code>.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Filter, then project</div>
+<p><code>where age &gt; 30</code> filters rows; <code>select name</code> keeps only the one column asked for.</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Do not write <code>select *</code>. The question asks for <em>names</em>; projecting everything loses marks for imprecision.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q6(a); A2 Q1(a); Midterm Q8(a)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 2: Multi-Table Join (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium).</strong> Find the names of employees who have borrowed a book titled "Harry Potter".
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+select distinct e.name<br>
+from employee e, borrow b, books k<br>
+where e.empid = b.empid<br>
+&nbsp;&nbsp;and b.isbn = k.isbn<br>
+&nbsp;&nbsp;and k.title = 'Harry Potter';
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Trace the join chain</div>
+<p>Employee &harr; borrow via <code>empid</code>; borrow &harr; books via <code>isbn</code>. Three-table join.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Apply the book-level filter</div>
+<p><code>k.title = 'Harry Potter'</code> narrows the books table to just the target book.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Project distinct names</div>
+<p>Without <code>distinct</code>, an employee who borrowed the book twice would appear twice.</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Forgetting <code>distinct</code>. Forgetting one of the two join predicates produces a Cartesian-product explosion.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q7(a); A2 Q1(a)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 3: GROUP BY + Aggregate (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium).</strong> For each publisher, count the number of books.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+select publisher, count(*) as book_count<br>
+from books<br>
+group by publisher;
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Group by the non-aggregate attribute</div>
+<p>The "for each" phrasing is the GROUP BY signal. Group by publisher; one row per distinct publisher.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Aggregate over the group</div>
+<p><code>count(*)</code> counts rows within each group. Alias it for readability.</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Writing <code>select title, count(*)</code>; non-aggregate columns that are not in the GROUP BY cannot appear in SELECT.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A2 Q2(b); Midterm Q8(b)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 4: GROUP BY + HAVING + Threshold (Bank)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium; 95% guaranteed on the final).</strong> Find the branches where the average account balance is greater than 10,000.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+select branch_name, avg(balance) as avg_bal<br>
+from account<br>
+group by branch_name<br>
+having avg(balance) &gt; 10000;
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: GROUP BY branch</div>
+<p>Each branch is one row in the output; aggregate balances within the group.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Filter groups with HAVING, not WHERE</div>
+<p>WHERE filters rows before grouping; HAVING filters groups after aggregation. Averages live at the group level, so the threshold lives in HAVING.</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Writing <code>where avg(balance) &gt; 10000</code>; SQL does not allow aggregate functions in WHERE. The error is fatal.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q5; A2 Q4; A3 Q1(c); Midterm Q5(b). The guaranteed pattern.</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 5: Correlated Subquery (Employee-Works)</h2>
+
+<div class="formula-box">
+<strong>Problem (4 marks; hard).</strong> Find the names of employees who earn more than the average salary at their own company.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+select w.employee_name<br>
+from works w<br>
+where w.employee_salary &gt; (<br>
+&nbsp;&nbsp;select avg(w2.employee_salary)<br>
+&nbsp;&nbsp;from works w2<br>
+&nbsp;&nbsp;where w2.company_name = w.company_name<br>
+);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Recognize the correlation</div>
+<p>"Average at their <em>own</em> company" changes per employee; the subquery must depend on the outer row. Correlated, not independent.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Alias both copies of works</div>
+<p>The outer reference is <code>w</code>; the inner is <code>w2</code>. The correlation is <code>w2.company_name = w.company_name</code>.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Do not over-join</div>
+<p>The company table is not needed; <code>works</code> already stores the company name. Adding a join to <code>company</code> is over-joining and wastes marks.</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Writing an uncorrelated subquery (<code>avg(employee_salary)</code> over all of works). That compares to the global average, not the per-company average.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q3(a) verbatim</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 6: NOT EXISTS for Universal Quantification (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (4 marks; hard).</strong> Find the names of employees who have borrowed every book published by "Springer".
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+select e.name<br>
+from employee e<br>
+where not exists (<br>
+&nbsp;&nbsp;select 1<br>
+&nbsp;&nbsp;from books k<br>
+&nbsp;&nbsp;where k.publisher = 'Springer'<br>
+&nbsp;&nbsp;and not exists (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select 1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from borrow b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where b.empid = e.empid<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and b.isbn = k.isbn<br>
+&nbsp;&nbsp;)<br>
+);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Translate "every" into double negation</div>
+<p>"Borrowed every Springer book" becomes "there does not exist a Springer book that this employee has not borrowed." Two negations.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Outer filter on employees</div>
+<p>The employee $e$ is kept iff the outer NOT EXISTS is true (no Springer book is unborrowed by $e$).</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Inner NOT EXISTS checks "has not borrowed"</div>
+<p>For a fixed Springer book $k$, the inner NOT EXISTS says "no borrow row connects this employee to this book".</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Trying to use <code>= all</code> or <code>count(...) = (select count(...) ...)</code>. Correct but clunky; the prof strongly prefers NOT EXISTS, which mirrors RA division directly.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A2 Q2(c); A3 Q3(b); the SQL side of RA division</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 7: Subquery with IN / NOT IN (Bank)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium).</strong> Find the names of customers who have an account but no loan.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+select distinct customer_name<br>
+from depositor<br>
+where customer_name not in (<br>
+&nbsp;&nbsp;select customer_name<br>
+&nbsp;&nbsp;from borrower<br>
+);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Identify the two relations</div>
+<p><code>depositor</code> records account holders; <code>borrower</code> records loan holders. "Account but no loan" is <code>depositor - borrower</code> on customer_name.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Express as NOT IN</div>
+<p>A customer is in the answer iff they appear in depositor and do NOT appear in borrower.</p>
+</div>
+<div class="step">
+<div class="step-label">Alternative</div>
+<p>Using EXCEPT: <code>(select customer_name from depositor) except (select customer_name from borrower);</code>. Functionally equivalent.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q2</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 8: View Definition (Bank)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium).</strong> Create a view $savings\_customers\_no\_loan$ listing the names of customers who have a savings account (branch "Brighton") but no loan at any branch.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL</div>
+create view savings_customers_no_loan as<br>
+select distinct d.customer_name<br>
+from depositor d, account a<br>
+where d.account_number = a.account_number<br>
+&nbsp;&nbsp;and a.branch_name = 'Brighton'<br>
+&nbsp;&nbsp;and d.customer_name not in (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select customer_name from borrower<br>
+&nbsp;&nbsp;);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Wrap a SELECT with CREATE VIEW</div>
+<p>Views are named queries; the syntax is <code>create view &lt;name&gt; as &lt;select-query&gt;</code>.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Join depositor to account to filter by branch</div>
+<p>Depositor only names customers; the branch lives in account.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Exclude borrowers via NOT IN</div>
+<p>Same trick as Problem 7, embedded inside the view definition.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q1(a) verbatim</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 9: INTERSECT / EXCEPT (Bank)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium).</strong> Two parts.<br>
+(a) Find customers who have <em>both</em> an account and a loan.<br>
+(b) Find customers who have an account but <em>no</em> loan.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Part (a): INTERSECT</div>
+(select customer_name from depositor)<br>
+intersect<br>
+(select customer_name from borrower);
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Part (b): EXCEPT</div>
+(select customer_name from depositor)<br>
+except<br>
+(select customer_name from borrower);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Set operators require compatible select lists</div>
+<p>Both sides of INTERSECT/EXCEPT must project the same number and type of columns. Here both project one text column <code>customer_name</code>.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Duplicates</div>
+<p>INTERSECT and EXCEPT remove duplicates by default in SQL (unlike UNION ALL). If you need duplicates preserved, use <code>intersect all</code> / <code>except all</code>.</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Mixing tables that have different schemas on each side without explicit projection; always project explicitly.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q2; classic Bank-schema test of set ops</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 10: Complex Correlated Subquery (Employee-Works)</h2>
+
+<div class="formula-box">
+<strong>Problem (5 marks; hard).</strong> Find the names of all companies located in <em>every</em> city where "IBM" is located.
+</div>
+
+<div class="algo-box">
+<div class="algo-title">Model SQL (NOT EXISTS form)</div>
+select distinct c.company_name<br>
+from company c<br>
+where not exists (<br>
+&nbsp;&nbsp;select 1<br>
+&nbsp;&nbsp;from company ibm<br>
+&nbsp;&nbsp;where ibm.company_name = 'IBM'<br>
+&nbsp;&nbsp;and not exists (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select 1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from company c2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where c2.company_name = c.company_name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and c2.company_city = ibm.company_city<br>
+&nbsp;&nbsp;)<br>
+);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Recognize universal quantification again</div>
+<p>"In every city where IBM is" = "there is no IBM city where this company is NOT".</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Structure the three levels</div>
+<p>Outer: candidate company $c$. Middle: for each IBM city, check. Inner: does $c$ have a row in that same city?</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Note the multi-row assumption</div>
+<p>Note: in this schema <code>company(company_name, company_city)</code>, a company can have multiple rows (one per city). That is what makes "every city" meaningful. IBM has rows for every city it operates in.</p>
+</div>
+<div class="step">
+<div class="step-label">Common error</div>
+<p>Missing the IBM alias and writing a single <code>where company_name = 'IBM'</code>; you lose the ability to iterate over IBM's cities.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q3(b); canonical hard-tier SQL problem</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Summary: the 10 templates</h2>
+
+<table class="step-table">
+<tr><th>#</th><th>Pattern</th><th>Keywords in prompt</th><th>Difficulty</th></tr>
+<tr><td>1</td><td>SELECT + WHERE</td><td>"find names where"</td><td>Easy</td></tr>
+<tr><td>2</td><td>Multi-table join</td><td>"who borrowed X"</td><td>Medium</td></tr>
+<tr><td>3</td><td>GROUP BY + agg</td><td>"for each / count per"</td><td>Medium</td></tr>
+<tr><td>4</td><td>GROUP BY + HAVING + avg</td><td>"avg balance &gt; T"</td><td>Medium (guaranteed)</td></tr>
+<tr><td>5</td><td>Correlated subquery</td><td>"more than avg of their own"</td><td>Hard</td></tr>
+<tr><td>6</td><td>NOT EXISTS / division</td><td>"borrowed every / all"</td><td>Hard</td></tr>
+<tr><td>7</td><td>NOT IN / EXCEPT</td><td>"account but no loan"</td><td>Medium</td></tr>
+<tr><td>8</td><td>CREATE VIEW</td><td>"create view..."</td><td>Medium</td></tr>
+<tr><td>9</td><td>INTERSECT / EXCEPT</td><td>"both / and no"</td><td>Medium</td></tr>
+<tr><td>10</td><td>Nested NOT EXISTS</td><td>"every city where X"</td><td>Hard</td></tr>
+</table>
+
+<div class="why-box">
+<h3>The three-pass drill</h3>
+<p>Pass 1: read only the problem statement, draft the query on paper from memory. Pass 2: compare your draft to the model answer; note any structural differences. Pass 3: rewrite the query once from scratch without looking. Do this for Problems 4, 5, 6, and 10 (the high-yield and hard ones); those are the discriminators that decide your grade.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>GROUP BY</dt><dd>Partitions rows by the listed attributes; each partition becomes one output row.</dd>
+<dt>HAVING</dt><dd>Filters groups after aggregation; required when the threshold is on an aggregate function.</dd>
+<dt>Correlated subquery</dt><dd>A subquery that references an outer row; runs once per outer row.</dd>
+<dt>NOT EXISTS</dt><dd>True when the subquery returns zero rows; the SQL form of universal quantification when nested twice.</dd>
+<dt>INTERSECT / EXCEPT</dt><dd>Set operators; intersect returns common tuples, except returns tuples in the left not in the right.</dd>
+<dt>View</dt><dd>A named SELECT query; not materialized by default.</dd>
+<dt>Over-join</dt><dd>Adding a table that is not needed; costs marks for imprecision.</dd>
+<dt>Distinct</dt><dd>Removes duplicate rows from the result; needed when join can produce repeats.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-13-concept-questions.html">&larr; 13. Concept Questions</a>
+<a class="bottom-nav-btn next" href="cg-15-ra-walkthrough.html">15. RA Walkthrough &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

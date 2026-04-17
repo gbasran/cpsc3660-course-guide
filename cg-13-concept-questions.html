@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 13 : Concept Questions | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 13; EXAM PREP</span>
+<h1>15 Concept Questions with Model Answers</h1>
+<p class="subtitle">The 2-mark opening block, rehearsed. Every answer is written to fit on 2 lines of exam paper; that is the length the prof accepts.</p>
+
+<div class="analogy">
+<strong>Physical analogy; flashcards the night before.</strong><br><br>
+A medical student does not walk into an anatomy practical without having rehearsed every bone name out loud the night before. Concept questions are the same drill: small, high-yield, and punished heavily if you freeze. Each of these 15 questions is phrased the way the prof phrases them, and each model answer shows exactly what a 2/2 response looks like. Read each question, cover the answer, answer out loud, then check.
+</div>
+
+<!-- ============================================================ -->
+<h2>Q1: Schema vs Instance</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> Define schema and instance in the context of a relational database, and state how they differ.
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p><strong>Schema</strong> is the logical structure of the database: relations, attributes, domains, constraints; it changes rarely. <strong>Instance</strong> is the set of tuples currently stored in those relations; it changes with every INSERT, UPDATE, or DELETE. The schema is fixed; the instance is the current snapshot.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q1; Midterm Q1</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q2: Super/Candidate/Primary Key Distinction</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> Define super key, candidate key, and primary key. Give an example of each using the relation $employee(empid, name, office, age)$.
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>A <strong>super key</strong> is any set of attributes that uniquely identifies a tuple (e.g. $\{empid, name\}$). A <strong>candidate key</strong> is a minimal super key, with no redundant attributes (e.g. $\{empid\}$). A <strong>primary key</strong> is the candidate key chosen as the official row identifier (here, $empid$); it must be NOT NULL and unique.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q3; Midterm Q2</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q3: DML vs DDL</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> Define DML and DDL. Give one SQL example of each.
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p><strong>DDL</strong> (Data Definition Language) defines and alters schema structure; example: <code>create table employee(...)</code>. <strong>DML</strong> (Data Manipulation Language) queries and modifies the data inside those structures; example: <code>insert into employee values(...)</code> or <code>select * from employee</code>.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q1; Midterm Q1</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q4: Data Dictionary Purpose</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> What is the data dictionary, and why does the DBMS need it?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>The <strong>data dictionary</strong> (system catalog) is a set of tables describing every relation, attribute, key, constraint, view, and privilege in the database. The DBMS uses it to validate queries (does this table exist? is this column the right type?), enforce constraints, and feed statistics to the optimizer.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q2; Midterm-style short answer</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q5: Primary Key Uniqueness</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> If $K$ is the primary key of relation $R$, and two tuples $t_1, t_2 \in R$ satisfy $t_1[K] = t_2[K]$, what can you conclude about the other attributes?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>Since $K$ uniquely identifies each tuple, $t_1[K] = t_2[K]$ forces $t_1 = t_2$; they are the same tuple. Therefore $t_1[A] = t_2[A]$ for <em>every</em> attribute $A$ of $R$, not just for $K$. The key's uniqueness propagates to all attributes.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors Midterm Q3</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q6: Set Intersection via Basic RA Operations</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> Show how $r \cap s$ can be expressed using only the basic RA operators (selection, projection, union, set-difference, Cartesian product, rename).
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>Intersection is not a basic operator but reduces to two set-differences: $r \cap s = r - (r - s)$. The inner $(r - s)$ removes tuples of $r$ not in $s$; subtracting again from $r$ leaves only the tuples that <em>are</em> in both.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q4; Midterm Q6</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q7: Cascading Delete Rationale</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> What is ON DELETE CASCADE? When should a designer use it rather than RESTRICT?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p><strong>ON DELETE CASCADE</strong> means that deleting a parent row automatically deletes every child row referencing it via the foreign key. Use CASCADE when child rows have no meaning without the parent (e.g. borrow rows when the employee is gone); use RESTRICT when child rows are historical records that should block casual deletion.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors Midterm Q7</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q8: Strong vs Weak Entity</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> Define strong entity and weak entity. Give one example of each.
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>A <strong>strong entity</strong> has its own primary key and exists independently (e.g. $employee$). A <strong>weak entity</strong> cannot be identified by its own attributes alone and requires the key of an owner entity plus a local discriminator (e.g. $dependent$ of an employee, identified by $(empid, name)$).</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q5; New territory for the final</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q9: Multi-valued Attribute Decomposition</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> An $employee$ entity has a multi-valued attribute $phone$. How is this mapped to relations?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>Create a separate relation $employee\_phone(empid, phone)$ where $empid$ is a foreign key referencing $employee$ and $(empid, phone)$ is the primary key. Each phone value becomes one row; the original $employee$ table holds the single-valued attributes only.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q4; A3 Q8</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q10: Composite Attribute Decomposition</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> An $employee$ entity has a composite attribute $address$ with sub-parts $street$, $city$, $postal\_code$. How is this mapped to a relation?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>Flatten the composite attribute: each leaf sub-attribute becomes its own column in the $employee$ relation. The mapped schema is $employee(empid, name, street, city, postal\_code)$; the grouping $address$ is conceptual only, not stored as a single column.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q4</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q11: Weak Entity Rationale</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> Why do we model some entities as weak instead of just adding a unique identifier?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>A weak entity exists <em>only</em> in the context of its owner and has no natural standalone key (e.g. a $room$ within a $building$; room "101" is only meaningful relative to its building). Modelling it weak preserves the identifying dependency, enforces mandatory total participation, and avoids inventing artificial IDs.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q5; Midterm-style short answer</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q12: Generalization / ISA Purpose</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> What does an ISA (generalization) relationship in an ER diagram represent, and why is it useful?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>An <strong>ISA</strong> relationship groups two or more lower-level entity types (subtypes) under a common higher-level type (supertype); subtypes inherit the supertype's attributes and add their own. It reduces redundancy when subtypes share attributes (e.g. $book$ and $music$ both ISA $item$, sharing $isbn, title, price$).</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q8 (online bookstore with music)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q13: Functional Dependency Definition</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> Define a functional dependency $\alpha \to \beta$ on a relation $R$.
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>$\alpha \to \beta$ holds on $R$ if, for any two tuples $t_1, t_2 \in R$ with $t_1[\alpha] = t_2[\alpha]$, it must also be that $t_1[\beta] = t_2[\beta]$. Informally: knowing the values of $\alpha$ uniquely determines the values of $\beta$.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A4 Q1; New territory for the final</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q14: BCNF Definition</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> State the definition of Boyce-Codd Normal Form (BCNF). Why do we aim for it?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>A relation $R$ is in <strong>BCNF</strong> if for every non-trivial FD $\alpha \to \beta$ that holds on $R$, $\alpha$ is a super key of $R$. We aim for BCNF to eliminate redundancy and the update/insertion/deletion anomalies that arise when non-key attributes determine other non-key attributes.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A4 Q2; A4 Q6</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Q15: Lossless Decomposition Criterion</h2>
+
+<div class="formula-box">
+<strong>Question (2 marks).</strong> A decomposition of $R$ into $R_1, R_2$ is lossless-join under FD set $F$ when what condition holds?
+</div>
+
+<div class="hand-calc">
+<h3>Model answer</h3>
+<p>The decomposition is lossless when $R_1 \cap R_2 \to R_1$ or $R_1 \cap R_2 \to R_2$ is implied by $F$; that is, the shared attributes functionally determine one of the fragments. Equivalently, $R_1 \bowtie R_2 = R$ for every legal instance, so no spurious tuples are created by the natural join.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A4 Q5; the showpiece lossless-check</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Rapid-fire summary table</h2>
+
+<table class="step-table">
+<tr><th>#</th><th>Topic</th><th>Mirror</th><th>Keyword in answer</th></tr>
+<tr><td>Q1</td><td>Schema vs instance</td><td>A1 Q1</td><td>"structure" vs "tuples"</td></tr>
+<tr><td>Q2</td><td>Key types</td><td>A1 Q3</td><td>"minimal"</td></tr>
+<tr><td>Q3</td><td>DML/DDL</td><td>A1 Q1</td><td>"define" vs "manipulate"</td></tr>
+<tr><td>Q4</td><td>Data dictionary</td><td>A1 Q2</td><td>"validate, enforce, statistics"</td></tr>
+<tr><td>Q5</td><td>PK uniqueness</td><td>Mid Q3</td><td>"same tuple"</td></tr>
+<tr><td>Q6</td><td>Intersection via difference</td><td>A1 Q4</td><td>"$r - (r - s)$"</td></tr>
+<tr><td>Q7</td><td>Cascading delete</td><td>Mid Q7</td><td>"child meaningless without parent"</td></tr>
+<tr><td>Q8</td><td>Strong vs weak</td><td>A3 Q5</td><td>"discriminator"</td></tr>
+<tr><td>Q9</td><td>Multi-valued attribute</td><td>A3 Q4</td><td>"separate relation with FK"</td></tr>
+<tr><td>Q10</td><td>Composite attribute</td><td>A3 Q4</td><td>"flatten to sub-attributes"</td></tr>
+<tr><td>Q11</td><td>Weak entity rationale</td><td>A3 Q5</td><td>"no natural standalone key"</td></tr>
+<tr><td>Q12</td><td>ISA / generalization</td><td>A3 Q8</td><td>"inherit shared attributes"</td></tr>
+<tr><td>Q13</td><td>FD definition</td><td>A4 Q1</td><td>"$t_1[\alpha]=t_2[\alpha] \Rightarrow t_1[\beta]=t_2[\beta]$"</td></tr>
+<tr><td>Q14</td><td>BCNF definition</td><td>A4 Q2</td><td>"$\alpha$ is a super key"</td></tr>
+<tr><td>Q15</td><td>Lossless criterion</td><td>A4 Q5</td><td>"common attrs determine a fragment"</td></tr>
+</table>
+
+<div class="why-box">
+<h3>How to use this page in the last 48 hours</h3>
+<p>Do not read the answers twice in a row; that builds false confidence. Cover each answer, say yours out loud, and only then uncover. If the keyword in the summary table is not in your spoken answer, you missed the grading target. Rinse three times over two days.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Schema</dt><dd>Logical structure of the database; relations, attributes, domains, constraints.</dd>
+<dt>Instance</dt><dd>Current set of tuples stored in those relations.</dd>
+<dt>DDL / DML</dt><dd>Data definition vs data manipulation languages; schema changes vs data changes.</dd>
+<dt>Super key / candidate key / primary key</dt><dd>Unique attribute set / minimal unique set / chosen unique set.</dd>
+<dt>Data dictionary</dt><dd>Metadata tables describing the schema; used by DBMS for validation and optimization.</dd>
+<dt>ON DELETE CASCADE</dt><dd>FK option that deletes child rows when the parent row is deleted.</dd>
+<dt>Strong / weak entity</dt><dd>Entity with / without its own standalone primary key.</dd>
+<dt>Multi-valued attribute</dt><dd>Attribute that takes a set of values; mapped to its own relation.</dd>
+<dt>Composite attribute</dt><dd>Attribute that has sub-parts; flattened into its leaf attributes.</dd>
+<dt>Generalization (ISA)</dt><dd>Higher-level entity type whose subtypes inherit attributes.</dd>
+<dt>Functional dependency</dt><dd>$\alpha \to \beta$ means $\alpha$ uniquely determines $\beta$.</dd>
+<dt>BCNF</dt><dd>Every non-trivial FD $\alpha \to \beta$ has $\alpha$ as a super key.</dd>
+<dt>Lossless decomposition</dt><dd>Common attributes determine at least one fragment; natural-join back produces no spurious tuples.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-12-professors-signature.html">&larr; 12. Professor's Signature</a>
+<a class="bottom-nav-btn next" href="cg-14-sql-walkthrough.html">14. SQL Walkthrough &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

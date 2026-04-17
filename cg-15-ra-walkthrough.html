@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 15 : RA Walkthrough | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 15; EXAM PREP</span>
+<h1>8 Relational Algebra Problems, Side-by-Side with SQL</h1>
+<p class="subtitle">Each problem is solved in RA on the left, SQL on the right. Division, grouping, and set ops all walked through.</p>
+
+<div class="analogy">
+<strong>Physical analogy; looking at a blueprint and a photograph of the same house.</strong><br><br>
+An architect reads the blueprint and understands the geometry; a buyer looks at a photograph and sees the result. For every RA expression there is a corresponding SQL query that produces the same rows; the RA is the blueprint (compact, algebraic) and the SQL is the photograph (procedural, verbose). Training your brain to flip between them is the whole point of this page; you will face an exam question asking for one and sometimes both.
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 1: Basic Selection + Projection + Join (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (2 marks).</strong> Find the names of employees who have borrowed a book published by "Springer".
+</div>
+
+<p><strong>RA expression:</strong></p>
+<p>$$\pi_{name}\bigl(\sigma_{publisher='Springer'}\,(employee \bowtie borrow \bowtie books)\bigr)$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL</div>
+select distinct e.name<br>
+from employee e, borrow b, books k<br>
+where e.empid = b.empid<br>
+&nbsp;&nbsp;and b.isbn = k.isbn<br>
+&nbsp;&nbsp;and k.publisher = 'Springer';
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Join the three relations on shared attributes</div>
+<p>Natural join chains: employee $\bowtie$ borrow on <code>empid</code>; that result $\bowtie$ books on <code>isbn</code>.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Select where publisher = Springer</div>
+<p>Apply $\sigma$ with the publisher predicate. This filters the combined tuples.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Project name</div>
+<p>$\pi_{name}$ keeps only the <code>name</code> column; duplicates are removed automatically in RA (set semantics).</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q7(a); canonical warm-up</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 2: Natural Join Exposure (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (2 marks).</strong> List every (employee name, book title) pair where the employee has borrowed that book.
+</div>
+
+<p><strong>RA expression:</strong></p>
+<p>$$\pi_{name,\,title}\,(employee \bowtie borrow \bowtie books)$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL</div>
+select e.name, k.title<br>
+from employee e, borrow b, books k<br>
+where e.empid = b.empid<br>
+&nbsp;&nbsp;and b.isbn = k.isbn;
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Chain natural joins</div>
+<p>Employee and borrow share <code>empid</code>; borrow and books share <code>isbn</code>. The natural join handles both automatically.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Project the two asked-for columns</div>
+<p>$\pi_{name, title}$; the projection list names the attributes you keep.</p>
+</div>
+<div class="step">
+<div class="step-label">Note on ambiguity</div>
+<p>If <code>authors</code> in books overlapped with another attribute, natural join would inadvertently match on it. Always check which attributes are shared before writing $\bowtie$.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q7(a); A2 Q1(a)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 3: Division (Library) &mdash; THE HARD ONE</h2>
+
+<div class="formula-box">
+<strong>Problem (3-4 marks; hard; guaranteed).</strong> Find the names of employees who have borrowed <em>every</em> book published by "Springer".
+</div>
+
+<p><strong>RA expression:</strong></p>
+<p>$$R_1 = \pi_{empid,\,isbn}\,(borrow)$$</p>
+<p>$$R_2 = \pi_{isbn}\bigl(\sigma_{publisher='Springer'}(books)\bigr)$$</p>
+<p>$$R_3 = R_1 \div R_2 \quad (\text{employees who borrowed all Springer books, by } empid)$$</p>
+<p>$$\text{Final} = \pi_{name}\bigl(employee \bowtie R_3\bigr)$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL (NOT EXISTS form)</div>
+select e.name<br>
+from employee e<br>
+where not exists (<br>
+&nbsp;&nbsp;select 1 from books k<br>
+&nbsp;&nbsp;where k.publisher = 'Springer'<br>
+&nbsp;&nbsp;and not exists (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;select 1 from borrow b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where b.empid = e.empid and b.isbn = k.isbn<br>
+&nbsp;&nbsp;)<br>
+);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough of division itself</h3>
+
+<div class="step">
+<div class="step-label">Definition of $\div$</div>
+<p>If $R_1$ has schema $(X, Y)$ and $R_2$ has schema $(Y)$, then $R_1 \div R_2$ returns the set of $X$-values in $R_1$ that are paired with <em>every</em> $Y$-value in $R_2$. In other words, for each candidate $x$, we check that for every $y \in R_2$, the tuple $(x,y)$ appears in $R_1$; if so, $x$ survives.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 1: Build the "who borrowed what" table</div>
+<p>$R_1 = \pi_{empid, isbn}(borrow)$; the set of all (employee, book) pairs that actually happened.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Build the "which books must be borrowed" set</div>
+<p>$R_2 = \pi_{isbn}(\sigma_{publisher='Springer'}(books))$; all Springer ISBNs.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Divide</div>
+<p>$R_3 = R_1 \div R_2$; empid values in $R_1$ paired with <em>every</em> ISBN in $R_2$.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 4: Join to get names</div>
+<p>$R_3$ has only empid values; join back with employee and project name.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Express $\div$ with basic operators (if prof demands)</div>
+<p>$R_1 \div R_2 = \pi_X(R_1) - \pi_X\bigl((\pi_X(R_1) \times R_2) - R_1\bigr)$; "all candidate X-values, minus those with an unfulfilled Y-pair."</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q7(b); A2 Q1(b); THE division question</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 4: Rename + Self-Join (Bank)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium).</strong> Find the account numbers with the second-smallest balance in the account relation.
+</div>
+
+<p><strong>RA expression:</strong></p>
+<p>$$R = \rho_{A_1}(account),\quad S = \rho_{A_2}(account)$$</p>
+<p>$$\text{smallest} = \pi_{A_1.balance}\bigl(R\bigr) - \pi_{A_1.balance}\bigl(\sigma_{A_1.balance \gt A_2.balance}(R \times S)\bigr)$$</p>
+<p>$$\text{second} = \pi_{A_2.account\_number}\bigl(\sigma_{A_2.balance = (\text{smallest after removing itself})}(\ldots)\bigr)$$</p>
+
+<p>More cleanly, the "second smallest balance value" is:</p>
+<p>$$b_2 = \pi_{balance}(account) - \{\min\ balance\} \text{ then min again}$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL</div>
+select account_number, balance<br>
+from account<br>
+where balance = (<br>
+&nbsp;&nbsp;select min(balance) from account<br>
+&nbsp;&nbsp;where balance &gt; (select min(balance) from account)<br>
+);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Why rename is needed</div>
+<p>Whenever you join a relation to itself in RA, you must rename one copy with $\rho$ so that the two sets of attributes are distinguishable. Without rename, $account \times account$ has duplicate attribute names and cannot be filtered.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Find the smallest via "remove those with anything smaller"</div>
+<p>The smallest balance is the balance for which no other row has a smaller balance. Self-join and filter where $A_1.balance \lt A_2.balance$; subtract.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Apply the trick again to the set minus smallest</div>
+<p>Second smallest = smallest of the set obtained by removing the smallest.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q5(b); classic rename exercise</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 5: Grouping + Aggregation in RA (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; hard).</strong> Find the names of authors whose books have been borrowed by at least 3 distinct employees.
+</div>
+
+<p><strong>RA expression (using $\gamma$ for aggregation):</strong></p>
+<p>$$T_1 = employee \bowtie borrow \bowtie books$$</p>
+<p>$$T_2 = {}_{authors}\gamma_{\text{count-distinct}(empid)\to cnt}\,(T_1)$$</p>
+<p>$$\text{Final} = \pi_{authors}\bigl(\sigma_{cnt \geq 3}(T_2)\bigr)$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL</div>
+select k.authors<br>
+from employee e, borrow b, books k<br>
+where e.empid = b.empid and b.isbn = k.isbn<br>
+group by k.authors<br>
+having count(distinct e.empid) &gt;= 3;
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Join everything that is needed</div>
+<p>Three-way join to connect authors (in books) to employees (in employee) via borrow.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Group on the "by author" axis, aggregate count-distinct</div>
+<p>$_{authors}\gamma_{\text{count-distinct}(empid)}$; the subscript before $\gamma$ is the grouping attribute list.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Filter groups with $\sigma$</div>
+<p>$\sigma_{cnt \geq 3}$ on the grouped result; equivalent to SQL's HAVING clause.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q7(c); Midterm Q8(c)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 6: Multi-Level Grouping (Library)</h2>
+
+<div class="formula-box">
+<strong>Problem (4 marks; hard).</strong> For each publisher, find the employees who have borrowed more than 5 of that publisher's books.
+</div>
+
+<p><strong>RA expression:</strong></p>
+<p>$$T = employee \bowtie borrow \bowtie books$$</p>
+<p>$$G = {}_{publisher,\,empid,\,name}\gamma_{\text{count}(isbn)\to n}\,(T)$$</p>
+<p>$$\text{Final} = \pi_{publisher,\,name}\bigl(\sigma_{n \gt 5}(G)\bigr)$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL</div>
+select k.publisher, e.name<br>
+from employee e, borrow b, books k<br>
+where e.empid = b.empid and b.isbn = k.isbn<br>
+group by k.publisher, e.empid, e.name<br>
+having count(b.isbn) &gt; 5;
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Group on multiple attributes</div>
+<p>Group by (publisher, empid, name). Each distinct combination becomes a group.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Aggregate and filter</div>
+<p>Count ISBNs per group; filter groups with $n \gt 5$.</p>
+</div>
+<div class="step">
+<div class="step-label">Why empid is in GROUP BY even when we only output name</div>
+<p>If two employees share a name, grouping only by name would merge their counts. Grouping by empid keeps them separate; projecting name at the end is safe because empid determines name.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A1 Q7(d)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 7: Set Operations (Bank)</h2>
+
+<div class="formula-box">
+<strong>Problem (2 marks).</strong> Find the names of customers who have an account but no loan.
+</div>
+
+<p><strong>RA expression:</strong></p>
+<p>$$\pi_{customer\_name}(depositor) - \pi_{customer\_name}(borrower)$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL</div>
+(select customer_name from depositor)<br>
+except<br>
+(select customer_name from borrower);
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: Project before the difference</div>
+<p>Both operands of $-$ must be union-compatible (same attributes). Projecting <code>customer_name</code> from each makes them so.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Set difference is the RA match for "but not"</div>
+<p>Set difference $-$ directly expresses exclusion. No correlated subquery needed in RA.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A3 Q2</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Problem 8: RA Insert via Union (Midterm Q9(c) style)</h2>
+
+<div class="formula-box">
+<strong>Problem (3 marks; medium).</strong> An employee (E05, Dora, D-220, 31) borrows book 978-NEW on 2026-04-17. Write RA assignments that simultaneously add the employee to <code>employee</code>, add the book (if not already there), and add the borrow record.
+</div>
+
+<p><strong>RA assignments:</strong></p>
+<p>$$employee \leftarrow employee \cup \{(E05,\ Dora,\ D\text{-}220,\ 31)\}$$</p>
+<p>$$books \leftarrow books \cup \{(978\text{-}NEW,\ title,\ authors,\ publisher)\}$$</p>
+<p>$$borrow \leftarrow borrow \cup \{(E05,\ 978\text{-}NEW,\ 2026\text{-}04\text{-}17)\}$$</p>
+
+<div class="algo-box">
+<div class="algo-title">Equivalent SQL</div>
+insert into employee values ('E05', 'Dora', 'D-220', 31);<br>
+insert into books values ('978-NEW', 'New Title', 'Author Name', 'Publisher');<br>
+insert into borrow values ('E05', '978-NEW', '2026-04-17');
+</div>
+
+<div class="hand-calc">
+<h3>Walkthrough</h3>
+<div class="step">
+<div class="step-label">Step 1: RA INSERT is just union with a singleton</div>
+<p>$r \leftarrow r \cup \{t\}$ is the algebraic form of INSERT; the arrow denotes assignment (reassign $r$ to include the new tuple).</p>
+</div>
+<div class="step">
+<div class="step-label">Step 2: Order of operations matters for FKs</div>
+<p>Insert the parent rows before the child; otherwise the FK constraint on <code>borrow.empid</code> and <code>borrow.isbn</code> would fail.</p>
+</div>
+<div class="step">
+<div class="step-label">Step 3: Check for duplicates</div>
+<p>RA union is set-based; if the tuple is already in the relation, the union does nothing. In SQL, duplicate PKs throw an error instead.</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors Midterm Q9(c)</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Summary: the 8 patterns</h2>
+
+<table class="step-table">
+<tr><th>#</th><th>Pattern</th><th>Key operators</th><th>Difficulty</th></tr>
+<tr><td>1</td><td>Select + project + join</td><td>$\sigma, \pi, \bowtie$</td><td>Easy</td></tr>
+<tr><td>2</td><td>Natural-join expose</td><td>$\bowtie, \pi$</td><td>Easy</td></tr>
+<tr><td>3</td><td>Division</td><td>$\div$</td><td>Hard (guaranteed)</td></tr>
+<tr><td>4</td><td>Rename + self-join</td><td>$\rho, \times, \sigma$</td><td>Medium</td></tr>
+<tr><td>5</td><td>Grouping + aggregation</td><td>$\gamma, \sigma$</td><td>Hard</td></tr>
+<tr><td>6</td><td>Multi-level grouping</td><td>$\gamma$ with 3 grouping attrs</td><td>Hard</td></tr>
+<tr><td>7</td><td>Set difference</td><td>$-, \pi$</td><td>Easy</td></tr>
+<tr><td>8</td><td>INSERT via union</td><td>$\cup$, $\leftarrow$</td><td>Medium</td></tr>
+</table>
+
+<div class="why-box">
+<h3>The RA-to-SQL flip drill</h3>
+<p>Pick a problem at random. Cover the SQL side; write it yourself from the RA. Then cover the RA side; derive the RA from the SQL. If you can do both directions for problems 3, 5, and 6, you can handle any RA question the prof writes. See also <a href="cg-07-ra-to-sql.html">Page 07</a> for the systematic translation rules.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>$\sigma$ (sigma)</dt><dd>Selection; keeps tuples satisfying a predicate.</dd>
+<dt>$\pi$ (pi)</dt><dd>Projection; keeps the listed attributes; duplicates removed.</dd>
+<dt>$\bowtie$ (bowtie)</dt><dd>Natural join; combines tuples matching on shared attributes.</dd>
+<dt>$\rho$ (rho)</dt><dd>Rename; relabels a relation or its attributes.</dd>
+<dt>$\gamma$ (gamma)</dt><dd>Generalized projection with aggregation; equivalent to SQL GROUP BY + aggregate.</dd>
+<dt>$\div$ (division)</dt><dd>Returns the X-values paired with every Y-value in the divisor.</dd>
+<dt>$\cup, \cap, -$</dt><dd>Union, intersection, set difference; operands must be union-compatible.</dd>
+<dt>$\times$ (Cartesian product)</dt><dd>Pairs every tuple of $R$ with every tuple of $S$.</dd>
+<dt>$\leftarrow$ (assignment)</dt><dd>RA form of INSERT / UPDATE; reassigns a relation variable.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-14-sql-walkthrough.html">&larr; 14. SQL Walkthrough</a>
+<a class="bottom-nav-btn next" href="cg-16-er-walkthrough.html">16. ER Walkthrough &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 04 : Relational Algebra | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 04</span>
+<h1>Relational Algebra</h1>
+<p class="subtitle">Every operator, with worked examples; division is the pattern that keeps coming back.</p>
+
+<div class="analogy">
+<strong>Physical analogy; a cooking recipe made from a pantry.</strong><br><br>
+Relational algebra is a set of kitchen verbs applied to relations. You do not write paragraphs of instructions; you chain verbs. "Take the library table, <em>select</em> the rows where publisher is Penguin, <em>join</em> that with the borrow table, <em>project</em> the employee names." The pantry (your stored relations) never moves; each verb produces a new relation that you feed into the next verb. Every query you can write in SQL can be expressed this way. The chain reads left-to-right or bottom-up; think of it as a pipeline.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part A: Select ($\sigma$); Filter Rows</h2>
+
+<div class="analogy">
+<strong>Physical analogy; a sieve.</strong><br><br>
+Pour a bowl of mixed nuts through a sieve sized for walnuts; only walnuts fall through, everything else stays behind. $\sigma$ (sigma) is that sieve. You give it a predicate (a condition on attribute values) and a relation, and it returns exactly the tuples for which the predicate is true.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Selection.</strong>
+$$\sigma_{\text{predicate}}(R) = \{t \in R \mid \text{predicate}(t)\}$$
+<dl class="breakdown">
+<dt>predicate</dt>
+<dd>A Boolean condition using attribute names, comparisons ($=, \neq, \lt, \leq, \gt, \geq$), and logical connectives ($\land, \lor, \lnot$).</dd>
+<dt>Result schema</dt>
+<dd>Same as $R$; selection does not add or remove columns.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Employees over 30</h3>
+<p>$\sigma_{\text{age} \gt 30}(\text{employee})$ using employee from <a href="cg-03-relational-model.html">Page 03</a>.</p>
+<table class="step-table">
+<tr><th>empid</th><th>name</th><th>office</th><th>age</th></tr>
+<tr><td>E01</td><td>Ada</td><td>D-210</td><td>34</td></tr>
+<tr><td>E03</td><td>Chen</td><td>D-210</td><td>41</td></tr>
+</table>
+<p class="result">Boris (age 29) filtered out; result has the same schema, fewer rows.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part B: Project ($\pi$); Pick Columns</h2>
+
+<div class="analogy">
+<strong>Physical analogy; tearing strips off a document.</strong><br><br>
+Take a four-column spreadsheet and scissor off two of the columns. What remains is a narrower sheet with only the columns you wanted. $\pi$ (pi) does that to a relation. It is the <em>column</em> filter to $\sigma$'s row filter. Subtle point: because the result is a set, duplicates are automatically collapsed.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Projection.</strong>
+$$\pi_{A_1, A_2, \ldots, A_k}(R)$$
+<dl class="breakdown">
+<dt>$A_1, \ldots, A_k$</dt>
+<dd>A subset of the attributes of $R$.</dd>
+<dt>Duplicates</dt>
+<dd>Automatically removed (it is a set). SQL's <code>SELECT</code> keeps duplicates unless you write <code>DISTINCT</code>.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Just the offices, deduplicated</h3>
+<p>$\pi_{\text{office}}(\text{employee})$ gives:</p>
+<table class="step-table">
+<tr><th>office</th></tr>
+<tr><td>D-210</td></tr>
+<tr><td>D-214</td></tr>
+</table>
+<p class="result">Ada and Chen both sit in D-210 but D-210 appears once. Compare to SQL <code>SELECT DISTINCT office FROM employee</code>.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part C: Cartesian Product ($\times$)</h2>
+
+<div class="analogy">
+<strong>Physical analogy; every sock paired with every shirt.</strong><br><br>
+Dump a drawer of three socks and a drawer of two shirts onto the floor; for each sock-shirt pair, make one outfit. You get $3 \times 2 = 6$ outfits. That is the Cartesian product. Every tuple of $R$ is concatenated with every tuple of $S$; the result has $|R| \cdot |S|$ tuples and the combined columns of both.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Cartesian product.</strong>
+$$R \times S = \{(r, s) \mid r \in R, s \in S\}$$
+<dl class="breakdown">
+<dt>Schema</dt>
+<dd>Attributes of $R$ followed by attributes of $S$. If names collide, prefix with the relation name.</dd>
+<dt>Cardinality</dt>
+<dd>$|R| \cdot |S|$; can explode quickly.</dd>
+</dl>
+</div>
+
+<div class="note">
+<strong>Rarely used alone.</strong> Pure Cartesian products are usually followed by a $\sigma$ that keeps only the matching tuples; that combination is so common it gets its own operator, the join.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part D: Natural Join ($\bowtie$)</h2>
+
+<div class="analogy">
+<strong>Physical analogy; matching puzzle pieces.</strong><br><br>
+Two tables, each with an <code>empid</code> column. $R \bowtie S$ picks every pair of tuples that agree on all shared column names and glues them together, keeping one copy of each shared column. It is the Cartesian product followed by "keep only the rows where every shared attribute matches" followed by "remove the duplicated columns."
+</div>
+
+<div class="formula-box">
+<strong>Definition: Natural join.</strong>
+$$R \bowtie S = \pi_{\text{all attrs, dedup shared}}(\sigma_{R.A_1 = S.A_1 \land \ldots \land R.A_k = S.A_k}(R \times S))$$
+<dl class="breakdown">
+<dt>Shared attributes</dt>
+<dd>The common column names of $R$ and $S$. The join equates them pairwise.</dd>
+<dt>Result schema</dt>
+<dd>All attributes of $R$ plus all attributes of $S$ not shared with $R$.</dd>
+<dt>No shared columns</dt>
+<dd>If $R$ and $S$ share no attribute names, $R \bowtie S = R \times S$ (degenerates to Cartesian product).</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>employee $\bowtie$ borrow</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Relations</div>
+<p><code>employee</code>: (E01,Ada), (E02,Boris).<br>
+<code>borrow</code>: (E01, 978-A), (E01, 978-B), (E02, 978-A).<br>
+Shared attribute: <code>empid</code>.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Join on empid</div>
+<table class="step-table">
+<tr><th>empid</th><th>name</th><th>isbn</th></tr>
+<tr><td>E01</td><td>Ada</td><td>978-A</td></tr>
+<tr><td>E01</td><td>Ada</td><td>978-B</td></tr>
+<tr><td>E02</td><td>Boris</td><td>978-A</td></tr>
+</table>
+<p class="result">Every matching pair combined into one row; <code>empid</code> appears once.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part E: Set Operations ($\cup$, $-$, $\cap$)</h2>
+
+<div class="analogy">
+<strong>Physical analogy; mixing pots of beads of matching shapes.</strong><br><br>
+You have two cups, each filled with beads whose shapes come from the same mold (same schema). Union pours both cups into one and removes duplicates. Difference keeps beads from cup A that do <em>not</em> also appear in cup B. Intersection keeps beads that appear in both cups. The absolute requirement: the molds must match. If one cup has triangular beads and the other square, the operations are nonsense.
+</div>
+
+<div class="formula-box">
+<strong>Rule: Schema compatibility.</strong>
+<p>For $R \cup S$, $R - S$, and $R \cap S$:</p>
+<p>(1) $R$ and $S$ must have the <strong>same degree</strong> (same number of attributes).<br>
+(2) Corresponding attributes must have <strong>compatible domains</strong>.</p>
+<p>If not, you must use $\rho$ (rename) and/or $\pi$ first to make the schemas match.</p>
+</div>
+
+<div class="formula-box">
+<strong>Useful identity.</strong>
+$$R \cap S = R - (R - S)$$
+<dl class="breakdown">
+<dt>Why this matters</dt>
+<dd>Some "minimal" versions of relational algebra include only $\sigma, \pi, \times, \cup, -, \rho$; intersection is derived. The prof has asked to show this derivation.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Customers who have both an account and a loan (Bank schema)</h3>
+<p>$$\pi_{\text{customer\_name}}(\text{depositor}) \cap \pi_{\text{customer\_name}}(\text{borrower})$$</p>
+<p>Or equivalently using only $-$:</p>
+<p>$$\pi_{\text{cn}}(\text{depositor}) - (\pi_{\text{cn}}(\text{depositor}) - \pi_{\text{cn}}(\text{borrower}))$$</p>
+<p class="result">Both forms give the customers in the intersection; the second form is what you write if you are restricted to a minimal operator set.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (Midterm Q4)</h4>
+<p>The prof likes "show how intersection can be expressed using only union/difference, or vice versa." Always: $R \cap S = R - (R - S)$. Write it out fully, do not just cite it.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part F: Rename ($\rho$)</h2>
+
+<div class="analogy">
+<strong>Physical analogy; putting a name tag on a twin.</strong><br><br>
+If you need to compare two copies of the same relation to itself (a self-join) you run into a name collision; both copies have the same attribute names. $\rho$ is the name tag that distinguishes them. You either rename the whole relation (and keep its attribute names) or rename individual attributes; the rest of the query then refers to the new name.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Rename.</strong>
+$$\rho_{S}(R)\ \ \text{or}\ \ \rho_{S(B_1, \ldots, B_n)}(R)$$
+<dl class="breakdown">
+<dt>$\rho_S(R)$</dt>
+<dd>The relation $R$ is now called $S$; attribute names unchanged.</dd>
+<dt>$\rho_{S(B_1, \ldots, B_n)}(R)$</dt>
+<dd>Relation renamed to $S$ and attributes renamed to $B_1, \ldots, B_n$ in order.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>Pairs of employees who share an office</h3>
+
+<div class="step">
+<div class="step-label">Step 1: Need two copies of employee</div>
+<p>Call them $e_1$ and $e_2$:</p>
+<p>$e_1 \leftarrow \rho_{E1(\text{id1, name1, office, age1})}(\text{employee})$<br>
+$e_2 \leftarrow \rho_{E2(\text{id2, name2, office, age2})}(\text{employee})$</p>
+<p>Notice we kept <code>office</code> the same in both; that way natural join will match on it.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Join and filter</div>
+<p>$\pi_{\text{name1, name2}}(\sigma_{\text{id1} \lt \text{id2}}(e_1 \bowtie e_2))$</p>
+<p class="result">The $\text{id1} \lt \text{id2}$ condition prevents each pair from appearing twice and excludes pairing a person with themselves.</p>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part G: Division ($\div$); the ALL-pattern</h2>
+
+<div class="analogy">
+<strong>Physical analogy; passing a reference checklist.</strong><br><br>
+Imagine applying for a security clearance. They hand you a checklist of ten forms you must submit. You pass if, and only if, you submit <em>every</em> form on the checklist. Division is that passing predicate made into an operator. Given a "relationship" relation $R(A, B)$ (you-submitted-form pairs) and a "checklist" relation $S(B)$ (the required forms), division $R \div S$ returns the set of $A$ values (people) that have covered every $B$ on the checklist. "Find employees who have borrowed ALL books from publisher X" is exactly this pattern; the checklist is "books by publisher X," the pairs are "employee-borrowed-book," and division picks the employees who covered the whole list.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Division.</strong>
+$$R(A, B) \div S(B) = \{ a \mid \forall b \in S,\ (a, b) \in R \}$$
+<dl class="breakdown">
+<dt>$R$</dt>
+<dd>A relation with attributes $A \cup B$ (here $A$ and $B$ denote sets of attributes).</dd>
+<dt>$S$</dt>
+<dd>A relation whose schema is exactly $B$; the "checklist."</dd>
+<dt>Result</dt>
+<dd>A relation with schema $A$ only; all $a$-values such that $(a, b)$ is in $R$ for <em>every</em> $b$ in $S$.</dd>
+</dl>
+</div>
+
+<div class="formula-box">
+<strong>Expressing division using the minimal operators.</strong>
+$$R \div S = \pi_A(R) - \pi_A\bigl(\ (\pi_A(R) \times S) - R\ \bigr)$$
+<p>Read this as "start from every candidate $a$; throw away the $a$'s for which at least one required $b$ is missing from $R$." Appears often on the exam because the prof may restrict you to the minimal operator set.</p>
+</div>
+
+<!-- ===== THE BIG WORKED EXAMPLE ===== -->
+<div class="hand-calc">
+<h3>Employees who have borrowed ALL books from publisher "Penguin"</h3>
+<p>Schema: <code>employee(empid, name)</code>, <code>borrow(empid, isbn)</code>, <code>books(isbn, title, publisher)</code>.</p>
+
+<div class="step">
+<div class="step-label">Step 1: Build the "checklist"</div>
+<p>We need the set of ISBNs published by Penguin; that is the checklist $S$:</p>
+<p>$$\text{penguinISBN} \leftarrow \pi_{\text{isbn}}(\sigma_{\text{publisher} = \text{'Penguin'}}(\text{books}))$$</p>
+<p>This is a one-column relation; each row is one ISBN we require.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 2: Build the "you-did-it" pairs</div>
+<p>We need (empid, isbn) pairs that record who borrowed what. The <code>borrow</code> relation already has this, but let us narrow to just those two columns to match the division schema:</p>
+<p>$$\text{empBorrowed} \leftarrow \pi_{\text{empid, isbn}}(\text{borrow})$$</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 3: Apply division</div>
+<p>$$\text{answerIDs} \leftarrow \text{empBorrowed} \div \text{penguinISBN}$$</p>
+<p>This returns the set of <code>empid</code>s such that, for every ISBN in <code>penguinISBN</code>, $(\text{empid}, \text{isbn}) \in \text{empBorrowed}$. In plain English: employees who have at least one <code>borrow</code> row for every Penguin book.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 4: Project names (if the question asks)</div>
+<p>$$\pi_{\text{name}}(\text{answerIDs} \bowtie \text{employee})$$</p>
+<p class="result">Final answer: the names of employees who have borrowed every book published by Penguin.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Step 5: What if you cannot use $\div$?</div>
+<p>Expand using the minimal-operator formula:</p>
+<p>$$\text{answerIDs} = \pi_{\text{empid}}(\text{empBorrowed}) - \pi_{\text{empid}}\bigl(\ (\pi_{\text{empid}}(\text{empBorrowed}) \times \text{penguinISBN}) - \text{empBorrowed}\ \bigr)$$</p>
+<p>Parse this: "for every employee, list every Penguin ISBN they would need; subtract the ones they actually borrowed; whatever is left is their list of missing books; if that set is empty, the employee qualifies; so subtract from the universe of employees the ones with any missing book."</p>
+<p class="check">Both forms give the same answer; the expanded form is what you write when the question says "use only $\sigma, \pi, \times, -, \cup, \rho$."</p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern (A1 Q7(b), A2 Q1(b))</h4>
+<p>Any question containing the word <strong>ALL</strong> in the English spec ("all books," "every course," "each branch") is a division problem. The prof has asked this at least twice. Template:</p>
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li>Identify the checklist: what set must the answer cover entirely?</li>
+<li>Build a one-column relation of checklist items via $\sigma$ then $\pi$.</li>
+<li>Build a two-column "did-it" relation from the linking table.</li>
+<li>Divide; project names if required.</li>
+</ol>
+<p>Practice this pattern until it is automatic; it reappears on the final almost every year.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Part H: Aggregation ($\gamma$); Groups and Counts</h2>
+
+<div class="analogy">
+<strong>Physical analogy; sorting a pile of mail by zip code and counting each pile.</strong><br><br>
+Dump a pile of envelopes on the table. Group them by zip code (everything with 90210 in one stack, 60601 in another). For each stack, count the envelopes, or weigh the heaviest, or find the average postage. That is aggregation: partition the tuples by some grouping attribute, then summarize each group with a function. In relational algebra this is written with $\gamma$ (gamma); SQL spells it <code>GROUP BY</code>.
+</div>
+
+<div class="formula-box">
+<strong>Definition: Aggregation.</strong>
+$$_{G_1, \ldots, G_k} \gamma _{F_1(A_1), \ldots, F_m(A_m)}(R)$$
+<dl class="breakdown">
+<dt>$G_1, \ldots, G_k$</dt>
+<dd>Grouping attributes; tuples are partitioned so that tuples agreeing on all $G_i$ go in the same group.</dd>
+<dt>$F_i$</dt>
+<dd>Aggregation function: <code>count</code>, <code>sum</code>, <code>avg</code>, <code>min</code>, <code>max</code>.</dd>
+<dt>$A_i$</dt>
+<dd>Attribute the function is applied to (or $*$ for count of all rows).</dd>
+<dt>Result schema</dt>
+<dd>$(G_1, \ldots, G_k, F_1(A_1), \ldots, F_m(A_m))$.</dd>
+</dl>
+</div>
+
+<div class="hand-calc">
+<h3>How many books each employee has borrowed</h3>
+
+<p>Using the library schema:</p>
+<p>$$_{\text{empid}} \gamma _{\text{count}(\text{isbn}) \to \text{num\_borrowed}}(\text{borrow})$$</p>
+
+<div class="step">
+<div class="step-label">Data</div>
+<p><code>borrow</code>: (E01, 978-A), (E01, 978-B), (E02, 978-A).</p>
+</div>
+
+<div class="step">
+<div class="step-label">Group</div>
+<p>Partition by <code>empid</code>: group E01 = {978-A, 978-B}, group E02 = {978-A}.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Apply count</div>
+<table class="step-table">
+<tr><th>empid</th><th>num_borrowed</th></tr>
+<tr><td>E01</td><td>2</td></tr>
+<tr><td>E02</td><td>1</td></tr>
+</table>
+<p class="result">One row per group; the count is per-group.</p>
+</div>
+</div>
+
+<div class="note">
+<strong>Shorthand used in course.</strong> The prof sometimes writes <code>authorGcount(empid)(borrow &bowtie; books)</code> meaning "group by author, count distinct empid for each." The subscript before $\gamma$ is the grouping; the subscript after is the aggregation. Always name the output column (<code>-&gt;</code>) for clarity.
+</div>
+
+<!-- ============================================================ -->
+<h2>Part I: Putting Operators Together</h2>
+
+<div class="why-box">
+<h3>Why This Matters</h3>
+<p>The whole point of relational algebra is compositionality. Each operator produces a relation, which you feed into the next operator. A complex English spec ("find the names of employees who borrowed at least one book from Penguin published after 2020") decomposes into a pipeline: $\sigma$ on books for Penguin-and-date, $\pi$ to extract isbn, $\bowtie$ with borrow to link to employees, $\bowtie$ with employee to get names, $\pi$ to keep only the name column. Practice translating English → pipeline step by step; the final exam's RA section is almost entirely this.</p>
+</div>
+
+<div class="exam-flag">
+<h4>Exam Pattern</h4>
+<p>Typical marks distribution on an RA question: 2 points for selecting the right base relations, 3 points for choosing the right operators in the right order, 2 points for correct attribute lists in $\pi$, 3 points for writing the final expression cleanly. Always label intermediate relations with a descriptive name; "temp1, temp2" loses clarity marks.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>$\sigma_\theta(R)$ Selection</dt><dd>Rows of $R$ satisfying predicate $\theta$.</dd>
+<dt>$\pi_{A_1,\ldots}(R)$ Projection</dt><dd>Keep only named columns; duplicates removed.</dd>
+<dt>$R \times S$ Cartesian product</dt><dd>Every pair of tuples concatenated; $|R| \cdot |S|$ rows.</dd>
+<dt>$R \bowtie S$ Natural join</dt><dd>Cartesian then equate on shared columns, deduplicate shared columns.</dd>
+<dt>$R \cup S$ Union</dt><dd>All tuples from either; schemas must match.</dd>
+<dt>$R - S$ Difference</dt><dd>Tuples in $R$ not in $S$; schemas must match.</dd>
+<dt>$R \cap S$ Intersection</dt><dd>Tuples in both; equals $R - (R - S)$.</dd>
+<dt>$\rho_S(R)$ Rename</dt><dd>Rename relation or attributes; needed for self-joins.</dd>
+<dt>$R \div S$ Division</dt><dd>All $a$-values in $R$ that appear with every $b$-value in $S$. The ALL-pattern.</dd>
+<dt>$\gamma$ Aggregation</dt><dd>Group by attributes, apply functions (count, sum, avg, min, max) per group.</dd>
+<dt>Minimal operator set</dt><dd>$\{\sigma, \pi, \times, \cup, -, \rho\}$; all other operators derivable.</dd>
+<dt>ALL-pattern</dt><dd>English "all X" or "every X" signals division.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-03-relational-model.html">&larr; 03. Relational Model</a>
+<a class="bottom-nav-btn next" href="cg-05-sql-ddl-basics.html">05. SQL: DDL + Basics &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

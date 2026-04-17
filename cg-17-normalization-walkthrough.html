@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page 17 : Normalization Walkthrough | CPSC 3660 Course Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<span class="tag">PAGE 17; EXAM PREP</span>
+<h1>3 Full Normalization Walkthroughs</h1>
+<p class="subtitle">The A4 Q6 gold standard, the lossless bank example, and the lossy-join counter-example. Every algebra step shown.</p>
+
+<div class="analogy">
+<strong>Physical analogy; splitting a cluttered drawer into two neat drawers.</strong><br><br>
+You have one drawer full of socks, underwear, and T-shirts all jumbled together. Every morning you waste time digging. You split it into two drawers: one for socks, one for shirts + underwear. That split works if every item still has a home (nothing disappears; that is <strong>lossless</strong>), and if the "find me a black sock that matches this one" rule can still be enforced without looking across drawers (that is <strong>dependency preservation</strong>). Normalization is this drawer-splitting exercise, done on tables, driven by functional dependencies.
+</div>
+
+<div class="note">
+<strong>The BCNF pipeline, in one breath.</strong>
+<ol style="margin-left:24px;color:var(--text-secondary);">
+<li>Compute candidate keys of $R$ under $F$.</li>
+<li>For each non-trivial FD $\alpha \to \beta$ in $F$, check whether $\alpha$ is a super key.</li>
+<li>If not, $\alpha \to \beta$ is a BCNF violation; decompose $R$ into $R_1 = (\alpha \cup \beta)$ and $R_2 = R - \beta$.</li>
+<li>Recurse on $R_1$ and $R_2$ until every fragment is in BCNF.</li>
+<li>Check lossless join ($R_1 \cap R_2 \to R_1$ or $\to R_2$).</li>
+<li>Check dependency preservation (each FD lives in some fragment).</li>
+</ol>
+</div>
+
+<!-- ============================================================ -->
+<h2>Walkthrough 1: A4 Q6 (BCNF Gold Standard)</h2>
+
+<div class="formula-box">
+<strong>Given.</strong> $R = (A, B, C, D, E)$ with $F = \{A \to BC,\ CD \to E,\ B \to D,\ E \to A\}$.<br>
+<strong>Tasks.</strong> (a) Find all candidate keys. (b) Check whether $R$ is in BCNF. (c) If not, decompose into BCNF. (d) Is the decomposition lossless? (e) Is it dependency-preserving?
+</div>
+
+<div class="hand-calc">
+<h3>Part (a): candidate keys via attribute closure</h3>
+
+<div class="step">
+<div class="step-label">Check $\{A\}^+$</div>
+<p>Start: $\{A\}$. Apply $A \to BC$: $\{A,B,C\}$. Apply $B \to D$: $\{A,B,C,D\}$. Apply $CD \to E$: $\{A,B,C,D,E\}$.</p>
+<p class="result">$\{A\}^+ = R$; so $\{A\}$ is a candidate key.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Check $\{BC\}^+$</div>
+<p>Start: $\{B,C\}$. Apply $B \to D$: $\{B,C,D\}$. Apply $CD \to E$: $\{B,C,D,E\}$. Apply $E \to A$: $\{A,B,C,D,E\}$.</p>
+<p class="result">$\{BC\}^+ = R$; $\{BC\}$ is a candidate key. Neither $B$ alone nor $C$ alone yields $R$, so it is minimal.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Check $\{CD\}^+$</div>
+<p>Start: $\{C,D\}$. Apply $CD \to E$: $\{C,D,E\}$. Apply $E \to A$: $\{A,C,D,E\}$. Apply $A \to BC$: $\{A,B,C,D,E\}$.</p>
+<p class="result">$\{CD\}^+ = R$; $\{CD\}$ is a candidate key.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Check $\{E\}^+$</div>
+<p>Start: $\{E\}$. Apply $E \to A$: $\{A,E\}$. Apply $A \to BC$: $\{A,B,C,E\}$. Apply $B \to D$: $\{A,B,C,D,E\}$.</p>
+<p class="result">$\{E\}^+ = R$; $\{E\}$ is a candidate key.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Collect the candidate keys</div>
+<p class="result">Candidate keys: $\{A\},\ \{BC\},\ \{CD\},\ \{E\}$. Prime attributes: $A, B, C, D, E$ (all of them). Non-prime: none.</p>
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>Part (b): check BCNF</h3>
+
+<div class="step">
+<div class="step-label">Check each FD in $F$</div>
+<table class="step-table">
+<tr><th>FD</th><th>$\alpha$</th><th>$\alpha^+$</th><th>Super key?</th><th>Status</th></tr>
+<tr><td>$A \to BC$</td><td>$A$</td><td>$\{A,B,C,D,E\}$</td><td>Yes</td><td>OK</td></tr>
+<tr><td>$CD \to E$</td><td>$CD$</td><td>$\{A,B,C,D,E\}$</td><td>Yes</td><td>OK</td></tr>
+<tr><td>$B \to D$</td><td>$B$</td><td>$\{B,D\}$</td><td>No</td><td><span class="red">Violation</span></td></tr>
+<tr><td>$E \to A$</td><td>$E$</td><td>$\{A,B,C,D,E\}$</td><td>Yes</td><td>OK</td></tr>
+</table>
+<p class="result">$B \to D$ is the BCNF violation; $B$ is not a super key.</p>
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>Part (c): decompose using the violation</h3>
+
+<div class="step">
+<div class="step-label">Apply the BCNF decomposition rule</div>
+<p>Given violation $\alpha \to \beta$ where $\alpha = B$, $\beta = D$. Form:</p>
+<p>$R_1 = \alpha \cup \beta = \{B, D\}$</p>
+<p>$R_2 = R - \beta = \{A, B, C, E\}$</p>
+</div>
+
+<div class="step">
+<div class="step-label">Check $R_1 = (B, D)$ for BCNF</div>
+<p>FDs projected onto $R_1$: $\{B \to D\}$. $B^+_{R_1} = \{B,D\} = R_1$, so $B$ is super key of $R_1$. BCNF satisfied. $\checkmark$</p>
+</div>
+
+<div class="step">
+<div class="step-label">Check $R_2 = (A, B, C, E)$ for BCNF</div>
+<p>Project FDs onto $R_2$: <code>A → BC</code> (both B and C are in $R_2$), <code>E → A</code> (A in $R_2$). Also derivable: $BC \to E$ in $R_2$ (since $BC \to D$ via $B \to D$, and $CD \to E$ chains; though $D$ is outside $R_2$, the implication $BC \to E$ still holds for $R_2$-tuples that extend to full $R$-tuples).</p>
+<p>Candidate keys of $R_2$: $\{A\}$ (from $A \to BC$, then $BC \to E$, reaching $R_2$); $\{E\}$ (from $E \to A$); $\{BC\}$ (closes to $R_2$). Each determining set in the projected FDs is a super key. BCNF satisfied. $\checkmark$</p>
+</div>
+
+<div class="step">
+<div class="step-label">Final decomposition</div>
+<p class="result">$R_1 = (B, D)$ and $R_2 = (A, B, C, E)$, both in BCNF.</p>
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>Part (d): lossless-join check</h3>
+
+<div class="step">
+<div class="step-label">Compute the common attributes</div>
+<p>$R_1 \cap R_2 = \{B\}$.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Check $R_1 \cap R_2 \to R_1$ (or $\to R_2$) under $F$</div>
+<p>Does $B \to R_1$? That is, does $B \to \{B, D\}$? Yes, since $B \to D \in F$ and trivially $B \to B$. So the shared attribute $B$ functionally determines the smaller fragment $R_1$.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Conclusion</div>
+<p class="result">The decomposition is <span class="hl">lossless</span>. $R_1 \bowtie R_2 = R$ for every legal instance; no spurious tuples. $\checkmark$</p>
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>Part (e): dependency-preservation check</h3>
+
+<div class="step">
+<div class="step-label">Track each FD</div>
+<table class="step-table">
+<tr><th>FD</th><th>Attrs</th><th>Fragment containing all attrs</th><th>Preserved?</th></tr>
+<tr><td>$A \to BC$</td><td>$\{A,B,C\}$</td><td>$R_2 = \{A,B,C,E\}$</td><td>Yes</td></tr>
+<tr><td>$CD \to E$</td><td>$\{C,D,E\}$</td><td>Split! $D \in R_1$, $C,E \in R_2$</td><td><span class="red">No</span></td></tr>
+<tr><td>$B \to D$</td><td>$\{B,D\}$</td><td>$R_1 = \{B,D\}$</td><td>Yes</td></tr>
+<tr><td>$E \to A$</td><td>$\{A,E\}$</td><td>$R_2 = \{A,B,C,E\}$</td><td>Yes</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">Is $CD \to E$ recoverable via the union of projected FDs?</div>
+<p>No single fragment contains $C$, $D$, and $E$ together. The projection of $F$ onto $R_1$ gives $\{B \to D\}$; onto $R_2$ gives FDs on $\{A,B,C,E\}$. Neither can re-derive $CD \to E$ without inspecting tuples across both fragments.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Conclusion</div>
+<p class="result">The decomposition is <span class="red">NOT dependency-preserving</span>. The FD $CD \to E$ cannot be enforced by checking each fragment in isolation.</p>
+</div>
+
+<div class="check">This is the classic BCNF trade-off; we always get lossless, but dependency preservation is not guaranteed. The prof explicitly flags this on A4.</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors A4 Q6 verbatim; the showpiece 15-mark question</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Walkthrough 2: Lossless Bank Example (Week 14)</h2>
+
+<div class="formula-box">
+<strong>Given.</strong> $borrow\_loan(customerID,\ loan\_number,\ amount)$ with FD $loan\_number \to amount$.<br>
+<strong>Decomposition.</strong> $R_1 = (customerID, loan\_number)$, $R_2 = (loan\_number, amount)$.<br>
+<strong>Task.</strong> Verify the decomposition is lossless by computing $R_1 \bowtie R_2$ on a concrete instance.
+</div>
+
+<div class="hand-calc">
+<h3>Theoretical check</h3>
+<div class="step">
+<div class="step-label">Common attributes</div>
+<p>$R_1 \cap R_2 = \{loan\_number\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Does the common attribute determine a fragment?</div>
+<p>$loan\_number \to amount$ given. So $loan\_number \to R_2 = \{loan\_number, amount\}$. $\checkmark$ Lossless.</p>
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>Concrete instance check</h3>
+
+<div class="step">
+<div class="step-label">Original instance of borrow_loan</div>
+<table class="step-table">
+<tr><th>customerID</th><th>loan_number</th><th>amount</th></tr>
+<tr><td>C01</td><td>L-100</td><td>5000</td></tr>
+<tr><td>C02</td><td>L-100</td><td>5000</td></tr>
+<tr><td>C03</td><td>L-200</td><td>8000</td></tr>
+<tr><td>C01</td><td>L-300</td><td>3000</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">$R_1$ (customerID, loan_number)</div>
+<table class="step-table">
+<tr><th>customerID</th><th>loan_number</th></tr>
+<tr><td>C01</td><td>L-100</td></tr>
+<tr><td>C02</td><td>L-100</td></tr>
+<tr><td>C03</td><td>L-200</td></tr>
+<tr><td>C01</td><td>L-300</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">$R_2$ (loan_number, amount)</div>
+<table class="step-table">
+<tr><th>loan_number</th><th>amount</th></tr>
+<tr><td>L-100</td><td>5000</td></tr>
+<tr><td>L-200</td><td>8000</td></tr>
+<tr><td>L-300</td><td>3000</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">$R_1 \bowtie R_2$ on loan_number</div>
+<table class="step-table">
+<tr><th>customerID</th><th>loan_number</th><th>amount</th></tr>
+<tr><td>C01</td><td>L-100</td><td>5000</td></tr>
+<tr><td>C02</td><td>L-100</td><td>5000</td></tr>
+<tr><td>C03</td><td>L-200</td><td>8000</td></tr>
+<tr><td>C01</td><td>L-300</td><td>3000</td></tr>
+</table>
+<p class="result">Identical to the original 4 rows. <span class="hl">Lossless confirmed.</span></p>
+</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors Week 14 slide example; the "happy path" decomposition</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Walkthrough 3: Lossy-Join Counter-Example (Week 14)</h2>
+
+<div class="formula-box">
+<strong>Given.</strong> $Employee(EmployeeID,\ Project,\ Branch)$ with FDs $EmployeeID \to Branch$ and $Project \to Branch$.<br>
+<strong>Decomposition.</strong> $R_1 = (EmployeeID, Branch)$, $R_2 = (Project, Branch)$.<br>
+<strong>Task.</strong> Show the decomposition is <em>lossy</em>; the natural join produces spurious tuples.
+</div>
+
+<div class="hand-calc">
+<h3>Theoretical check</h3>
+<div class="step">
+<div class="step-label">Common attributes</div>
+<p>$R_1 \cap R_2 = \{Branch\}$.</p>
+</div>
+<div class="step">
+<div class="step-label">Does $Branch \to R_1$ or $\to R_2$ hold?</div>
+<p>$Branch \to EmployeeID$? No; one branch can host many employees. $Branch \to Project$? No; one branch can host many projects. Neither direction holds.</p>
+</div>
+<div class="step">
+<div class="step-label">Conclusion</div>
+<p class="result">Decomposition is <span class="red">LOSSY</span>; natural join will invent spurious tuples.</p>
+</div>
+</div>
+
+<div class="hand-calc">
+<h3>Concrete instance demonstration</h3>
+
+<div class="step">
+<div class="step-label">Original instance (5 rows)</div>
+<table class="step-table">
+<tr><th>EmployeeID</th><th>Project</th><th>Branch</th></tr>
+<tr><td>B</td><td>Mars</td><td>LA</td></tr>
+<tr><td>G</td><td>Jupiter</td><td>SJ</td></tr>
+<tr><td>G</td><td>Venus</td><td>SJ</td></tr>
+<tr><td>H</td><td>Saturn</td><td>SJ</td></tr>
+<tr><td>H</td><td>Venus</td><td>SJ</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">Project onto $R_1$ = (EmployeeID, Branch)</div>
+<table class="step-table">
+<tr><th>EmployeeID</th><th>Branch</th></tr>
+<tr><td>B</td><td>LA</td></tr>
+<tr><td>G</td><td>SJ</td></tr>
+<tr><td>H</td><td>SJ</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">Project onto $R_2$ = (Project, Branch)</div>
+<table class="step-table">
+<tr><th>Project</th><th>Branch</th></tr>
+<tr><td>Mars</td><td>LA</td></tr>
+<tr><td>Jupiter</td><td>SJ</td></tr>
+<tr><td>Venus</td><td>SJ</td></tr>
+<tr><td>Saturn</td><td>SJ</td></tr>
+</table>
+</div>
+
+<div class="step">
+<div class="step-label">Compute $R_1 \bowtie R_2$ on Branch</div>
+<p>LA in $R_1$ matches LA in $R_2$: $(B, Mars, LA)$.<br>
+SJ in $R_1$ has 2 rows (G, H); SJ in $R_2$ has 3 rows (Jupiter, Venus, Saturn). So the SJ block contributes $2 \times 3 = 6$ joined rows.</p>
+<table class="step-table">
+<tr><th>EmployeeID</th><th>Project</th><th>Branch</th><th>Spurious?</th></tr>
+<tr><td>B</td><td>Mars</td><td>LA</td><td>No (original)</td></tr>
+<tr><td>G</td><td>Jupiter</td><td>SJ</td><td>No (original)</td></tr>
+<tr><td>G</td><td>Venus</td><td>SJ</td><td>No (original)</td></tr>
+<tr><td>G</td><td>Saturn</td><td>SJ</td><td><span class="red">SPURIOUS</span></td></tr>
+<tr><td>H</td><td>Jupiter</td><td>SJ</td><td><span class="red">SPURIOUS</span></td></tr>
+<tr><td>H</td><td>Venus</td><td>SJ</td><td>No (original)</td></tr>
+<tr><td>H</td><td>Saturn</td><td>SJ</td><td>No (original)</td></tr>
+</table>
+<p class="result">7 rows after join; <strong>2 are spurious</strong>. The original had only 5. $(G, Saturn, SJ)$ and $(H, Jupiter, SJ)$ appear out of nowhere.</p>
+</div>
+
+<div class="step">
+<div class="step-label">Why it happened</div>
+<p>Branch is the only shared attribute, and Branch does not determine either EmployeeID or Project. Multiple employees and multiple projects share Branch SJ; natural join combines every combination, not just the ones that were true.</p>
+</div>
+
+<div class="check">Moral: for a decomposition to be lossless, the shared attributes must functionally determine at least one of the fragments. Here Branch determines neither, so the join invents pairings that never existed.</div>
+</div>
+
+<div class="exam-flag">
+<h4>Mirrors Week 14 slide; the textbook lossy counter-example</h4>
+</div>
+
+<!-- ============================================================ -->
+<h2>Decision tree: lossless vs dependency-preserving</h2>
+
+<div class="formula-box">
+<strong>Fast checks.</strong>
+<dl class="breakdown">
+<dt>Lossless?</dt>
+<dd>Compute $R_1 \cap R_2$; ask if it is a super key of $R_1$ OR of $R_2$ under $F$. If yes &rarr; lossless. If no &rarr; lossy.</dd>
+<dt>Dependency-preserving?</dt>
+<dd>For each FD $\alpha \to \beta$ in $F$, check whether there exists a fragment containing $\alpha \cup \beta$. If every FD lives entirely inside some fragment, preserved. If any FD is split across fragments, not preserved.</dd>
+<dt>BCNF guarantees</dt>
+<dd>Always lossless (by construction of the decomposition rule). May sacrifice dependency preservation. 3NF always preserves dependencies but may not reach BCNF.</dd>
+</dl>
+</div>
+
+<div class="why-box">
+<h3>What the grader wants to see</h3>
+<p>For 15 marks on the BCNF showpiece, write out: (1) each candidate-key closure line-by-line, (2) the FD violation table like the one in Walkthrough 1, (3) the decomposition with both fragments named, (4) the lossless check as an algebraic statement ($R_1 \cap R_2 = \{\ldots\}$, then show the FD that proves it), (5) the dependency-preservation check as a table per FD. If you skip the tables and just write "lossless, dep-preserving," you will lose half the marks.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="glossary">
+<h3>Glossary</h3>
+<dl>
+<dt>Attribute closure $\alpha^+$</dt><dd>The set of attributes functionally determined by $\alpha$ under $F$; computed by iteratively applying FDs until no change.</dd>
+<dt>Candidate key</dt><dd>Minimal attribute set $K$ with $K^+ = R$.</dd>
+<dt>Super key</dt><dd>Any attribute set whose closure is $R$; not necessarily minimal.</dd>
+<dt>Prime attribute</dt><dd>Attribute appearing in at least one candidate key.</dd>
+<dt>BCNF violation</dt><dd>Non-trivial FD $\alpha \to \beta$ with $\alpha$ not a super key.</dd>
+<dt>Lossless decomposition</dt><dd>Natural-join back produces no spurious tuples; equivalent to common attrs determining one fragment.</dd>
+<dt>Dependency preservation</dt><dd>Every FD in $F$ can be checked by inspecting one fragment; no cross-fragment joins needed.</dd>
+<dt>Spurious tuple</dt><dd>A tuple that appears in $R_1 \bowtie R_2$ but was not in the original $R$.</dd>
+</dl>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+<div class="bottom-nav-row">
+<a class="bottom-nav-btn prev" href="cg-16-er-walkthrough.html">&larr; 16. ER Walkthrough</a>
+<a class="bottom-nav-btn next" href="cg-18-paper-exam-techniques.html">18. Paper Exam Techniques &rarr;</a>
+</div>
+<a class="bottom-nav-index" href="index.html">Back to Index</a>
+</div>
+
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>
