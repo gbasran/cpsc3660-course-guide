@@ -50,6 +50,14 @@
     html += '</a>';
   }
 
+  /* Downloads tab at the end */
+  html += '<div class="sidebar-section">Resources</div>';
+  var dlActive = (currentFile === "downloads.html") ? " active" : "";
+  html += '<a class="sidebar-link dl' + dlActive + '" href="downloads.html">';
+  html += '<span class="sidebar-num">&#11123;</span>';
+  html += '<span class="sidebar-title">Downloads</span>';
+  html += '</a>';
+
   html += '</div>';
 
   /* Toggle button for mobile */
