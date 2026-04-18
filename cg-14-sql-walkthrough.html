@@ -29,6 +29,10 @@ A cooking class does not just give you the recipe; the chef stands next to you, 
 <strong>Employee-Works-Company:</strong> <code>employee(employee_name, employee_street, employee_city)</code>, <code>works(employee_name, company_name, employee_salary)</code>, <code>company(company_name, company_city)</code>, <code>manages(employee_name, manager_name)</code>.
 </div>
 
+<div class="note">
+<strong>How to read this page.</strong> The final is paper-based; every problem now shows a 3-stage paper workflow: (1) <em>mental steps</em> (what you decide before pen touches paper: which tables, what filter, do I need DISTINCT / aggregation / correlation), (2) <em>scratch work</em> (margin shorthand; table letters, join keys, filter condition), (3) <em>answer booklet</em> (the final query written neatly on ruled paper with keywords underlined like you would underline with pen; every <code>and</code> on its own indented line; short aliases; final semicolon visible). The standard textbook walkthrough follows each answer for deeper explanation.
+</div>
+
 <!-- ============================================================ -->
 <h2>Problem 1: Simple SELECT + WHERE (Library)</h2>
 
@@ -36,11 +40,25 @@ A cooking class does not just give you the recipe; the chef stands next to you, 
 <strong>Problem (2 marks; easy).</strong> Find the names of all employees over age 30.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-select name<br>
-from employee<br>
-where age &gt; 30;
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> I need <code>name</code>; it lives in <code>employee</code>. One table, no joins.</div>
+<div class="paper-step"><span class="n">Step 2</span> Filter: <code>age &gt; 30</code> on the same table.</div>
+<div class="paper-step"><span class="n">Step 3</span> Project only <code>name</code>; do NOT write <code>select *</code>.</div>
+</div>
+
+<div class="scratch-work">
+1 table: E (employee)<br>
+filter: E.age &gt; 30<br>
+project: E.name<br>
+<strong>→ no join, no distinct needed</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q1:</span> <span class="mnote">// employees over 30</span><br>
+<br>
+<span class="kw">select</span> name<br>
+<span class="kw">from</span> employee<br>
+<span class="kw">where</span> age <span class="box">&gt; 30</span>;
 </div>
 
 <div class="hand-calc">
@@ -70,13 +88,28 @@ where age &gt; 30;
 <strong>Problem (3 marks; medium).</strong> Find the names of employees who have borrowed a book titled "Harry Potter".
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-select distinct e.name<br>
-from employee e, borrow b, books k<br>
-where e.empid = b.empid<br>
-&nbsp;&nbsp;and b.isbn = k.isbn<br>
-&nbsp;&nbsp;and k.title = 'Harry Potter';
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Need <code>name</code> (from employee) AND filter by <code>title</code> (from books); bridge is <code>borrow</code>.</div>
+<div class="paper-step"><span class="n">Step 2</span> Join keys: employee.empid = borrow.empid; borrow.isbn = books.isbn.</div>
+<div class="paper-step"><span class="n">Step 3</span> Filter: <code>title = 'Harry Potter'</code>. Same book borrowed twice → use <code>distinct</code>.</div>
+</div>
+
+<div class="scratch-work">
+3 tables: E, B (borrow), K (books)<br>
+E.empid = B.empid<br>
+B.isbn = K.isbn<br>
+filter: K.title = 'Harry Potter'<br>
+<strong>→ 3 tables, 2 joins, WHERE filter, DISTINCT names</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q2:</span> <span class="mnote">// employees who borrowed "Harry Potter"</span><br>
+<br>
+<span class="kw">select distinct</span> E.name<br>
+<span class="kw">from</span> employee E, borrow B, books K<br>
+<span class="kw">where</span> E.empid = B.empid<br>
+<span class="indent-1"><span class="kw">and</span> B.isbn = K.isbn</span><br>
+<span class="indent-1"><span class="kw">and</span> K.title = <span class="box">'Harry Potter'</span>;</span>
 </div>
 
 <div class="hand-calc">
@@ -110,11 +143,25 @@ where e.empid = b.empid<br>
 <strong>Problem (3 marks; medium).</strong> For each publisher, count the number of books.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-select publisher, count(*) as book_count<br>
-from books<br>
-group by publisher;
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "For each" = <code>group by</code>. One table: <code>books</code>.</div>
+<div class="paper-step"><span class="n">Step 2</span> Group by <code>publisher</code>; aggregate with <code>count(*)</code> inside each group.</div>
+<div class="paper-step"><span class="n">Step 3</span> Alias the count so the column has a clean name.</div>
+</div>
+
+<div class="scratch-work">
+1 table: K (books)<br>
+group: K.publisher<br>
+aggregate: count(*)<br>
+<strong>→ "for each" = GROUP BY</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q3:</span> <span class="mnote">// count books per publisher</span><br>
+<br>
+<span class="kw">select</span> publisher, <span class="kw">count</span>(*) <span class="kw">as</span> book_count<br>
+<span class="kw">from</span> books<br>
+<span class="kw">group by</span> <span class="box">publisher</span>;
 </div>
 
 <div class="hand-calc">
@@ -144,12 +191,27 @@ group by publisher;
 <strong>Problem (3 marks; medium; 95% guaranteed on the final).</strong> Find the branches where the average account balance is greater than 10,000.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-select branch_name, avg(balance) as avg_bal<br>
-from account<br>
-group by branch_name<br>
-having avg(balance) &gt; 10000;
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "Per branch" = group by <code>branch_name</code>; aggregate over <code>balance</code>.</div>
+<div class="paper-step"><span class="n">Step 2</span> Threshold is on an aggregate → filter belongs in <code>having</code>, not <code>where</code>.</div>
+<div class="paper-step"><span class="n">Step 3</span> Remember the rule: WHERE runs before grouping, HAVING after.</div>
+</div>
+
+<div class="scratch-work">
+1 table: A (account)<br>
+group: A.branch_name<br>
+agg: avg(balance)<br>
+<span class="struck">where avg(...) &gt; 10000</span> <span class="mnote">// illegal</span><br>
+<strong>→ HAVING avg(balance) &gt; 10000</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q4:</span> <span class="mnote">// the guaranteed HAVING pattern</span><br>
+<br>
+<span class="kw">select</span> branch_name, <span class="kw">avg</span>(balance) <span class="kw">as</span> avg_bal<br>
+<span class="kw">from</span> account<br>
+<span class="kw">group by</span> branch_name<br>
+<span class="kw">having</span> <span class="kw">avg</span>(balance) <span class="box">&gt; 10000</span>;
 </div>
 
 <div class="hand-calc">
@@ -179,14 +241,28 @@ having avg(balance) &gt; 10000;
 <strong>Problem (4 marks; hard).</strong> Find the names of employees who earn more than the average salary at their own company.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-select w.employee_name<br>
-from works w<br>
-where w.employee_salary &gt; (<br>
-&nbsp;&nbsp;select avg(w2.employee_salary)<br>
-&nbsp;&nbsp;from works w2<br>
-&nbsp;&nbsp;where w2.company_name = w.company_name<br>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "Their own company" = per-row reference; subquery must depend on outer row (correlated).</div>
+<div class="paper-step"><span class="n">Step 2</span> Both sides use <code>works</code>; need two aliases W and W2.</div>
+<div class="paper-step"><span class="n">Step 3</span> Don't join company; <code>works</code> already has company_name. Avoid over-joining.</div>
+</div>
+
+<div class="scratch-work">
+outer: W (works)<br>
+inner: avg of W2.salary where W2.company = W.company <span class="mnote">// correlation</span><br>
+compare: W.salary &gt; inner<br>
+<strong>→ correlated subquery, NOT uncorrelated</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q5:</span> <span class="mnote">// earn &gt; avg at own company (correlated)</span><br>
+<br>
+<span class="kw">select</span> W.employee_name<br>
+<span class="kw">from</span> works W<br>
+<span class="kw">where</span> W.employee_salary &gt; (<br>
+<span class="indent-1"><span class="kw">select</span> <span class="kw">avg</span>(W2.employee_salary)</span><br>
+<span class="indent-1"><span class="kw">from</span> works W2</span><br>
+<span class="indent-1"><span class="kw">where</span> W2.company_name = <span class="box">W.company_name</span></span><br>
 );
 </div>
 
@@ -221,20 +297,36 @@ where w.employee_salary &gt; (<br>
 <strong>Problem (4 marks; hard).</strong> Find the names of employees who have borrowed every book published by "Springer".
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-select e.name<br>
-from employee e<br>
-where not exists (<br>
-&nbsp;&nbsp;select 1<br>
-&nbsp;&nbsp;from books k<br>
-&nbsp;&nbsp;where k.publisher = 'Springer'<br>
-&nbsp;&nbsp;and not exists (<br>
-&nbsp;&nbsp;&nbsp;&nbsp;select 1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;from borrow b<br>
-&nbsp;&nbsp;&nbsp;&nbsp;where b.empid = e.empid<br>
-&nbsp;&nbsp;&nbsp;&nbsp;and b.isbn = k.isbn<br>
-&nbsp;&nbsp;)<br>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "Every" = universal quantifier; translate to double negation: "there is no Springer book this employee did NOT borrow."</div>
+<div class="paper-step"><span class="n">Step 2</span> Outer filter: employee E; keep if outer NOT EXISTS holds.</div>
+<div class="paper-step"><span class="n">Step 3</span> Middle: iterate over Springer books K. Inner: does E have a borrow row for K?</div>
+<div class="paper-step"><span class="n">Step 4</span> Prof prefers NOT EXISTS (mirrors RA division) over <code>= all</code> / count tricks.</div>
+</div>
+
+<div class="scratch-work">
+"every" → $\forall$ → double $\neg \exists$<br>
+outer: E from employee<br>
+middle: K from books, K.publisher = 'Springer'<br>
+inner: B in borrow, B.empid = E.empid AND B.isbn = K.isbn<br>
+<strong>→ NOT EXISTS (NOT EXISTS ...) — RA division pattern</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q6:</span> <span class="mnote">// borrowed every Springer book = division</span><br>
+<br>
+<span class="kw">select</span> E.name<br>
+<span class="kw">from</span> employee E<br>
+<span class="kw">where</span> <span class="kw">not exists</span> (<br>
+<span class="indent-1"><span class="kw">select</span> 1</span><br>
+<span class="indent-1"><span class="kw">from</span> books K</span><br>
+<span class="indent-1"><span class="kw">where</span> K.publisher = <span class="box">'Springer'</span></span><br>
+<span class="indent-1"><span class="kw">and</span> <span class="kw">not exists</span> (</span><br>
+<span class="indent-2"><span class="kw">select</span> 1</span><br>
+<span class="indent-2"><span class="kw">from</span> borrow B</span><br>
+<span class="indent-2"><span class="kw">where</span> B.empid = E.empid</span><br>
+<span class="indent-2"><span class="kw">and</span> B.isbn = K.isbn</span><br>
+<span class="indent-1">)</span><br>
 );
 </div>
 
@@ -269,13 +361,26 @@ where not exists (<br>
 <strong>Problem (3 marks; medium).</strong> Find the names of customers who have an account but no loan.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-select distinct customer_name<br>
-from depositor<br>
-where customer_name not in (<br>
-&nbsp;&nbsp;select customer_name<br>
-&nbsp;&nbsp;from borrower<br>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Account holders = <code>depositor</code>; loan holders = <code>borrower</code>.</div>
+<div class="paper-step"><span class="n">Step 2</span> "Account AND no loan" = set difference on <code>customer_name</code>.</div>
+<div class="paper-step"><span class="n">Step 3</span> Express as <code>not in</code> subquery (or equivalently <code>except</code>).</div>
+</div>
+
+<div class="scratch-work">
+D = depositor, Br = borrower<br>
+D − Br on customer_name<br>
+<strong>→ NOT IN subquery (or EXCEPT)</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q7:</span> <span class="mnote">// account but no loan</span><br>
+<br>
+<span class="kw">select distinct</span> customer_name<br>
+<span class="kw">from</span> depositor<br>
+<span class="kw">where</span> customer_name <span class="kw">not in</span> (<br>
+<span class="indent-1"><span class="kw">select</span> customer_name</span><br>
+<span class="indent-1"><span class="kw">from</span> borrower</span><br>
 );
 </div>
 
@@ -306,16 +411,32 @@ where customer_name not in (<br>
 <strong>Problem (3 marks; medium).</strong> Create a view $savings\_customers\_no\_loan$ listing the names of customers who have a savings account (branch "Brighton") but no loan at any branch.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL</div>
-create view savings_customers_no_loan as<br>
-select distinct d.customer_name<br>
-from depositor d, account a<br>
-where d.account_number = a.account_number<br>
-&nbsp;&nbsp;and a.branch_name = 'Brighton'<br>
-&nbsp;&nbsp;and d.customer_name not in (<br>
-&nbsp;&nbsp;&nbsp;&nbsp;select customer_name from borrower<br>
-&nbsp;&nbsp;);
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> View syntax: <code>create view &lt;name&gt; as &lt;select&gt;</code>.</div>
+<div class="paper-step"><span class="n">Step 2</span> Depositor has customer_name; branch lives in account. Join D to A on account_number.</div>
+<div class="paper-step"><span class="n">Step 3</span> Filter: <code>a.branch_name = 'Brighton'</code> AND NOT IN borrower (Problem 7 trick).</div>
+</div>
+
+<div class="scratch-work">
+view wraps a SELECT<br>
+2 tables: D (depositor), A (account)<br>
+D.account_number = A.account_number<br>
+A.branch_name = 'Brighton'<br>
+exclude borrower (NOT IN)<br>
+<strong>→ 2 joins + anti-join</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q8:</span> <span class="mnote">// savings (Brighton) customers with no loan</span><br>
+<br>
+<span class="kw">create view</span> savings_customers_no_loan <span class="kw">as</span><br>
+<span class="kw">select distinct</span> D.customer_name<br>
+<span class="kw">from</span> depositor D, account A<br>
+<span class="kw">where</span> D.account_number = A.account_number<br>
+<span class="indent-1"><span class="kw">and</span> A.branch_name = <span class="box">'Brighton'</span></span><br>
+<span class="indent-1"><span class="kw">and</span> D.customer_name <span class="kw">not in</span> (</span><br>
+<span class="indent-2"><span class="kw">select</span> customer_name <span class="kw">from</span> borrower</span><br>
+<span class="indent-1">);</span>
 </div>
 
 <div class="hand-calc">
@@ -347,18 +468,30 @@ where d.account_number = a.account_number<br>
 (b) Find customers who have an account but <em>no</em> loan.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Part (a): INTERSECT</div>
-(select customer_name from depositor)<br>
-intersect<br>
-(select customer_name from borrower);
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Both sides must project the same column(s); here both project <code>customer_name</code>.</div>
+<div class="paper-step"><span class="n">Step 2</span> "Both" → INTERSECT; "A but not B" → EXCEPT.</div>
+<div class="paper-step"><span class="n">Step 3</span> SQL INTERSECT/EXCEPT remove duplicates by default (unlike UNION ALL).</div>
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Part (b): EXCEPT</div>
-(select customer_name from depositor)<br>
-except<br>
-(select customer_name from borrower);
+<div class="scratch-work">
+(a) D ∩ Br on customer_name → INTERSECT<br>
+(b) D − Br on customer_name → EXCEPT<br>
+<strong>→ same column shape both sides</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q9:</span><br>
+<h4>Part (a):</h4>
+(<span class="kw">select</span> customer_name <span class="kw">from</span> depositor)<br>
+<span class="kw">intersect</span><br>
+(<span class="kw">select</span> customer_name <span class="kw">from</span> borrower);
+<hr class="answer-sep">
+<h4>Part (b):</h4>
+(<span class="kw">select</span> customer_name <span class="kw">from</span> depositor)<br>
+<span class="kw">except</span><br>
+(<span class="kw">select</span> customer_name <span class="kw">from</span> borrower);
+<br><span class="mnote">// INTERSECT/EXCEPT remove dups by default</span>
 </div>
 
 <div class="hand-calc">
@@ -388,20 +521,35 @@ except<br>
 <strong>Problem (5 marks; hard).</strong> Find the names of all companies located in <em>every</em> city where "IBM" is located.
 </div>
 
-<div class="algo-box">
-<div class="algo-title">Model SQL (NOT EXISTS form)</div>
-select distinct c.company_name<br>
-from company c<br>
-where not exists (<br>
-&nbsp;&nbsp;select 1<br>
-&nbsp;&nbsp;from company ibm<br>
-&nbsp;&nbsp;where ibm.company_name = 'IBM'<br>
-&nbsp;&nbsp;and not exists (<br>
-&nbsp;&nbsp;&nbsp;&nbsp;select 1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;from company c2<br>
-&nbsp;&nbsp;&nbsp;&nbsp;where c2.company_name = c.company_name<br>
-&nbsp;&nbsp;&nbsp;&nbsp;and c2.company_city = ibm.company_city<br>
-&nbsp;&nbsp;)<br>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "Every" again → double NOT EXISTS (RA division).</div>
+<div class="paper-step"><span class="n">Step 2</span> Schema note: <code>company(company_name, company_city)</code> can have multiple rows per company (one per city).</div>
+<div class="paper-step"><span class="n">Step 3</span> Three aliases: outer candidate <code>c</code>, IBM's cities <code>ibm</code>, candidate's city rows <code>c2</code>.</div>
+<div class="paper-step"><span class="n">Step 4</span> Read literally: "no IBM city exists where C does NOT have a row."</div>
+</div>
+
+<div class="scratch-work">
+outer: C from company (candidate)<br>
+middle: ibm from company, ibm.name = 'IBM' <span class="mnote">// iterate IBM's cities</span><br>
+inner: C2 from company, C2.name = C.name AND C2.city = ibm.city<br>
+<strong>→ $\forall$ ibm-city $\exists$ C-row with that city</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q10:</span> <span class="mnote">// in every city where IBM is — nested NOT EXISTS</span><br>
+<br>
+<span class="kw">select distinct</span> C.company_name<br>
+<span class="kw">from</span> company C<br>
+<span class="kw">where</span> <span class="kw">not exists</span> (<br>
+<span class="indent-1"><span class="kw">select</span> 1</span><br>
+<span class="indent-1"><span class="kw">from</span> company ibm</span><br>
+<span class="indent-1"><span class="kw">where</span> ibm.company_name = <span class="box">'IBM'</span></span><br>
+<span class="indent-1"><span class="kw">and</span> <span class="kw">not exists</span> (</span><br>
+<span class="indent-2"><span class="kw">select</span> 1</span><br>
+<span class="indent-2"><span class="kw">from</span> company C2</span><br>
+<span class="indent-2"><span class="kw">where</span> C2.company_name = C.company_name</span><br>
+<span class="indent-2"><span class="kw">and</span> C2.company_city = ibm.company_city</span><br>
+<span class="indent-1">)</span><br>
 );
 </div>
 

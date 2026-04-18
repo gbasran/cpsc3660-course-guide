@@ -54,6 +54,110 @@ A pathologist does not stare at an X-ray and freestyle a diagnosis; she follows 
 </ul>
 </div>
 
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Underline nouns in the prompt: Customer, Car, Insurance. Each has its own attributes &rarr; these are <strong>entity sets</strong>.</div>
+<div class="paper-step"><span class="n">Step 2</span> Verbs describe relationships: <em>owns</em> (Customer&ndash;Car), <em>insured_by</em> (Car&ndash;Insurance). Each becomes a diamond.</div>
+<div class="paper-step"><span class="n">Step 3</span> Ask the cardinality question from each side. "How many cars can one customer own?" &rarr; many. "How many owners can one car have?" &rarr; one. So Customer 1 &mdash; N Car.</div>
+<div class="paper-step"><span class="n">Step 4</span> Same for insurance: "Can one car have many policies?" yes. "Can one policy cover many cars?" yes. So Car M &mdash; N Insurance.</div>
+<div class="paper-step"><span class="n">Step 5</span> Identify PKs (CID, VID, IID); underline each on paper. No weak entities here (every noun has its own key). No ISA.</div>
+<div class="paper-step"><span class="n">Step 6</span> Map to relations: 1:N collapses into the many side; M:N gets its own junction table.</div>
+</div>
+
+<div class="scratch-work">
+<strong>Entities:</strong> Customer, Car, Insurance<br>
+<strong>Rels:</strong> owns (Cust-Car), insured_by (Car-Ins)<br>
+<strong>Cards:</strong> Cust 1--N Car ; Car M--N Ins<br>
+<strong>Keys:</strong> CID, VID, IID (all underlined)<br>
+<strong>Attrs:</strong> Cust{name, phone, email} ; Car{brand, year, price} ; Ins{type, price, start, end}<br>
+<span class="arrow-line">&rarr; tables: customer, car(+owner_CID fk), insurance, car_insurance(junction)</span>
+</div>
+
+<div class="paper-er">
+<svg viewBox="0 0 740 380" width="100%">
+  <!-- Customer entity -->
+  <rect class="filled" x="30" y="140" width="150" height="70" rx="3"/>
+  <text x="105" y="182" text-anchor="middle" font-size="16">Customer</text>
+  <!-- Customer attributes -->
+  <ellipse class="filled" cx="30" cy="60" rx="42" ry="16"/>
+  <text x="30" y="64" text-anchor="middle" font-size="12" text-decoration="underline">CID</text>
+  <line x1="40" y1="74" x2="70" y2="140"/>
+  <ellipse class="filled" cx="95" cy="40" rx="34" ry="15"/>
+  <text x="95" y="45" text-anchor="middle" font-size="12">name</text>
+  <line x1="95" y1="55" x2="95" y2="140"/>
+  <ellipse class="filled" cx="160" cy="50" rx="34" ry="15"/>
+  <text x="160" y="54" text-anchor="middle" font-size="12">phone</text>
+  <line x1="160" y1="65" x2="140" y2="140"/>
+  <ellipse class="filled" cx="220" cy="95" rx="32" ry="15"/>
+  <text x="220" y="100" text-anchor="middle" font-size="12">email</text>
+  <line x1="205" y1="105" x2="170" y2="140"/>
+
+  <!-- owns relationship diamond -->
+  <polygon class="rel" points="260,175 315,140 370,175 315,210"/>
+  <text x="315" y="180" text-anchor="middle" font-size="13">owns</text>
+  <!-- Customer -- owns line -->
+  <line x1="180" y1="175" x2="260" y2="175"/>
+  <text x="215" y="168" text-anchor="middle" font-size="13">1</text>
+  <!-- owns -- Car line -->
+  <line x1="370" y1="175" x2="450" y2="175"/>
+  <text x="415" y="168" text-anchor="middle" font-size="13">N</text>
+
+  <!-- Car entity -->
+  <rect class="filled" x="450" y="140" width="140" height="70" rx="3"/>
+  <text x="520" y="182" text-anchor="middle" font-size="16">Car</text>
+  <!-- Car attributes -->
+  <ellipse class="filled" cx="460" cy="60" rx="36" ry="15"/>
+  <text x="460" y="64" text-anchor="middle" font-size="12" text-decoration="underline">VID</text>
+  <line x1="470" y1="74" x2="485" y2="140"/>
+  <ellipse class="filled" cx="530" cy="40" rx="36" ry="15"/>
+  <text x="530" y="45" text-anchor="middle" font-size="12">brand</text>
+  <line x1="530" y1="55" x2="520" y2="140"/>
+  <ellipse class="filled" cx="605" cy="55" rx="32" ry="15"/>
+  <text x="605" y="60" text-anchor="middle" font-size="12">year</text>
+  <line x1="590" y1="68" x2="560" y2="140"/>
+  <ellipse class="filled" cx="670" cy="105" rx="32" ry="15"/>
+  <text x="670" y="110" text-anchor="middle" font-size="12">price</text>
+  <line x1="650" y1="115" x2="590" y2="145"/>
+
+  <!-- insured_by relationship diamond -->
+  <polygon class="rel" points="470,270 525,235 580,270 525,305"/>
+  <text x="525" y="275" text-anchor="middle" font-size="12">insured_by</text>
+  <!-- Car -- insured_by line -->
+  <line x1="520" y1="210" x2="525" y2="235"/>
+  <text x="538" y="225" font-size="13">M</text>
+  <!-- insured_by -- Insurance line -->
+  <line x1="525" y1="305" x2="525" y2="335"/>
+  <text x="540" y="325" font-size="13">N</text>
+
+  <!-- Insurance entity -->
+  <rect class="filled" x="420" y="335" width="210" height="40" rx="3"/>
+  <text x="525" y="362" text-anchor="middle" font-size="15">Insurance</text>
+  <ellipse class="filled" cx="370" cy="355" rx="38" ry="14"/>
+  <text x="370" y="360" text-anchor="middle" font-size="12" text-decoration="underline">IID</text>
+  <line x1="408" y1="355" x2="420" y2="355"/>
+  <ellipse class="filled" cx="680" cy="345" rx="40" ry="14"/>
+  <text x="680" y="350" text-anchor="middle" font-size="12">type</text>
+  <line x1="640" y1="345" x2="630" y2="345"/>
+  <ellipse class="filled" cx="680" cy="375" rx="45" ry="14"/>
+  <text x="680" y="380" text-anchor="middle" font-size="11">start_date</text>
+  <line x1="635" y1="375" x2="630" y2="370"/>
+</svg>
+</div>
+
+<div class="paper-answer">
+<h4>Schema mapping:</h4>
+<pre>
+customer(<u>CID</u>, name, phone, email)
+car(<u>VID</u>, brand, year, price, owner_CID)   <span class="mnote">// 1:N merged in</span>
+   fk owner_CID &rarr; customer(CID)
+insurance(<u>IID</u>, type, price, start_date, end_date)
+car_insurance(<u>VID</u>, <u>IID</u>)                 <span class="mnote">// M:N junction</span>
+   fk VID &rarr; car(VID)
+   fk IID &rarr; insurance(IID)
+</pre>
+<hr class="answer-sep">
+<span class="mnote">Verify: every car has an owner (owner_CID NOT NULL); one cust &rarr; many cars; one car &rarr; many policies via junction.</span>
+</div>
+
 <div class="hand-calc">
 <h3>Step-by-step design</h3>
 
@@ -131,6 +235,146 @@ car_insurance(<u>VID, IID</u>)<br>
 <li>Relationships: written_by (book M &mdash; N author), published_by (book N &mdash; 1 publisher), contains (basket M &mdash; N book), stocks (warehouse M &mdash; N book).</li>
 <li><strong>Extension</strong>: music (cassettes, CDs) shipped like books; has its own attributes (e.g. playlist, format) plus shared attributes (isbn-like identifier, title, price, warehouse stocking).</li>
 </ul>
+</div>
+
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> List nouns: Book, Customer, Shopping_basket, Warehouse, Author, Publisher, Music. Seven entity candidates.</div>
+<div class="paper-step"><span class="n">Step 2</span> Spot shared attributes between Book and Music: id, title, price. This is the <strong>ISA signal</strong>; promote shared attrs to a supertype <em>Item</em>.</div>
+<div class="paper-step"><span class="n">Step 3</span> Verbs &rarr; relationships: written_by (M:N), published_by (N:1), contains (M:N), stocks (M:N), owns (1:N Customer&ndash;Basket).</div>
+<div class="paper-step"><span class="n">Step 4</span> Spot multi-valued: authors &rarr; many per book; modelled as the M:N written_by, not as a multi-valued attr.</div>
+<div class="paper-step"><span class="n">Step 5</span> ISA triangle: Item at top; Book and Music inherit id/title/price from Item and add their own (year for Book, playlist/format for Music).</div>
+<div class="paper-step"><span class="n">Step 6</span> Warehouse stocks <em>Item</em> (not Book); one relationship covers both subtypes.</div>
+</div>
+
+<div class="scratch-work">
+<strong>Entities:</strong> Item(parent), Book ISA Item, Music ISA Item, Customer, Basket, Warehouse, Author, Publisher<br>
+<strong>Shared (&rarr; Item):</strong> itemID, title, price<br>
+<strong>Book-only:</strong> year<br>
+<strong>Music-only:</strong> playlist, format<br>
+<strong>Rels:</strong> written_by (Book M&mdash;N Author) ; published_by (Book N&mdash;1 Publisher) ; contains (Basket M&mdash;N Item) ; stocks (Warehouse M&mdash;N Item) ; owns (Cust 1&mdash;N Basket)<br>
+<span class="arrow-line">&rarr; table per subtype (Option A); Book and Music reuse itemID as PK+FK</span>
+</div>
+
+<div class="paper-er">
+<svg viewBox="0 0 720 440" width="100%">
+  <!-- Item supertype -->
+  <rect class="filled" x="280" y="20" width="160" height="60" rx="3"/>
+  <text x="360" y="58" text-anchor="middle" font-size="16">Item</text>
+  <!-- Item attributes -->
+  <ellipse class="filled" cx="210" cy="30" rx="42" ry="14"/>
+  <text x="210" y="34" text-anchor="middle" font-size="12" text-decoration="underline">itemID</text>
+  <line x1="252" y1="35" x2="280" y2="40"/>
+  <ellipse class="filled" cx="210" cy="65" rx="32" ry="14"/>
+  <text x="210" y="69" text-anchor="middle" font-size="12">title</text>
+  <line x1="242" y1="65" x2="280" y2="60"/>
+  <ellipse class="filled" cx="510" cy="45" rx="32" ry="14"/>
+  <text x="510" y="50" text-anchor="middle" font-size="12">price</text>
+  <line x1="478" y1="50" x2="440" y2="55"/>
+
+  <!-- ISA triangle -->
+  <polygon class="rel" points="330,110 390,110 360,140"/>
+  <text x="360" y="125" text-anchor="middle" font-size="10">ISA</text>
+  <!-- line from Item to ISA -->
+  <line x1="360" y1="80" x2="360" y2="110"/>
+
+  <!-- Book subtype -->
+  <rect class="filled" x="210" y="165" width="130" height="55" rx="3"/>
+  <text x="275" y="198" text-anchor="middle" font-size="15">Book</text>
+  <line x1="340" y1="135" x2="275" y2="165"/>
+  <ellipse class="filled" cx="155" cy="192" rx="32" ry="14"/>
+  <text x="155" y="197" text-anchor="middle" font-size="12">year</text>
+  <line x1="187" y1="193" x2="210" y2="193"/>
+
+  <!-- Music subtype -->
+  <rect class="filled" x="400" y="165" width="130" height="55" rx="3"/>
+  <text x="465" y="198" text-anchor="middle" font-size="15">Music</text>
+  <line x1="380" y1="135" x2="465" y2="165"/>
+  <!-- multi-valued (double ellipse) for playlist -->
+  <ellipse cx="590" cy="180" rx="40" ry="16"/>
+  <ellipse class="filled" cx="590" cy="180" rx="36" ry="13"/>
+  <text x="590" y="184" text-anchor="middle" font-size="12">playlist</text>
+  <line x1="554" y1="182" x2="530" y2="185"/>
+  <ellipse class="filled" cx="590" cy="215" rx="36" ry="14"/>
+  <text x="590" y="220" text-anchor="middle" font-size="12">format</text>
+  <line x1="554" y1="215" x2="530" y2="210"/>
+
+  <!-- written_by diamond -->
+  <polygon class="rel" points="40,170 90,145 140,170 90,195"/>
+  <text x="90" y="172" text-anchor="middle" font-size="10">written_by</text>
+  <line x1="140" y1="170" x2="210" y2="190"/>
+  <text x="165" y="165" font-size="11">M</text>
+
+  <!-- Author entity -->
+  <rect class="filled" x="20" y="225" width="130" height="50" rx="3"/>
+  <text x="85" y="255" text-anchor="middle" font-size="14">Author</text>
+  <line x1="85" y1="195" x2="85" y2="225"/>
+  <text x="95" y="215" font-size="11">N</text>
+
+  <!-- contains relationship (Basket -- Item) -->
+  <polygon class="rel" points="280,285 340,265 340,305 280,305"/>
+  <text x="312" y="288" text-anchor="middle" font-size="10">contains</text>
+  <line x1="310" y1="265" x2="310" y2="220"/>
+  <text x="320" y="245" font-size="11">M</text>
+
+  <!-- Basket entity -->
+  <rect class="filled" x="150" y="300" width="130" height="50" rx="3"/>
+  <text x="215" y="330" text-anchor="middle" font-size="13">Basket</text>
+  <line x1="280" y1="325" x2="310" y2="305"/>
+  <text x="285" y="295" font-size="11">N</text>
+
+  <!-- owns -->
+  <polygon class="rel" points="70,330 130,310 130,350 70,350"/>
+  <text x="102" y="334" text-anchor="middle" font-size="11">owns</text>
+  <line x1="130" y1="325" x2="150" y2="325"/>
+  <text x="140" y="318" font-size="11">N</text>
+
+  <!-- Customer -->
+  <rect class="filled" x="10" y="370" width="140" height="50" rx="3"/>
+  <text x="80" y="400" text-anchor="middle" font-size="13">Customer</text>
+  <line x1="100" y1="350" x2="85" y2="370"/>
+  <text x="105" y="365" font-size="11">1</text>
+
+  <!-- stocks (Warehouse -- Item) -->
+  <polygon class="rel" points="420,340 480,320 480,360 420,360"/>
+  <text x="450" y="344" text-anchor="middle" font-size="11">stocks</text>
+  <line x1="450" y1="220" x2="450" y2="320"/>
+  <text x="460" y="275" font-size="11">M</text>
+
+  <!-- Warehouse -->
+  <rect class="filled" x="540" y="320" width="140" height="50" rx="3"/>
+  <text x="610" y="350" text-anchor="middle" font-size="13">Warehouse</text>
+  <line x1="480" y1="340" x2="540" y2="340"/>
+  <text x="505" y="334" font-size="11">N</text>
+
+  <!-- published_by (Book -- Publisher) -->
+  <polygon class="rel" points="250,400 320,375 320,415 250,415"/>
+  <text x="285" y="402" text-anchor="middle" font-size="10">published_by</text>
+  <line x1="260" y1="220" x2="270" y2="375"/>
+  <text x="280" y="320" font-size="11">N</text>
+  <rect class="filled" x="350" y="385" width="130" height="40" rx="3"/>
+  <text x="415" y="410" text-anchor="middle" font-size="13">Publisher</text>
+  <line x1="320" y1="400" x2="350" y2="405"/>
+  <text x="335" y="395" font-size="11">1</text>
+</svg>
+</div>
+
+<div class="paper-answer">
+<h4>Schema mapping (table-per-subtype; Option A):</h4>
+<pre>
+customer(<u>email</u>, name, address)
+item(<u>itemID</u>, title, price)
+book(<u>itemID</u>, year)               <span class="mnote">// PK and fk &rarr; item(itemID)</span>
+music(<u>itemID</u>, format)             <span class="mnote">// PK and fk &rarr; item(itemID)</span>
+music_playlist(<u>itemID</u>, <u>track</u>)     <span class="mnote">// multi-valued split out</span>
+author(<u>name</u>, bio)
+publisher(<u>name</u>, address)
+basket(<u>basketID</u>, customer_email)   <span class="mnote">// 1:N owns merged</span>
+warehouse(<u>code</u>, location)
+written_by(<u>itemID</u>, <u>author_name</u>)
+published_by(<u>itemID</u>, publisher_name)  <span class="mnote">// N:1 merged into item-side</span>
+contains(<u>basketID</u>, <u>itemID</u>, quantity)
+stocks(<u>code</u>, <u>itemID</u>, quantity)
+</pre>
 </div>
 
 <div class="hand-calc">
@@ -222,6 +466,125 @@ stocks(<u>code, itemID</u>, quantity)
 <li>A patient <em>may</em> be admitted to a ward (optional).</li>
 <li>A doctor <em>may</em> supervise a ward (optional; at most one supervisor per ward).</li>
 </ul>
+</div>
+
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Nouns: Patient, Doctor, Appointment, Ward. Ask: does Appointment stand on its own? It has its own attributes (date, time) &rarr; promote to a <strong>weak entity</strong> (reified relationship).</div>
+<div class="paper-step"><span class="n">Step 2</span> Appointment's key: no unique standalone id &rarr; composite (PID, DID, date, time). Double-border the rectangle; dashed-underline the discriminator.</div>
+<div class="paper-step"><span class="n">Step 3</span> Cardinality probe: "Every patient must be admitted?" no &rarr; <strong>0..1</strong> on patient side of admitted_to. "Every ward has a supervisor?" no &rarr; 0..1 on doctor side of supervises.</div>
+<div class="paper-step"><span class="n">Step 4</span> Identifying relationships have double diamonds. Admitted_to and supervises are plain (not identifying).</div>
+<div class="paper-step"><span class="n">Step 5</span> Map: nullable FKs for the optional 1:N rels; composite-key table for appointment.</div>
+</div>
+
+<div class="scratch-work">
+<strong>Entities:</strong> Patient, Doctor, Ward (strong); Appointment (weak, owned by Patient+Doctor)<br>
+<strong>Rels:</strong><br>
+&nbsp;&nbsp;- Patient &mdash;has&mdash; Appointment &mdash;has&mdash; Doctor (identifying)<br>
+&nbsp;&nbsp;- Patient 0..1 &mdash;admitted_to&mdash; N Ward<br>
+&nbsp;&nbsp;- Doctor 0..1 &mdash;supervises&mdash; 1 Ward<br>
+<strong>Keys:</strong> PID, DID, WID; appointment = (PID, DID, date, time)<br>
+<span class="arrow-line">&rarr; tables: patient (+wardWID nullable), doctor, ward (+supervisorDID nullable), appointment (composite PK)</span>
+</div>
+
+<div class="paper-er">
+<svg viewBox="0 0 720 420" width="100%">
+  <!-- Patient entity -->
+  <rect class="filled" x="20" y="140" width="130" height="60" rx="3"/>
+  <text x="85" y="175" text-anchor="middle" font-size="15">Patient</text>
+  <ellipse class="filled" cx="40" cy="60" rx="32" ry="13"/>
+  <text x="40" y="64" text-anchor="middle" font-size="12" text-decoration="underline">PID</text>
+  <line x1="50" y1="72" x2="65" y2="140"/>
+  <ellipse class="filled" cx="115" cy="40" rx="30" ry="13"/>
+  <text x="115" y="44" text-anchor="middle" font-size="12">name</text>
+  <line x1="110" y1="53" x2="95" y2="140"/>
+  <ellipse class="filled" cx="170" cy="85" rx="28" ry="13"/>
+  <text x="170" y="89" text-anchor="middle" font-size="12">dob</text>
+  <line x1="155" y1="95" x2="135" y2="140"/>
+
+  <!-- double-diamond 'has' for identifying relationship (weak entity) -->
+  <polygon points="170,175 220,145 270,175 220,205"/>
+  <polygon class="rel" points="174,175 220,150 266,175 220,200"/>
+  <text x="220" y="180" text-anchor="middle" font-size="12">has</text>
+  <line x1="150" y1="170" x2="170" y2="175"/>
+  <line x1="153" y1="175" x2="173" y2="180"/>
+  <text x="160" y="163" font-size="11">1</text>
+
+  <!-- Appointment weak entity (double rect) -->
+  <rect x="285" y="148" width="150" height="55"/>
+  <rect class="filled" x="288" y="151" width="144" height="49"/>
+  <text x="360" y="182" text-anchor="middle" font-size="14">Appointment</text>
+  <line x1="270" y1="175" x2="285" y2="175"/>
+  <text x="278" y="168" font-size="11">N</text>
+  <!-- weak entity attrs: date, time (dashed-underline for discriminator) -->
+  <ellipse class="filled" cx="315" cy="240" rx="32" ry="13"/>
+  <text x="315" y="244" text-anchor="middle" font-size="11" style="text-decoration: underline dashed;">date</text>
+  <line x1="320" y1="228" x2="325" y2="203"/>
+  <ellipse class="filled" cx="400" cy="240" rx="32" ry="13"/>
+  <text x="400" y="244" text-anchor="middle" font-size="11" style="text-decoration: underline dashed;">time</text>
+  <line x1="395" y1="228" x2="395" y2="203"/>
+
+  <!-- second identifying diamond to Doctor -->
+  <polygon points="450,175 500,145 550,175 500,205"/>
+  <polygon class="rel" points="454,175 500,150 546,175 500,200"/>
+  <text x="500" y="180" text-anchor="middle" font-size="12">has</text>
+  <line x1="435" y1="175" x2="450" y2="175"/>
+  <text x="443" y="168" font-size="11">N</text>
+
+  <!-- Doctor entity -->
+  <rect class="filled" x="565" y="145" width="130" height="55" rx="3"/>
+  <text x="630" y="178" text-anchor="middle" font-size="15">Doctor</text>
+  <line x1="550" y1="175" x2="565" y2="175"/>
+  <text x="555" y="168" font-size="11">1</text>
+  <ellipse class="filled" cx="680" cy="75" rx="32" ry="13"/>
+  <text x="680" y="79" text-anchor="middle" font-size="12" text-decoration="underline">DID</text>
+  <line x1="670" y1="88" x2="650" y2="145"/>
+  <ellipse class="filled" cx="600" cy="75" rx="38" ry="13"/>
+  <text x="600" y="79" text-anchor="middle" font-size="11">specialty</text>
+  <line x1="605" y1="88" x2="615" y2="145"/>
+
+  <!-- admitted_to relationship (dashed participation = optional on patient) -->
+  <polygon class="rel" points="40,290 100,265 160,290 100,315"/>
+  <text x="100" y="294" text-anchor="middle" font-size="11">admitted_to</text>
+  <line x1="85" y1="200" x2="85" y2="265"/>
+  <text x="70" y="240" font-size="11">0..1</text>
+
+  <!-- Ward entity -->
+  <rect class="filled" x="40" y="340" width="130" height="50" rx="3"/>
+  <text x="105" y="370" text-anchor="middle" font-size="14">Ward</text>
+  <line x1="100" y1="315" x2="105" y2="340"/>
+  <text x="112" y="330" font-size="11">N</text>
+  <ellipse class="filled" cx="200" cy="365" rx="32" ry="13"/>
+  <text x="200" y="369" text-anchor="middle" font-size="11" text-decoration="underline">WID</text>
+  <line x1="170" y1="365" x2="168" y2="365"/>
+
+  <!-- supervises relationship (optional on doctor side) -->
+  <polygon class="rel" points="520,290 580,265 640,290 580,315"/>
+  <text x="580" y="294" text-anchor="middle" font-size="10">supervises</text>
+  <line x1="600" y1="200" x2="590" y2="265"/>
+  <text x="605" y="240" font-size="11">0..1</text>
+  <!-- Ward (second copy to show shared via schema note) -->
+  <rect class="filled" x="525" y="340" width="120" height="45" rx="3"/>
+  <text x="585" y="368" text-anchor="middle" font-size="13">Ward</text>
+  <line x1="580" y1="315" x2="585" y2="340"/>
+  <text x="593" y="330" font-size="11">1</text>
+  <text x="405" y="398" text-anchor="middle" font-size="11" font-style="italic">(same Ward entity; drawn twice for clarity)</text>
+</svg>
+</div>
+
+<div class="paper-answer">
+<h4>Schema mapping:</h4>
+<pre>
+patient(<u>PID</u>, name, dob, wardWID)        <span class="mnote">// wardWID nullable (0..1)</span>
+   fk wardWID &rarr; ward(WID) on delete set null
+doctor(<u>DID</u>, specialty)
+ward(<u>WID</u>, name, capacity, supervisorDID) <span class="mnote">// nullable</span>
+   fk supervisorDID &rarr; doctor(DID) on delete set null
+appointment(<u>PID</u>, <u>DID</u>, <u>date</u>, <u>time</u>)   <span class="mnote">// weak; composite PK</span>
+   fk PID &rarr; patient(PID) on delete cascade
+   fk DID &rarr; doctor(DID) on delete cascade
+</pre>
+<hr class="answer-sep">
+<span class="mnote">Partial participation on admitted_to &rarr; nullable FK. Weak entity &rarr; CASCADE on its identifying owners.</span>
 </div>
 
 <div class="hand-calc">

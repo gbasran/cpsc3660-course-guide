@@ -22,6 +22,10 @@
 A medical student does not walk into an anatomy practical without having rehearsed every bone name out loud the night before. Concept questions are the same drill: small, high-yield, and punished heavily if you freeze. Each of these 15 questions is phrased the way the prof phrases them, and each model answer shows exactly what a 2/2 response looks like. Read each question, cover the answer, answer out loud, then check.
 </div>
 
+<div class="note">
+<strong>How to read this page.</strong> The final is paper-based; every question now shows a 3-stage workflow: (1) <em>mental steps</em> (how you decide what to write), (2) <em>scratch work</em> (what you'd jot in the margin before committing), (3) <em>answer booklet</em> (what the final answer looks like on ruled exam paper, with keywords underlined like you'd underline with pen). Then the standard textbook-style walkthrough follows for deeper explanation. For 2-mark concept questions the answer is only 2 lines; that is all the prof accepts for full marks.
+</div>
+
 <!-- ============================================================ -->
 <h2>Q1: Schema vs Instance</h2>
 
@@ -29,9 +33,21 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> Define schema and instance in the context of a relational database, and state how they differ.
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p><strong>Schema</strong> is the logical structure of the database: relations, attributes, domains, constraints; it changes rarely. <strong>Instance</strong> is the set of tuples currently stored in those relations; it changes with every INSERT, UPDATE, or DELETE. The schema is fixed; the instance is the current snapshot.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Two terms, one contrast; define each, then name the axis they differ on.</div>
+<div class="paper-step"><span class="n">Step 2</span> Anchor words: schema = structure; instance = data at this moment.</div>
+<div class="paper-step"><span class="n">Step 3</span> Finish with "schema static, instance changes with DML" to clinch the 2nd mark.</div>
+</div>
+
+<div class="scratch-work">
+schema = structure (tables, cols, FKs)<br>
+instance = rows right now<br>
+<strong>→ static vs snapshot</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q1:</span> <span class="kw">Schema</span> = logical structure (relations, attributes, domains, constraints); rarely changes.<br>
+<span class="kw">Instance</span> = set of tuples currently stored; changes with every insert/update/delete. <span class="mnote">// schema fixed, instance is a snapshot</span>
 </div>
 
 <div class="exam-flag">
@@ -45,9 +61,23 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> Define super key, candidate key, and primary key. Give an example of each using the relation $employee(empid, name, office, age)$.
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>A <strong>super key</strong> is any set of attributes that uniquely identifies a tuple (e.g. $\{empid, name\}$). A <strong>candidate key</strong> is a minimal super key, with no redundant attributes (e.g. $\{empid\}$). A <strong>primary key</strong> is the candidate key chosen as the official row identifier (here, $empid$); it must be NOT NULL and unique.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Three terms, nested: super key $\supseteq$ candidate key $\supseteq$ primary key.</div>
+<div class="paper-step"><span class="n">Step 2</span> Key word for candidate: "minimal". Key word for primary: "chosen".</div>
+<div class="paper-step"><span class="n">Step 3</span> Pull one example each from the given employee schema.</div>
+</div>
+
+<div class="scratch-work">
+SK: unique → {empid, name}<br>
+CK: minimal SK → {empid}<br>
+PK: chosen CK → empid<br>
+<strong>→ SK $\supseteq$ CK $\supseteq$ PK</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q2:</span> <span class="kw">Super key</span> = attr set that uniquely IDs a tuple; e.g. {empid, name}.<br>
+<span class="kw">Candidate key</span> = minimal super key (no proper subset is a SK); e.g. {empid}.<br>
+<span class="kw">Primary key</span> = chosen CK, NOT NULL + unique; here <span class="box">empid</span>. <span class="mnote">// can have &gt;1 CK</span>
 </div>
 
 <div class="exam-flag">
@@ -61,9 +91,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> Define DML and DDL. Give one SQL example of each.
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p><strong>DDL</strong> (Data Definition Language) defines and alters schema structure; example: <code>create table employee(...)</code>. <strong>DML</strong> (Data Manipulation Language) queries and modifies the data inside those structures; example: <code>insert into employee values(...)</code> or <code>select * from employee</code>.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Two acronyms, two examples. DDL = structure; DML = data.</div>
+<div class="paper-step"><span class="n">Step 2</span> Pick iconic examples: create table for DDL, select/insert for DML.</div>
+</div>
+
+<div class="scratch-work">
+DDL: define structure → <code>create table</code><br>
+DML: modify data → <code>select / insert / update</code><br>
+<strong>→ structure vs content</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q3:</span> <span class="kw">DDL</span> (Data Definition Language) defines/alters schema; e.g. <span class="kw">create table</span> employee(...).<br>
+<span class="kw">DML</span> (Data Manipulation Language) queries/modifies data; e.g. <span class="kw">select</span> * <span class="kw">from</span> employee.
 </div>
 
 <div class="exam-flag">
@@ -77,9 +118,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> What is the data dictionary, and why does the DBMS need it?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>The <strong>data dictionary</strong> (system catalog) is a set of tables describing every relation, attribute, key, constraint, view, and privilege in the database. The DBMS uses it to validate queries (does this table exist? is this column the right type?), enforce constraints, and feed statistics to the optimizer.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Define what it IS (metadata store), then say WHY the DBMS reads it.</div>
+<div class="paper-step"><span class="n">Step 2</span> Three uses to list: validate, enforce, optimize.</div>
+</div>
+
+<div class="scratch-work">
+= system catalog (tables about tables)<br>
+DBMS uses it to: validate / enforce / optimize<br>
+<strong>→ metadata lookup</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q4:</span> <span class="kw">Data dictionary</span> (system catalog) = tables describing every relation, attribute, key, constraint, view, privilege.<br>
+DBMS uses it to <span class="kw">validate</span> queries, <span class="kw">enforce</span> constraints, and feed <span class="kw">statistics</span> to the optimizer.
 </div>
 
 <div class="exam-flag">
@@ -93,9 +145,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> If $K$ is the primary key of relation $R$, and two tuples $t_1, t_2 \in R$ satisfy $t_1[K] = t_2[K]$, what can you conclude about the other attributes?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>Since $K$ uniquely identifies each tuple, $t_1[K] = t_2[K]$ forces $t_1 = t_2$; they are the same tuple. Therefore $t_1[A] = t_2[A]$ for <em>every</em> attribute $A$ of $R$, not just for $K$. The key's uniqueness propagates to all attributes.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> PK forces uniqueness; matching PK values means the rows ARE the same row.</div>
+<div class="paper-step"><span class="n">Step 2</span> Conclusion extends to every attribute, not just $K$.</div>
+</div>
+
+<div class="scratch-work">
+$t_1[K] = t_2[K]$ + K is PK<br>
+→ $t_1 = t_2$ (same tuple)<br>
+<strong>→ $t_1[A] = t_2[A]\ \forall A \in R$</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q5:</span> Since $K$ is the PK, $t_1[K] = t_2[K]$ forces $t_1 = t_2$; they are the <span class="kw">same tuple</span>.<br>
+Therefore $t_1[A] = t_2[A]$ for <span class="kw">every</span> attribute $A$ of $R$. <span class="mnote">// key uniqueness propagates</span>
 </div>
 
 <div class="exam-flag">
@@ -109,9 +172,21 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> Show how $r \cap s$ can be expressed using only the basic RA operators (selection, projection, union, set-difference, Cartesian product, rename).
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>Intersection is not a basic operator but reduces to two set-differences: $r \cap s = r - (r - s)$. The inner $(r - s)$ removes tuples of $r$ not in $s$; subtracting again from $r$ leaves only the tuples that <em>are</em> in both.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Intersection isn't basic; must use only the 6 allowed ops.</div>
+<div class="paper-step"><span class="n">Step 2</span> Classic trick: double set-difference strips out non-shared tuples twice.</div>
+<div class="paper-step"><span class="n">Step 3</span> Write the identity, then one sentence of intuition.</div>
+</div>
+
+<div class="scratch-work">
+$r - s$ = in r, not in s<br>
+$r - (r - s)$ = in r, and in s<br>
+<strong>→ $r \cap s = r - (r - s)$</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q6:</span> $r \cap s = \;$<span class="box">$r - (r - s)$</span>.<br>
+Inner $(r - s)$ removes tuples of $r$ not in $s$; subtracting again leaves only tuples in <span class="kw">both</span>.
 </div>
 
 <div class="exam-flag">
@@ -125,9 +200,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> What is ON DELETE CASCADE? When should a designer use it rather than RESTRICT?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p><strong>ON DELETE CASCADE</strong> means that deleting a parent row automatically deletes every child row referencing it via the foreign key. Use CASCADE when child rows have no meaning without the parent (e.g. borrow rows when the employee is gone); use RESTRICT when child rows are historical records that should block casual deletion.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Define mechanism: delete parent → delete children automatically.</div>
+<div class="paper-step"><span class="n">Step 2</span> Contrast with RESTRICT by asking: can the child row mean anything without the parent?</div>
+</div>
+
+<div class="scratch-work">
+CASCADE: parent del → child del auto<br>
+RESTRICT: blocks del if children exist<br>
+<strong>→ use CASCADE if child worthless w/o parent</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q7:</span> <span class="kw">on delete cascade</span>: deleting a parent row auto-deletes every child referencing it via FK.<br>
+Use CASCADE when child has no meaning w/o parent (e.g. borrow without employee); <span class="kw">RESTRICT</span> for historical records that shouldn't disappear silently.
 </div>
 
 <div class="exam-flag">
@@ -141,9 +227,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> Define strong entity and weak entity. Give one example of each.
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>A <strong>strong entity</strong> has its own primary key and exists independently (e.g. $employee$). A <strong>weak entity</strong> cannot be identified by its own attributes alone and requires the key of an owner entity plus a local discriminator (e.g. $dependent$ of an employee, identified by $(empid, name)$).</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Key question: can the entity be identified on its own?</div>
+<div class="paper-step"><span class="n">Step 2</span> Strong = yes, own PK; weak = no, needs owner's key + discriminator.</div>
+</div>
+
+<div class="scratch-work">
+strong: own PK → employee<br>
+weak: owner's PK + discriminator → dependent(empid, name)<br>
+<strong>→ identifying relationship</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q8:</span> <span class="kw">Strong entity</span>: own PK, exists independently; e.g. employee(empid, ...).<br>
+<span class="kw">Weak entity</span>: cannot be identified alone; needs owner's key + local discriminator; e.g. <span class="kw">dependent</span>(<span class="box">empid, name</span>).
 </div>
 
 <div class="exam-flag">
@@ -157,9 +254,21 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> An $employee$ entity has a multi-valued attribute $phone$. How is this mapped to relations?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>Create a separate relation $employee\_phone(empid, phone)$ where $empid$ is a foreign key referencing $employee$ and $(empid, phone)$ is the primary key. Each phone value becomes one row; the original $employee$ table holds the single-valued attributes only.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> MV attr cannot sit in the base table; 1NF violation.</div>
+<div class="paper-step"><span class="n">Step 2</span> Build a side table with (owner_FK, value) and a composite PK.</div>
+</div>
+
+<div class="scratch-work">
+employee_phone(empid, phone)<br>
+empid → FK to employee<br>
+PK = (empid, phone)<br>
+<strong>→ 1 row per phone</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q9:</span> Create a new relation <span class="box">employee_phone(empid, phone)</span>; <span class="kw">empid</span> is a FK to employee; PK = (empid, phone).<br>
+Each phone value = one row. The original employee table keeps only the single-valued attributes.
 </div>
 
 <div class="exam-flag">
@@ -173,9 +282,21 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> An $employee$ entity has a composite attribute $address$ with sub-parts $street$, $city$, $postal\_code$. How is this mapped to a relation?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>Flatten the composite attribute: each leaf sub-attribute becomes its own column in the $employee$ relation. The mapped schema is $employee(empid, name, street, city, postal\_code)$; the grouping $address$ is conceptual only, not stored as a single column.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Composite $\neq$ multi-valued; no side table needed.</div>
+<div class="paper-step"><span class="n">Step 2</span> Flatten: each leaf sub-attr becomes its own column in the base table.</div>
+</div>
+
+<div class="scratch-work">
+address = (street, city, postal)<br>
+<span class="struck">address as 1 col</span><br>
+flatten → 3 cols in employee<br>
+<strong>→ grouping is conceptual only</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q10:</span> <span class="kw">Flatten</span> each leaf into its own column:<br>
+<span class="box">employee(empid, name, street, city, postal_code)</span>. <span class="mnote">// grouping "address" is conceptual only, not stored</span>
 </div>
 
 <div class="exam-flag">
@@ -189,9 +310,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> Why do we model some entities as weak instead of just adding a unique identifier?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>A weak entity exists <em>only</em> in the context of its owner and has no natural standalone key (e.g. a $room$ within a $building$; room "101" is only meaningful relative to its building). Modelling it weak preserves the identifying dependency, enforces mandatory total participation, and avoids inventing artificial IDs.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Answer the "why not artificial ID?" question; identifying dependency matters.</div>
+<div class="paper-step"><span class="n">Step 2</span> List the 3 benefits: preserves dependency, total participation, no invented IDs.</div>
+</div>
+
+<div class="scratch-work">
+weak = no standalone meaning<br>
+e.g. room(101) only means something w/ building<br>
+<strong>→ preserves identifying dependency + total participation</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q11:</span> A weak entity exists <span class="kw">only</span> via its owner and has no natural standalone key (e.g. room "101" needs its building).<br>
+Modelling weak preserves the <span class="kw">identifying dependency</span>, forces total participation, avoids inventing artificial IDs.
 </div>
 
 <div class="exam-flag">
@@ -205,9 +337,21 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> What does an ISA (generalization) relationship in an ER diagram represent, and why is it useful?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>An <strong>ISA</strong> relationship groups two or more lower-level entity types (subtypes) under a common higher-level type (supertype); subtypes inherit the supertype's attributes and add their own. It reduces redundancy when subtypes share attributes (e.g. $book$ and $music$ both ISA $item$, sharing $isbn, title, price$).</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Define: subtypes inherit from a supertype; OOP-style.</div>
+<div class="paper-step"><span class="n">Step 2</span> Explain benefit: removes redundancy when subtypes share attributes.</div>
+</div>
+
+<div class="scratch-work">
+subtype ISA supertype → inherits attrs<br>
+e.g. book ISA item, music ISA item<br>
+shared: isbn, title, price<br>
+<strong>→ reduces attribute redundancy</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q12:</span> <span class="kw">ISA</span>: subtypes inherit a supertype's attributes and add their own.<br>
+Reduces redundancy when subtypes share attrs; e.g. book, music both ISA item (sharing <span class="kw">isbn, title, price</span>).
 </div>
 
 <div class="exam-flag">
@@ -221,9 +365,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> Define a functional dependency $\alpha \to \beta$ on a relation $R$.
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>$\alpha \to \beta$ holds on $R$ if, for any two tuples $t_1, t_2 \in R$ with $t_1[\alpha] = t_2[\alpha]$, it must also be that $t_1[\beta] = t_2[\beta]$. Informally: knowing the values of $\alpha$ uniquely determines the values of $\beta$.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Formal: two-tuple quantifier; matching $\alpha$ forces matching $\beta$.</div>
+<div class="paper-step"><span class="n">Step 2</span> Informal: knowing $\alpha$ uniquely determines $\beta$.</div>
+</div>
+
+<div class="scratch-work">
+$\forall\, t_1, t_2 \in R:$<br>
+$t_1[\alpha] = t_2[\alpha] \Rightarrow t_1[\beta] = t_2[\beta]$<br>
+<strong>→ $\alpha$ determines $\beta$</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q13:</span> <span class="kw">Formal</span>: $\alpha \to \beta$ on $R$ holds iff $\forall\, t_1, t_2 \in R$: $t_1[\alpha] = t_2[\alpha] \Rightarrow t_1[\beta] = t_2[\beta]$.<br>
+<span class="kw">Informal</span>: knowing $\alpha$ uniquely <span class="kw">determines</span> $\beta$.
 </div>
 
 <div class="exam-flag">
@@ -237,9 +392,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> State the definition of Boyce-Codd Normal Form (BCNF). Why do we aim for it?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>A relation $R$ is in <strong>BCNF</strong> if for every non-trivial FD $\alpha \to \beta$ that holds on $R$, $\alpha$ is a super key of $R$. We aim for BCNF to eliminate redundancy and the update/insertion/deletion anomalies that arise when non-key attributes determine other non-key attributes.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Formal: every non-trivial FD has a super key on its LHS.</div>
+<div class="paper-step"><span class="n">Step 2</span> Why: removes redundancy and update/insert/delete anomalies.</div>
+</div>
+
+<div class="scratch-work">
+$\forall$ non-trivial FD $\alpha \to \beta$ on $R$:<br>
+$\alpha$ is a super key<br>
+<strong>→ goal: no anomalies</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q14:</span> $R$ is in <span class="kw">BCNF</span> iff for every non-trivial FD $\alpha \to \beta$ on $R$, $\alpha$ is a <span class="box">super key of $R$</span>.<br>
+Goal: eliminate redundancy and the <span class="kw">update / insert / delete anomalies</span> when non-key attrs determine other non-key attrs.
 </div>
 
 <div class="exam-flag">
@@ -253,9 +419,20 @@ A medical student does not walk into an anatomy practical without having rehears
 <strong>Question (2 marks).</strong> A decomposition of $R$ into $R_1, R_2$ is lossless-join under FD set $F$ when what condition holds?
 </div>
 
-<div class="hand-calc">
-<h3>Model answer</h3>
-<p>The decomposition is lossless when $R_1 \cap R_2 \to R_1$ or $R_1 \cap R_2 \to R_2$ is implied by $F$; that is, the shared attributes functionally determine one of the fragments. Equivalently, $R_1 \bowtie R_2 = R$ for every legal instance, so no spurious tuples are created by the natural join.</p>
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Criterion: common attrs functionally determine at least one fragment.</div>
+<div class="paper-step"><span class="n">Step 2</span> Equivalent phrasing: natural join back produces exactly $R$, no spurious tuples.</div>
+</div>
+
+<div class="scratch-work">
+common = $R_1 \cap R_2$<br>
+need: common $\to R_1$ OR common $\to R_2$ (from $F^+$)<br>
+<strong>→ $R_1 \bowtie R_2 = R$</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q15:</span> Lossless iff $F \models (R_1 \cap R_2 \to R_1)$ or $F \models (R_1 \cap R_2 \to R_2)$; common attrs FD a fragment.<br>
+Equivalent: <span class="box">$R_1 \bowtie R_2 = R$</span> for every legal instance. <span class="mnote">// no spurious tuples from the join</span>
 </div>
 
 <div class="exam-flag">

@@ -47,6 +47,26 @@ A surgeon does not start the operation and then reach blindly for tools; the tra
 <strong>Set operators.</strong> $\cup$ (union) is a lowercase "u" with rounded bottom. $\cap$ (intersection) is $\cup$ flipped upside-down. $-$ (difference) is a plain minus sign. $\times$ (Cartesian product) is a multiplication sign; do not confuse with "x" letter.
 </div>
 
+<div class="paper-answer">
+<span class="q-num">Ex A(i):</span> "names of employees who borrowed a Springer book" <span class="mnote">// project after select+join</span><br>
+<br>
+<span class="ra-op">π</span><sub>name</sub>(<span class="ra-op">σ</span><sub>publisher='Springer'</sub>(<br>
+<span class="indent-1">employee <span class="ra-op">⋈</span> borrow <span class="ra-op">⋈</span> books))<br>
+<br>
+<hr class="answer-sep">
+<span class="q-num">Ex A(ii):</span> "employees who borrowed every Springer book" <span class="mnote">// "every" &rarr; division</span><br>
+<br>
+<span class="ra-op">π</span><sub>name</sub>(employee <span class="ra-op">⋈</span><br>
+<span class="indent-1">(<span class="ra-op">π</span><sub>empid, isbn</sub>(borrow) <span class="ra-op">÷</span><br>
+<span class="indent-2"><span class="ra-op">π</span><sub>isbn</sub>(<span class="ra-op">σ</span><sub>pub='Springer'</sub>(books))))<br>
+<br>
+<hr class="answer-sep">
+<span class="q-num">Ex A(iii):</span> self-join with rename <span class="mnote">// rho first, then sigma on cross</span><br>
+<br>
+R = <span class="ra-op">ρ</span><sub>A1</sub>(account), S = <span class="ra-op">ρ</span><sub>A2</sub>(account)<br>
+<span class="ra-op">σ</span><sub>R.bal &gt; S.bal</sub>(R <span class="ra-op">×</span> S)<br>
+</div>
+
 <div class="hand-calc">
 <h3>Writing subscripts cleanly</h3>
 
@@ -102,6 +122,23 @@ where e.employee_name = w.employee_name<br>
 &nbsp;&nbsp;)<br>
 group by e.name<br>
 having avg(w.employee_salary) &gt; 50000;
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Ex B:</span> handwritten-shape SQL <span class="mnote">// lowercase kw; one clause per line</span><br>
+<br>
+<span class="kw">select</span> e.name, <span class="kw">avg</span>(w.salary) <span class="kw">as</span> avg_sal<br>
+<span class="kw">from</span> employee e, works w<br>
+<span class="kw">where</span> e.emp_name = w.emp_name<br>
+<span class="indent-1"><span class="kw">and</span> w.company <span class="kw">in</span> (</span><br>
+<span class="indent-2"><span class="kw">select</span> company</span><br>
+<span class="indent-2"><span class="kw">from</span> company</span><br>
+<span class="indent-2"><span class="kw">where</span> city = 'Lethbridge'</span><br>
+<span class="indent-1">)</span><br>
+<span class="kw">group by</span> e.name<br>
+<span class="kw">having</span> <span class="kw">avg</span>(w.salary) &gt; 50000 ;<br>
+<hr class="answer-sep">
+<span class="mnote">&uarr; each <span class="kw">and</span> lines up under the first predicate. Subquery indents one level. Final <em>;</em> visible.</span>
 </div>
 
 <div class="hand-calc">
@@ -166,6 +203,68 @@ having avg(w.employee_salary) &gt; 50000;
 <strong>Paper order.</strong> Pencil first; place entities at the top and spread them out. Draw relationships (diamonds) between them. Add attributes last. Once everything fits, ink over in pen. Never start in pen.
 </div>
 
+<div class="paper-er">
+<svg viewBox="0 0 680 360" width="100%">
+  <!-- Strong entity -->
+  <rect class="filled" x="30" y="140" width="130" height="55" rx="3"/>
+  <text x="95" y="172" text-anchor="middle" font-size="14">Employee</text>
+  <text x="95" y="215" text-anchor="middle" font-size="10" font-style="italic" fill="#a85c5c">strong (single border)</text>
+  <!-- simple attribute -->
+  <ellipse class="filled" cx="45" cy="60" rx="30" ry="13"/>
+  <text x="45" y="64" text-anchor="middle" font-size="12" text-decoration="underline">empid</text>
+  <line x1="55" y1="72" x2="75" y2="140"/>
+  <text x="10" y="40" font-size="10" font-style="italic" fill="#a85c5c">PK: solid underline</text>
+  <!-- multi-valued: double ellipse -->
+  <ellipse cx="135" cy="50" rx="34" ry="15"/>
+  <ellipse class="filled" cx="135" cy="50" rx="30" ry="12"/>
+  <text x="135" y="54" text-anchor="middle" font-size="11">phones</text>
+  <line x1="135" y1="65" x2="115" y2="140"/>
+  <text x="175" y="30" font-size="10" font-style="italic" fill="#a85c5c">multi-valued: double oval</text>
+  <!-- derived: dashed ellipse -->
+  <ellipse class="filled" cx="70" cy="245" rx="34" ry="14" stroke-dasharray="4 3"/>
+  <text x="70" y="250" text-anchor="middle" font-size="11">age</text>
+  <line x1="70" y1="230" x2="70" y2="195"/>
+  <text x="110" y="265" font-size="10" font-style="italic" fill="#a85c5c">derived: dashed</text>
+
+  <!-- normal diamond relationship -->
+  <polygon class="rel" points="210,165 265,140 320,165 265,190"/>
+  <text x="265" y="170" text-anchor="middle" font-size="12">borrows</text>
+  <line x1="160" y1="165" x2="210" y2="165"/>
+  <text x="185" y="158" font-size="12">1</text>
+  <!-- attribute on relationship (date) -->
+  <ellipse class="filled" cx="265" cy="100" rx="28" ry="13"/>
+  <text x="265" y="104" text-anchor="middle" font-size="11">date</text>
+  <line x1="265" y1="113" x2="265" y2="140"/>
+
+  <!-- weak entity: double rectangle -->
+  <rect x="350" y="138" width="130" height="55"/>
+  <rect class="filled" x="353" y="141" width="124" height="49"/>
+  <text x="415" y="172" text-anchor="middle" font-size="14">Loan_pmt</text>
+  <line x1="320" y1="165" x2="350" y2="165"/>
+  <text x="330" y="158" font-size="12">N</text>
+  <text x="415" y="215" text-anchor="middle" font-size="10" font-style="italic" fill="#a85c5c">weak: double border</text>
+  <!-- weak entity discriminator (dashed underline) -->
+  <ellipse class="filled" cx="450" cy="245" rx="34" ry="14"/>
+  <text x="450" y="250" text-anchor="middle" font-size="11" style="text-decoration: underline dashed;">pmt_no</text>
+  <line x1="430" y1="232" x2="420" y2="193"/>
+
+  <!-- ISA triangle -->
+  <rect class="filled" x="520" y="30" width="120" height="45" rx="3"/>
+  <text x="580" y="58" text-anchor="middle" font-size="14">Person</text>
+  <polygon class="rel" points="555,100 605,100 580,130"/>
+  <text x="580" y="117" text-anchor="middle" font-size="10">ISA</text>
+  <line x1="580" y1="75" x2="580" y2="100"/>
+  <rect class="filled" x="525" y="150" width="115" height="40" rx="3"/>
+  <text x="582" y="175" text-anchor="middle" font-size="13">Employee</text>
+  <line x1="580" y1="130" x2="580" y2="150"/>
+  <text x="580" y="210" text-anchor="middle" font-size="10" font-style="italic" fill="#a85c5c">ISA: triangle, apex &uarr; to super</text>
+
+  <!-- total participation: double line (draw doubled lines between Employee and borrows) -->
+  <line x1="159" y1="170" x2="210" y2="170"/>
+  <text x="180" y="195" font-size="10" font-style="italic" fill="#a85c5c">double line = total part.</text>
+</svg>
+</div>
+
 <!-- ============================================================ -->
 <h2>Part D: FD Proof Layout</h2>
 
@@ -196,6 +295,22 @@ having avg(w.employee_salary) &gt; 50000;
 </div>
 
 <p>Notice: each step numbered on the left, FD in the middle, justification in parentheses on the right naming the rule and which prior steps were used. Close with $\blacksquare$ (or "QED" or "$\square$").</p>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Ex D:</span> prove pseudo-transitivity <span class="mnote">// number; cite rule; cite step</span><br>
+<br>
+Given: <span class="ra-op">α</span> &rarr; <span class="ra-op">β</span> , <span class="ra-op">γβ</span> &rarr; <span class="ra-op">δ</span><br>
+Show:  <span class="ra-op">αγ</span> &rarr; <span class="ra-op">δ</span><br>
+<hr class="answer-sep">
+<pre>
+ 1.  α → β                 (given)
+ 2.  αγ → βγ               (augmentation, from 1)
+ 3.  γβ → δ                (given)
+ 4.  βγ → δ                (commutativity of set, from 3)
+ 5.  αγ → δ                (transitivity, from 2 and 4)      ∎
+</pre>
+<span class="mnote">&rarr; each step earns partial marks; never skip the rule name.</span>
 </div>
 
 <div class="note">
@@ -232,6 +347,31 @@ having avg(w.employee_salary) &gt; 50000;
 <p>Both leaves are boxed (marked with ✓ BCNF); no further decomposition needed. The arrow is annotated with the violating FD that caused the split.</p>
 </div>
 
+<div class="paper-answer">
+<span class="q-num">Ex E:</span> BCNF decomposition tree (A4 Q6 shape) <span class="mnote">// label arrows with the FD that split</span><br>
+<br>
+<pre>
+                  R = (A, B, C, D, E)
+                  F = { A→BC , CD→E , B→D , E→A }
+                  CKs: {A}, {BC}, {CD}, {E}
+
+                  Violation: B → D     (B not superkey)
+                            |
+                            |  split on B → D
+                            v
+                  +---------+---------+
+                  |                   |
+                  v                   v
+              ┌────────┐        R2 = (A, B, C, E)
+              │ R1 =   │        FDs: { A→BC , E→A , BC→E }
+              │ (B, D) │        CKs: {A}, {BC}, {E}
+              │ B → D  │        ✓ BCNF
+              │ ✓ BCNF │
+              └────────┘
+</pre>
+<span class="mnote">&rarr; box every BCNF leaf; label every split arrow with its FD.</span>
+</div>
+
 <div class="why-box">
 <h3>Why the tree diagram earns marks</h3>
 <p>The tree makes the decomposition <em>visible</em>; the grader can trace every step without squinting. It also forces you to label the violating FD at each split, which is explicitly required for full marks. Students who just write "R &rarr; R1 and R2" without the FD label lose 1-2 marks.</p>
@@ -263,6 +403,26 @@ having avg(w.employee_salary) &gt; 50000;
 <div class="exam-flag">
 <h4>The BCNF showpiece is the time sink</h4>
 <p>That 25-minute block looks long, but it contains five sub-tasks: find candidate keys, identify violation, decompose, check lossless, check dependency preservation. Each takes 4-6 minutes. If you start this at the 150-minute mark with only 10 minutes left, you cannot finish. Schedule it so it ends by the 175-minute mark. Leave at least 5 minutes true buffer for review.</p>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Ex F:</span> pacing note &mdash; write this at the top of the cover sheet before starting <span class="mnote">// your clock map</span><br>
+<br>
+<pre>
+  === PACING (180 min / 120 marks) ===
+  0:00 &rarr; Q1-Q6  concepts    (12m,   +18)
+  0:18 &rarr; Q7-Q9  SQL         (32m,   +48)   end 1:06
+  1:06 &rarr; Q10-Q11 RA         (28m,   +24)   end 1:34
+  1:34 &rarr; Q12 ER+ISA         (22m,   +15)   end 1:56
+  1:56 &rarr; Q13 ER&rarr;Rel         (12m,   +8 )   end 2:08
+  2:08 &rarr; Q14 FD             (15m,   +10)   end 2:23
+  2:23 &rarr; Q15 BCNF showpiece (25m,   +15)   end 2:48
+  2:48 &rarr; Q16 integration    (10m,   +10)   end 2:58
+  2:58 &rarr; REVIEW buffer       (12m)         end 3:00  ;
+</pre>
+<span class="mnote">&rarr; cross off each block as you finish it. If a block blows its slot, mark the mm:ss overrun in the margin.</span>
+<hr class="answer-sep">
+<span class="box">HARD RULE</span> &nbsp; Q15 must START by 2:23. If still on Q14 at 2:20, cut losses and jump to Q15.
 </div>
 
 <!-- ============================================================ -->

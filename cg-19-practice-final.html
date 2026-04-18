@@ -207,6 +207,10 @@ You do not learn to fly in the air. You learn it in the simulator, on the ground
 <p><strong>Difficulty is hidden on the question itself</strong> so you get an honest read; difficulty tags live inside the Reveal blocks.</p>
 </div>
 
+<div class="note">
+<strong>New: every solution now shows paper-answer format.</strong> When you reveal a solution, the first block shows the answer as you would physically write it on exam paper (underlined keywords, proper indentation, margin notes). The detailed explanation follows below for learning.
+</div>
+
 <div class="download-box">
 <a class="dl-link" href="pdfs/3660-practice-final.pdf" target="_blank">
 Practice Exam PDF (no solutions)
@@ -226,6 +230,13 @@ Full Solutions PDF
 <h3>Question 1 <span class="qmeta">2 marks</span></h3>
 <p>Explain the difference between <strong>DML</strong> and <strong>DDL</strong>. Give one example of each.</p>
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q1:</span><br>
+<span class="kw">DDL</span> = Data Definition Lang &rarr; <em>schema</em>. <span class="mnote">// containers</span><br>
+&nbsp;&nbsp;ex: <span class="kw">create</span>, <span class="kw">alter</span>, <span class="kw">drop</span>, <span class="kw">truncate</span>.<br>
+<span class="kw">DML</span> = Data Manipulation Lang &rarr; <em>data</em>. <span class="mnote">// contents</span><br>
+&nbsp;&nbsp;ex: <span class="kw">insert</span>, <span class="kw">update</span>, <span class="kw">delete</span>, <span class="kw">select</span>.<br>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: Midterm Q1, A1 Q1 (recurring opener). Difficulty: Basic.</div>
 <h4>Your Answer</h4>
@@ -242,6 +253,15 @@ Full Solutions PDF
 <h3>Question 2 <span class="qmeta">2 marks</span></h3>
 <p>What is the difference between a <strong>superkey</strong>, a <strong>candidate key</strong>, and a <strong>primary key</strong>? Can a relation have more than one candidate key?</p>
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q2:</span><br>
+<span class="kw">superkey</span>: any attr-set that uniquely IDs a tuple.<br>
+<span class="kw">candidate key</span>: a <u>minimal</u> superkey (no proper subset works).<br>
+<span class="kw">primary key</span>: the CK the designer picks as main ID.<br>
+<hr class="answer-sep">
+Yes &mdash; can have many CKs. <span class="mnote">// e.g. employee(SIN, emp_id, name): {SIN}, {emp_id} both CKs</span><br>
+Hierarchy: superkey &supe; candidate key &supe; primary key.
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: Midterm Q2, A1 Q3. Difficulty: Basic.</div>
 <h4>Your Answer</h4>
@@ -258,6 +278,16 @@ Full Solutions PDF
 <h3>Question 3 <span class="qmeta">2 marks</span></h3>
 <p>In an E-R diagram, what distinguishes a <strong>strong entity set</strong> from a <strong>weak entity set</strong>? Give one example of each.</p>
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q3:</span><br>
+<span class="kw">Strong</span>: has its own PK; exists on its own. <span class="mnote">// single rectangle</span><br>
+&nbsp;&nbsp;ex: loan(<u>loan_number</u>, amount)<br>
+<span class="kw">Weak</span>: no standalone PK &rarr; ID = owner PK + discriminator. <span class="mnote">// double rectangle</span><br>
+&nbsp;&nbsp;ex: payment(payment_no, date, amt) owned by loan<br>
+&nbsp;&nbsp;full key = (<u>loan_number</u>, <u>payment_no</u>)<br>
+<hr class="answer-sep">
+<span class="mnote">&rarr; identifying rel = double diamond; weak entity always has total part. (double line).</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A3 Q5, A3 Q7 (loan/payment). Difficulty: Basic.</div>
 <h4>Your Answer</h4>
@@ -274,6 +304,14 @@ Full Solutions PDF
 <h3>Question 4 <span class="qmeta">2 marks</span></h3>
 <p>Using only the basic relational algebra operations ($\sigma, \pi, \times, \cup, -$), express the intersection $r \cap s$.</p>
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q4:</span> express r &cap; s using only primitives <span class="mnote">// &cap; is derived</span><br>
+<br>
+&nbsp;&nbsp;r <span class="ra-op">&cap;</span> s = r <span class="ra-op">&minus;</span> (r <span class="ra-op">&minus;</span> s)<br>
+<hr class="answer-sep">
+<span class="mnote">reasoning: (r&minus;s) = tuples in r not in s. Subtract that from r &rarr; exactly what r and s share.</span><br>
+<span class="mnote">6 primitives: &sigma;, &pi;, &times;, &cup;, &minus;, &rho;.</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A1 Q4, Midterm Q6. Difficulty: Basic.</div>
 <h4>Your Answer</h4>
@@ -289,6 +327,15 @@ Full Solutions PDF
 <h3>Question 5 <span class="qmeta">2 marks</span></h3>
 <p>Define <strong>BCNF</strong>. Why do we aim for BCNF in database design?</p>
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q5:</span> <span class="kw">BCNF</span> definition + motivation<br>
+<br>
+R is in <span class="kw">BCNF</span> iff for every non-trivial FD &alpha; &rarr; &beta; in F<sup>+</sup>,<br>
+&nbsp;&nbsp;&alpha; is a <span class="box">superkey</span> of R.<br>
+<hr class="answer-sep">
+<span class="kw">Why?</span> Any FD whose LHS is not a SK causes RHS to repeat &rarr; update/insert/delete anomalies. <span class="mnote">// BCNF kills them structurally.</span><br>
+(trivial = &beta; &sube; &alpha; &rarr; exempt)
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A4 Q2, expanded for final scope. Difficulty: Basic.</div>
 <h4>Your Answer</h4>
@@ -305,6 +352,16 @@ Full Solutions PDF
 <h3>Question 6 <span class="qmeta">2 marks</span></h3>
 <p>What does the functional dependency $\alpha \to \beta$ mean? Give a counterexample showing that $\alpha \to \beta$ does NOT imply $\beta \to \alpha$.</p>
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q6:</span> meaning of &alpha; &rarr; &beta; ; + counterexample<br>
+<br>
+<span class="kw">Meaning:</span> &forall; tuples t<sub>1</sub>, t<sub>2</sub>: if t<sub>1</sub>[&alpha;] = t<sub>2</sub>[&alpha;] then t<sub>1</sub>[&beta;] = t<sub>2</sub>[&beta;]. <span class="mnote">// &beta; is a function of &alpha;</span><br>
+<hr class="answer-sep">
+<span class="kw">Counter:</span> student(<u>student_id</u>, student_name)<br>
+&nbsp;&nbsp;student_id &rarr; student_name &nbsp; <span class="circled">holds</span><br>
+&nbsp;&nbsp;student_name &rarr; student_id &nbsp; <span class="struck">holds</span> &rarr; two "John Smith"s with different IDs.<br>
+<span class="mnote">&rarr; FDs are <u>directional</u>, not symmetric.</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A4 Q1, expanded for final scope. Difficulty: Basic.</div>
 <h4>Your Answer</h4>
@@ -334,6 +391,34 @@ appointment(patient_id, doctor_id, appt_date, fee)</pre>
 <div class="subq">(c) (4 marks) Find the names of patients who have had more appointments than the overall average number of appointments per patient.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q7(a):</span> patients with Cardiology appt <span class="mnote">// 3-table join</span><br>
+<br>
+<span class="kw">select distinct</span> p.patient_name<br>
+<span class="kw">from</span> patient p, doctor d, appointment a<br>
+<span class="kw">where</span> p.patient_id = a.patient_id<br>
+<span class="indent-1"><span class="kw">and</span> a.doctor_id = d.doctor_id</span><br>
+<span class="indent-1"><span class="kw">and</span> d.specialty = 'Cardiology' ;</span><br>
+<hr class="answer-sep">
+<span class="q-num">Q7(b):</span> specialties w/ avg fee &gt; 200 <span class="mnote">// group + having (aggregate &rarr; having, not where)</span><br>
+<br>
+<span class="kw">select</span> d.specialty, <span class="kw">avg</span>(a.fee) <span class="kw">as</span> avg_fee<br>
+<span class="kw">from</span> doctor d, appointment a<br>
+<span class="kw">where</span> d.doctor_id = a.doctor_id<br>
+<span class="kw">group by</span> d.specialty<br>
+<span class="kw">having</span> <span class="kw">avg</span>(a.fee) &gt; 200 ;<br>
+<hr class="answer-sep">
+<span class="q-num">Q7(c):</span> patients w/ more appts than avg <span class="mnote">// nested aggregate; *1.0 for float</span><br>
+<br>
+<span class="kw">select</span> p.patient_name<br>
+<span class="kw">from</span> patient p, appointment a<br>
+<span class="kw">where</span> p.patient_id = a.patient_id<br>
+<span class="kw">group by</span> p.patient_id, p.patient_name<br>
+<span class="kw">having</span> <span class="kw">count</span>(*) &gt; (<br>
+<span class="indent-1"><span class="kw">select</span> <span class="kw">count</span>(*) * 1.0 / <span class="kw">count</span>(<span class="kw">distinct</span> patient_id)</span><br>
+<span class="indent-1"><span class="kw">from</span> appointment</span><br>
+) ;
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A2 Q7 + Midterm Q6-Q7. Hospital is structurally analogous to the Employee-Works-Company trio. Difficulty: Medium.</div>
 
@@ -383,6 +468,40 @@ supervises(staff_id, supervisor_id)</pre>
 <div class="subq">(c) (5 marks) Find staff whose flights_assigned at every airport is strictly greater than that of staff with staff_id = 100. Use ALL or NOT EXISTS.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q8(a):</span> staff living in supervisor's city <span class="mnote">// self-join: alias staff twice</span><br>
+<br>
+<span class="kw">select</span> s1.staff_name<br>
+<span class="kw">from</span> staff s1, supervises sp, staff s2<br>
+<span class="kw">where</span> s1.staff_id = sp.staff_id<br>
+<span class="indent-1"><span class="kw">and</span> sp.supervisor_id = s2.staff_id</span><br>
+<span class="indent-1"><span class="kw">and</span> s1.staff_city = s2.staff_city ;</span><br>
+<hr class="answer-sep">
+<span class="q-num">Q8(b):</span> view busy_staff (total flights &ge; 50) <span class="mnote">// wrap select in create view</span><br>
+<br>
+<span class="kw">create view</span> busy_staff <span class="kw">as</span><br>
+<span class="kw">select</span> s.staff_id, s.staff_name, <span class="kw">sum</span>(r.flights_assigned) <span class="kw">as</span> total_flights<br>
+<span class="kw">from</span> staff s, route r<br>
+<span class="kw">where</span> s.staff_id = r.staff_id<br>
+<span class="kw">group by</span> s.staff_id, s.staff_name<br>
+<span class="kw">having</span> <span class="kw">sum</span>(r.flights_assigned) &gt;= 50 ;<br>
+<hr class="answer-sep">
+<span class="q-num">Q8(c):</span> staff beating 100 at every airport <span class="mnote">// &forall; &rarr; double NOT EXISTS</span><br>
+<br>
+<span class="kw">select</span> s.staff_name<br>
+<span class="kw">from</span> staff s<br>
+<span class="kw">where</span> s.staff_id &lt;&gt; 100<br>
+<span class="indent-1"><span class="kw">and not exists</span> (</span><br>
+<span class="indent-2"><span class="kw">select</span> *</span><br>
+<span class="indent-2"><span class="kw">from</span> route r100</span><br>
+<span class="indent-2"><span class="kw">where</span> r100.staff_id = 100</span><br>
+<span class="indent-2">&nbsp;&nbsp;<span class="kw">and not exists</span> (</span><br>
+<span class="indent-2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">select</span> * <span class="kw">from</span> route r</span><br>
+<span class="indent-2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">where</span> r.staff_id = s.staff_id</span><br>
+<span class="indent-2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">and</span> r.airport_code = r100.airport_code</span><br>
+<span class="indent-2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">and</span> r.flights_assigned &gt; r100.flights_assigned))</span>  ;<br>
+<span class="mnote">pattern: "for all x in B, P(x)" &equiv; "NOT EXISTS x in B: NOT P(x)".</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A2 Q7 + A3 Q3 + Midterm Q9. Supervises mirrors the manages relation; part (c) mirrors the ">= ALL" pattern. Difficulty: Medium-Hard.</div>
 
@@ -437,6 +556,28 @@ supplies(supplier_id, dept_id, item_count)</pre>
 <div class="subq">(b) (6 marks) Find suppliers who supply to every department (universal quantification). Use NOT EXISTS with EXCEPT.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q9(a):</span> suppliers serving &ge;1 Calgary dept <span class="mnote">// 3-table join + city filter</span><br>
+<br>
+<span class="kw">select distinct</span> s.supplier_name<br>
+<span class="kw">from</span> supplier s, supplies sup, department d<br>
+<span class="kw">where</span> s.supplier_id = sup.supplier_id<br>
+<span class="indent-1"><span class="kw">and</span> sup.dept_id = d.dept_id</span><br>
+<span class="indent-1"><span class="kw">and</span> d.dept_city = 'Calgary' ;</span><br>
+<hr class="answer-sep">
+<span class="q-num">Q9(b):</span> suppliers serving <u>every</u> dept <span class="mnote">// A &supe; B  &equiv;  NOT EXISTS (B EXCEPT A)</span><br>
+<br>
+<span class="kw">select</span> s.supplier_name<br>
+<span class="kw">from</span> supplier s<br>
+<span class="kw">where not exists</span> (<br>
+<span class="indent-1">(<span class="kw">select</span> dept_id <span class="kw">from</span> department)</span><br>
+<span class="indent-1"><span class="kw">except</span></span><br>
+<span class="indent-1">(<span class="kw">select</span> sup.dept_id</span><br>
+<span class="indent-1">&nbsp;<span class="kw">from</span> supplies sup</span><br>
+<span class="indent-1">&nbsp;<span class="kw">where</span> sup.supplier_id = s.supplier_id)</span><br>
+) ;<br>
+<span class="mnote">&rarr; B = all dept_ids; A = dept_ids this supplier serves. If B&minus;A empty &rarr; covers all.</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A3 Q3(b) (companies in every city where IBM is). Difficulty: Hard.</div>
 
@@ -483,6 +624,33 @@ cites(rid, pid, citation_date)</pre>
 <div class="subq">(d) (3 marks) SQL DDL: CREATE TABLE for the <code>cites</code> relation with PK and FK constraints.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q10(a):</span> RA, cited a Nature paper<br>
+<br>
+<span class="ra-op">&pi;</span><sub>name</sub>(researcher <span class="ra-op">&bowtie;</span> cites <span class="ra-op">&bowtie;</span> <span class="ra-op">&sigma;</span><sub>venue='Nature'</sub>(paper))<br>
+<hr class="answer-sep">
+<span class="q-num">Q10(b):</span> cited <u>every</u> Nature paper <span class="mnote">// "every" &rarr; division</span><br>
+<br>
+T = <span class="ra-op">&pi;</span><sub>rid, pid</sub>(cites) <span class="ra-op">&divide;</span> <span class="ra-op">&pi;</span><sub>pid</sub>(<span class="ra-op">&sigma;</span><sub>venue='Nature'</sub>(paper))<br>
+result = <span class="ra-op">&pi;</span><sub>name</sub>(researcher <span class="ra-op">&bowtie;</span> T)<br>
+<hr class="answer-sep">
+<span class="q-num">Q10(c):</span> researchers who cited &gt;5 papers per venue <span class="mnote">// grouping + count</span><br>
+<br>
+J = cites <span class="ra-op">&bowtie;</span> paper<br>
+G = <sub>venue, rid</sub><span class="ra-op">&gamma;</span><sub>count-distinct(pid) &rarr; cnt</sub>(J)<br>
+result = <span class="ra-op">&pi;</span><sub>name, venue</sub>(researcher <span class="ra-op">&bowtie;</span> <span class="ra-op">&sigma;</span><sub>cnt&gt;5</sub>(G))<br>
+<hr class="answer-sep">
+<span class="q-num">Q10(d):</span> DDL for <em>cites</em> <span class="mnote">// composite PK; cascade on delete</span><br>
+<br>
+<span class="kw">create table</span> cites (<br>
+<span class="indent-1">rid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">integer not null</span>,</span><br>
+<span class="indent-1">pid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">integer not null</span>,</span><br>
+<span class="indent-1">citation_date <span class="kw">date</span>,</span><br>
+<span class="indent-1"><span class="kw">primary key</span> (rid, pid),</span><br>
+<span class="indent-1"><span class="kw">foreign key</span> (rid) <span class="kw">references</span> researcher(rid) <span class="kw">on delete cascade</span>,</span><br>
+<span class="indent-1"><span class="kw">foreign key</span> (pid) <span class="kw">references</span> paper(pid) <span class="kw">on delete cascade</span></span><br>
+) ;
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A1 Q7 + A2 Q1 + Midterm Q8 (Library-analog). Difficulty: Medium-Hard.</div>
 
@@ -524,6 +692,32 @@ $$\text{result} = \pi_{\text{name}, \text{venue}}\!\left( \text{researcher} \bow
 <div class="subq">(c) (2 marks) $R \cap S$</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q11(a):</span> <span class="ra-op">&pi;</span><sub>A,D</sub>(<span class="ra-op">&sigma;</span><sub>A='x'</sub>(R <span class="ra-op">&bowtie;</span> S))<br>
+<br>
+<span class="kw">select</span> r.A, s.D<br>
+<span class="kw">from</span> R r, S s<br>
+<span class="kw">where</span> r.A = 'x'<br>
+<span class="indent-1"><span class="kw">and</span> r.B = s.B</span><br>
+<span class="indent-1"><span class="kw">and</span> r.C = s.C ;</span><br>
+<hr class="answer-sep">
+<span class="q-num">Q11(b):</span> <span class="ra-op">&pi;</span><sub>A</sub>(R) <span class="ra-op">&minus;</span> <span class="ra-op">&pi;</span><sub>A</sub>(<span class="ra-op">&sigma;</span><sub>D='y'</sub>(S)) <span class="mnote">// &minus; &rarr; EXCEPT</span><br>
+<br>
+(<span class="kw">select</span> A <span class="kw">from</span> R)<br>
+<span class="kw">except</span><br>
+(<span class="kw">select</span> R.A <span class="kw">from</span> R, S<br>
+<span class="indent-1"><span class="kw">where</span> R.B=S.B <span class="kw">and</span> R.C=S.C <span class="kw">and</span> S.D='y') ;</span><br>
+<hr class="answer-sep">
+<span class="q-num">Q11(c):</span> R <span class="ra-op">&cap;</span> S <span class="mnote">// &larr; FLAG: schemas differ; need union-compatible!</span><br>
+<br>
+<span class="box">NOTE</span> R(A,B,C) and S(B,C,D) &rarr; not union-compatible.<br>
+Intended: intersection on shared (B, C):<br>
+<br>
+(<span class="kw">select</span> B, C <span class="kw">from</span> R)<br>
+<span class="kw">intersect</span><br>
+(<span class="kw">select</span> B, C <span class="kw">from</span> S) ;<br>
+<span class="mnote">&rarr; the <u>flag</u> is part of the marks.</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A2 Q3-Q5. Standard RA-to-SQL translation drill. Difficulty: Medium.</div>
 
@@ -572,6 +766,133 @@ intersect
 <div class="subq">(c) (5 marks) Add the subscription plans using generalization / ISA. Show the ISA and list shared vs specific attributes.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-er">
+<svg viewBox="0 0 740 460" width="100%">
+  <!-- user -->
+  <rect class="filled" x="20" y="150" width="120" height="50" rx="3"/>
+  <text x="80" y="180" text-anchor="middle" font-size="13">user</text>
+  <ellipse class="filled" cx="30" cy="90" rx="32" ry="13"/>
+  <text x="30" y="94" text-anchor="middle" font-size="11" text-decoration="underline">user_id</text>
+  <line x1="40" y1="102" x2="60" y2="150"/>
+  <ellipse class="filled" cx="105" cy="90" rx="28" ry="13"/>
+  <text x="105" y="94" text-anchor="middle" font-size="11">email</text>
+  <line x1="105" y1="103" x2="95" y2="150"/>
+
+  <!-- creates -->
+  <polygon class="rel" points="155,215 205,195 255,215 205,235"/>
+  <text x="205" y="220" text-anchor="middle" font-size="11">creates</text>
+  <line x1="90" y1="200" x2="155" y2="215"/>
+  <text x="120" y="203" font-size="11">1</text>
+  <!-- playlist -->
+  <rect class="filled" x="265" y="190" width="120" height="50" rx="3"/>
+  <text x="325" y="220" text-anchor="middle" font-size="13">playlist</text>
+  <line x1="255" y1="215" x2="265" y2="215"/>
+  <text x="260" y="208" font-size="11">N</text>
+  <ellipse class="filled" cx="330" cy="275" rx="42" ry="13"/>
+  <text x="330" y="279" text-anchor="middle" font-size="11" text-decoration="underline">playlist_id</text>
+  <line x1="325" y1="262" x2="325" y2="240"/>
+
+  <!-- contains -->
+  <polygon class="rel" points="410,215 460,195 510,215 460,235"/>
+  <text x="460" y="220" text-anchor="middle" font-size="11">contains</text>
+  <line x1="385" y1="215" x2="410" y2="215"/>
+  <text x="395" y="208" font-size="11">M</text>
+  <!-- song -->
+  <rect class="filled" x="520" y="190" width="120" height="50" rx="3"/>
+  <text x="580" y="220" text-anchor="middle" font-size="13">song</text>
+  <line x1="510" y1="215" x2="520" y2="215"/>
+  <text x="513" y="208" font-size="11">N</text>
+  <ellipse class="filled" cx="655" cy="150" rx="34" ry="13"/>
+  <text x="655" y="154" text-anchor="middle" font-size="11" text-decoration="underline">song_id</text>
+  <line x1="625" y1="158" x2="625" y2="190"/>
+  <ellipse class="filled" cx="670" cy="260" rx="34" ry="13"/>
+  <text x="670" y="264" text-anchor="middle" font-size="11">title</text>
+  <line x1="640" y1="255" x2="630" y2="240"/>
+
+  <!-- performs (artist primary, 1:N) -->
+  <polygon class="rel" points="540,80 590,60 640,80 590,100"/>
+  <text x="590" y="85" text-anchor="middle" font-size="11">performs</text>
+  <line x1="580" y1="100" x2="580" y2="190"/>
+  <text x="590" y="150" font-size="11">N</text>
+  <!-- features (artist featured, M:N) -->
+  <polygon class="rel" points="380,315 440,295 500,315 440,335"/>
+  <text x="440" y="320" text-anchor="middle" font-size="11">features</text>
+  <line x1="580" y1="240" x2="500" y2="315"/>
+  <text x="540" y="290" font-size="11">M</text>
+
+  <!-- artist -->
+  <rect class="filled" x="530" y="20" width="120" height="40" rx="3"/>
+  <text x="590" y="45" text-anchor="middle" font-size="13">artist</text>
+  <line x1="590" y1="60" x2="590" y2="60"/>
+  <text x="600" y="72" font-size="11">1</text>
+  <line x1="440" y1="295" x2="590" y2="60"/>
+  <text x="500" y="255" font-size="11">N</text>
+
+  <!-- subscribes_to -->
+  <polygon class="rel" points="40,320 100,300 160,320 100,340"/>
+  <text x="100" y="325" text-anchor="middle" font-size="10">subscribes</text>
+  <line x1="80" y1="200" x2="80" y2="300"/>
+  <text x="90" y="260" font-size="11">M</text>
+  <line x1="160" y1="320" x2="530" y2="60"/>
+  <text x="350" y="210" font-size="11">N</text>
+
+  <!-- has subscription (1:1 with total on user) -->
+  <polygon class="rel" points="180,390 240,370 300,390 240,410"/>
+  <text x="240" y="395" text-anchor="middle" font-size="11">has</text>
+  <line x1="80" y1="200" x2="180" y2="390"/>
+  <text x="110" y="320" font-size="11">1</text>
+  <!-- subscription (supertype) -->
+  <rect class="filled" x="320" y="365" width="140" height="45" rx="3"/>
+  <text x="390" y="392" text-anchor="middle" font-size="13">subscription</text>
+  <line x1="300" y1="390" x2="320" y2="390"/>
+  <text x="308" y="383" font-size="11">1</text>
+  <!-- ISA triangle -->
+  <polygon class="rel" points="360,420 420,420 390,445"/>
+  <text x="390" y="438" text-anchor="middle" font-size="9">ISA</text>
+  <line x1="390" y1="410" x2="390" y2="420"/>
+  <!-- three subtype boxes: Free, Premium, Family -->
+  <rect class="filled" x="270" y="450" width="80" height="30"/>
+  <text x="310" y="470" text-anchor="middle" font-size="11">Free</text>
+  <rect class="filled" x="360" y="450" width="80" height="30"/>
+  <text x="400" y="470" text-anchor="middle" font-size="11">Premium</text>
+  <rect class="filled" x="450" y="450" width="80" height="30"/>
+  <text x="490" y="470" text-anchor="middle" font-size="11">Family</text>
+  <line x1="370" y1="445" x2="310" y2="450"/>
+  <line x1="390" y1="445" x2="400" y2="450"/>
+  <line x1="410" y1="445" x2="490" y2="450"/>
+  <text x="560" y="478" font-size="10" font-style="italic" fill="#a85c5c">disjoint + total</text>
+</svg>
+</div>
+<div class="paper-answer">
+<span class="q-num">Q12(a):</span> entities + PKs<br>
+<pre>
+user       (<u>user_id</u>, email, join_date, country)
+artist     (<u>artist_id</u>, name, country_of_origin)
+song       (<u>song_id</u>, title, duration, release_year)
+playlist   (<u>playlist_id</u>, name, created_date)
+</pre>
+<strong>Rels / cards / part.:</strong>
+<pre>
+creates       user --1:N--&gt; playlist     (playlist: total)
+contains      playlist M:N  song          (partial both)
+subscribes_to user M:N  artist            (partial)
+performs      artist --1:N--&gt; song      (song: total, primary)
+features      artist M:N  song            (partial, featured)
+</pre>
+<hr class="answer-sep">
+<span class="q-num">Q12(b):</span> featured-artist multi-valued <span class="mnote">// model as M:N rel, NOT a string/multivalued attr</span><br>
+&rarr; <strong>features</strong>(<u>song_id</u>, <u>artist_id</u>) junction.<br>
+&nbsp;&nbsp;rationale: (i) clean M:N, (ii) 1NF-safe, (iii) no double-oval to flatten later.<br>
+<hr class="answer-sep">
+<span class="q-num">Q12(c):</span> plan ISA<br>
+Supertype <span class="box">subscription</span>(<u>sub_id</u>, plan_type)<br>
+&nbsp;&nbsp;ISA &darr; three subtypes:<br>
+&nbsp;&nbsp;- Free &rarr; ad_frequency<br>
+&nbsp;&nbsp;- Premium &rarr; billing_cycle<br>
+&nbsp;&nbsp;- Family &rarr; family_size<br>
+<span class="circled">disjoint</span> + <span class="circled">total</span> constraint.<br>
+user &mdash;has&mdash; subscription (1:1, total on user).
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A3 Q4 + A3 Q8(c) (generalization with multiple subtypes). Difficulty: Medium-Hard.</div>
 
@@ -621,6 +942,27 @@ intersect
 <div class="subq">(b) (4 marks) Identify all foreign keys and referential constraints. State an ON DELETE action for each.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q13(a):</span> ER &rarr; relational <span class="mnote">// 1:N merged; M:N &rarr; its own table</span><br>
+<pre>
+customer(<u>customer_id</u>, email)
+orders  (<u>order_id</u>, date, customer_id)   <span class="mnote">// 1:N places merged in</span>
+product (<u>sku</u>, price)
+contains(<u>order_id</u>, <u>sku</u>, quantity)     <span class="mnote">// M:N junction</span>
+</pre>
+<span class="mnote">&rarr; "orders" plural because ORDER is a SQL reserved word.</span>
+<hr class="answer-sep">
+<span class="q-num">Q13(b):</span> FKs + referential actions<br>
+<pre>
+orders.customer_id &rarr; customer(customer_id)   ON DELETE RESTRICT
+contains.order_id  &rarr; orders(order_id)         ON DELETE CASCADE
+contains.sku       &rarr; product(sku)              ON DELETE RESTRICT
+</pre>
+reasons:<br>
+&nbsp;&nbsp;RESTRICT cust: don't drop a cust w/ active orders.<br>
+&nbsp;&nbsp;CASCADE line items: dependent on their parent order.<br>
+&nbsp;&nbsp;RESTRICT sku: preserve sales history.
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A3 Q8(a) (entity sets + relationship FKs table). Difficulty: Basic-Medium.</div>
 
@@ -663,6 +1005,31 @@ intersect
 <div class="subq">(c) (4 marks) Prove pseudo-transitivity using Armstrong's axioms: if $\alpha \to \beta$ and $\beta\gamma \to \delta$, then $\alpha\gamma \to \delta$. Number every step and cite the axiom.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q14(a):</span> (AF)<sup>+</sup> <span class="mnote">// iterate until stable</span><br>
+<pre>
+start:          {A, F}
+apply A → B:    {A, B, F}
+apply B → CD:   {A, B, C, D, F}
+apply D → E:    {A, B, C, D, E, F}  = R    ✓
+</pre>
+<span class="box">(AF)<sup>+</sup> = R</span>
+<hr class="answer-sep">
+<span class="q-num">Q14(b):</span> candidate keys<br>
+F never appears on RHS &rarr; F in every CK.<br>
+check {A,F}: <strong>(AF)<sup>+</sup> = R</strong> &rarr; superkey.<br>
+minimality: A<sup>+</sup> = {A,B,C,D,E} miss F; F<sup>+</sup> = {F}; neither is SK.<br>
+other {X,F}: B<sup>+</sup>F = {B,C,D,E,F} miss A &cross;; C<sup>+</sup>F = {C,F} &cross;; D<sup>+</sup>F = {D,E,F} &cross;; E<sup>+</sup>F = {E,F} &cross;.<br>
+<span class="box">only CK = {A, F}</span>
+<hr class="answer-sep">
+<span class="q-num">Q14(c):</span> prove pseudo-transitivity<br>
+<pre>
+ 1.  α → β                (given)
+ 2.  αγ → βγ              (augmentation, from 1)
+ 3.  βγ → δ               (given)
+ 4.  αγ → δ               (transitivity, from 2 and 3)    ∎
+</pre>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A4 Q3 + Q4 + Q6(a) (closure + candidate key + Armstrong proof). Difficulty: Medium.</div>
 
@@ -711,6 +1078,66 @@ intersect
 <div class="subq">(d) (2 marks) Is your decomposition dependency-preserving? Justify.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-answer">
+<span class="q-num">Q15(a):</span> candidate keys <span class="mnote">// B never on RHS &rarr; B in every CK</span><br>
+<pre>
+(AB)+: {A,B} →AB→C→ {A,B,C} →C→D→ {A,B,C,D} →D→E→ R       ✓ CK
+(BC)+: {B,C} →C→D→ {B,C,D}   →D→E→ {B,C,D,E} →E→A→ R       ✓ CK
+(BD)+: {B,D} →D→E→ {B,D,E}   →E→A→ {A,B,D,E} →AB→C→ R      ✓ CK
+(BE)+: {B,E} →E→A→ {A,B,E}   →AB→C→ {A,B,C,E} →C→D→ R      ✓ CK
+</pre>
+<span class="box">CKs = { AB, BC, BD, BE }</span>
+<hr class="answer-sep">
+<span class="q-num">Q15(b):</span> BCNF violations<br>
+<pre>
+AB → C :  AB is CK.               ok
+C  → D :  C+ = {A,C,D,E}, no B   → NOT SK   ✗ violation
+D  → E :  D+ = {A,D,E}, no B,C   → NOT SK   ✗ violation
+E  → A :  E+ = {A,E}, no B,C,D   → NOT SK   ✗ violation
+</pre>
+<hr class="answer-sep">
+<span class="q-num">Q15(c):</span> BCNF decomposition tree<br>
+<pre>
+          R = (A,B,C,D,E)   F = {AB→C, C→D, D→E, E→A}
+                     |
+                     |  split on  C → D
+                     v
+              ┌────────────┐
+              |            |
+              v            v
+        R1 = (A,C,D,E)   R2 = (B, C)
+        FDs: C→D,D→E,E→A   ✓ BCNF
+        CK: {C}
+          |
+          | split on D → E
+          v
+       ┌──────────┐
+       |          |
+       v          v
+   R1b = (C,D)   R1a = (A,D,E)
+   ✓ BCNF         FDs: D→E, E→A
+                  CK: {D}
+                    |
+                    | split on E → A
+                    v
+                 ┌──────┐
+                 |      |
+                 v      v
+              (A,E)   (D,E)
+              ✓ BCNF  ✓ BCNF
+</pre>
+<span class="box">Final: { (A,E), (D,E), (C,D), (B,C) }</span>
+<hr class="answer-sep">
+<span class="q-num">Q15(d):</span> dependency preservation<br>
+<pre>
+C → D :  C,D in (C,D)         ✓ preserved
+D → E :  D,E in (D,E)         ✓ preserved
+E → A :  E,A in (A,E)         ✓ preserved
+AB → C:  A ∈ (A,E); B ∈ (B,C); C ∈ (C,D)
+         &rarr; split across 3 fragments         ✗ NOT preserved
+</pre>
+<span class="box">NOT dependency-preserving.</span>  <span class="mnote">// classic BCNF trade-off; 3NF would preserve all.</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A4 Q5 + Q6 (full BCNF decomposition with lossless + dependency-preserving check). Difficulty: Hard.</div>
 
@@ -781,6 +1208,78 @@ R_1a_beta  = (D, E)</pre>
 <div class="subq">(c) (3 marks) Check whether your schema is in BCNF. If not, decompose.</div>
 
 <details class="reveal"><summary>Reveal Solution</summary>
+<div class="paper-er">
+<svg viewBox="0 0 700 320" width="100%">
+  <!-- student -->
+  <rect class="filled" x="30" y="130" width="130" height="55" rx="3"/>
+  <text x="95" y="163" text-anchor="middle" font-size="14">student</text>
+  <ellipse class="filled" cx="40" cy="65" rx="38" ry="13"/>
+  <text x="40" y="69" text-anchor="middle" font-size="11" text-decoration="underline">student_id</text>
+  <line x1="55" y1="78" x2="70" y2="130"/>
+
+  <!-- enrolls M:N with grade attribute -->
+  <polygon class="rel" points="210,155 280,130 350,155 280,180"/>
+  <text x="280" y="160" text-anchor="middle" font-size="12">enrolls</text>
+  <line x1="160" y1="155" x2="210" y2="155"/>
+  <text x="185" y="148" font-size="12">M</text>
+  <line x1="350" y1="155" x2="400" y2="155"/>
+  <text x="375" y="148" font-size="12">N</text>
+  <!-- grade attr on relationship -->
+  <ellipse class="filled" cx="280" cy="90" rx="32" ry="13"/>
+  <text x="280" y="94" text-anchor="middle" font-size="11">grade</text>
+  <line x1="280" y1="103" x2="280" y2="130"/>
+
+  <!-- course -->
+  <rect class="filled" x="400" y="130" width="130" height="55" rx="3"/>
+  <text x="465" y="163" text-anchor="middle" font-size="14">course</text>
+  <ellipse class="filled" cx="520" cy="65" rx="38" ry="13"/>
+  <text x="520" y="69" text-anchor="middle" font-size="11" text-decoration="underline">course_id</text>
+  <line x1="500" y1="78" x2="490" y2="130"/>
+
+  <!-- teaches 1:N from instructor to course -->
+  <polygon class="rel" points="410,235 460,215 510,235 460,255"/>
+  <text x="460" y="240" text-anchor="middle" font-size="11">teaches</text>
+  <line x1="465" y1="185" x2="465" y2="215"/>
+  <text x="475" y="205" font-size="11">N</text>
+  <!-- instructor -->
+  <rect class="filled" x="530" y="220" width="140" height="45" rx="3"/>
+  <text x="600" y="248" text-anchor="middle" font-size="14">instructor</text>
+  <line x1="510" y1="235" x2="530" y2="235"/>
+  <text x="518" y="228" font-size="11">1</text>
+  <ellipse class="filled" cx="630" cy="300" rx="42" ry="13"/>
+  <text x="630" y="304" text-anchor="middle" font-size="11" text-decoration="underline">instructor_id</text>
+  <line x1="600" y1="287" x2="600" y2="265"/>
+</svg>
+</div>
+<div class="paper-answer">
+<span class="q-num">Q16(a):</span> ER sketch (above) + entities<br>
+<pre>
+student   (<u>student_id</u>, name, major)
+course    (<u>course_id</u>, course_title, credits)
+instructor(<u>instructor_id</u>, name, department)
+</pre>
+rels:<br>
+&nbsp;&nbsp;enrolls (student M:N course, attr grade) &mdash; partial both<br>
+&nbsp;&nbsp;teaches (instructor 1:N course) &mdash; total on course
+<hr class="answer-sep">
+<span class="q-num">Q16(b):</span> FDs<br>
+<pre>
+student_id  → name, major
+course_id   → course_title, credits, instructor_id
+instructor_id → name, department
+student_id, course_id → grade
+</pre>
+<hr class="answer-sep">
+<span class="q-num">Q16(c):</span> BCNF check<br>
+<pre>
+student   (<u>student_id</u>, name, major)             LHS=CK  ✓ BCNF
+course    (<u>course_id</u>, title, credits, inst_id)   LHS=CK  ✓ BCNF
+instructor(<u>instructor_id</u>, name, dept)            LHS=CK  ✓ BCNF
+enrollment(<u>student_id</u>, <u>course_id</u>, grade)        LHS=CK  ✓ BCNF
+</pre>
+<span class="box">All 4 tables already in BCNF; no decomposition needed.</span><br>
+<span class="mnote">&rarr; splitting across entity/relationship lines avoided the classic course_id &rarr; instructor_id violation that would arise if we lumped them all in one table.</span>
+</div>
 <div class="solution-body">
 <div class="mirrors">Mirrors: A3 Q4 + A4 Q6 combined. Difficulty: Medium.</div>
 

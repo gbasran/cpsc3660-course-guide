@@ -17,6 +17,10 @@
 <h1>8 Relational Algebra Problems, Side-by-Side with SQL</h1>
 <p class="subtitle">Each problem is solved in RA on the left, SQL on the right. Division, grouping, and set ops all walked through.</p>
 
+<div class="note">
+<strong>How to read this page.</strong> The final is paper-based; every walkthrough now shows what the answer looks like on ruled exam paper. You'll see: (1) <em>mental steps</em>, (2) <em>margin scratch work</em>, (3) <em>final answer as written</em>. Then the standard explanation walkthrough follows for deeper understanding.
+</div>
+
 <div class="analogy">
 <strong>Physical analogy; looking at a blueprint and a photograph of the same house.</strong><br><br>
 An architect reads the blueprint and understands the geometry; a buyer looks at a photograph and sees the result. For every RA expression there is a corresponding SQL query that produces the same rows; the RA is the blueprint (compact, algebraic) and the SQL is the photograph (procedural, verbose). Training your brain to flip between them is the whole point of this page; you will face an exam question asking for one and sometimes both.
@@ -39,6 +43,32 @@ from employee e, borrow b, books k<br>
 where e.empid = b.empid<br>
 &nbsp;&nbsp;and b.isbn = k.isbn<br>
 &nbsp;&nbsp;and k.publisher = 'Springer';
+</div>
+
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Identify which relations hold the needed attributes. <code>name</code> is in employee, <code>publisher</code> is in books, the link between them is borrow.</div>
+<div class="paper-step"><span class="n">Step 2</span> Chain natural joins: employee ⋈ borrow on empid, then ⋈ books on isbn.</div>
+<div class="paper-step"><span class="n">Step 3</span> Filter with <span class="ra-op">σ</span><sub>publisher='Springer'</sub>.</div>
+<div class="paper-step"><span class="n">Step 4</span> Project name with <span class="ra-op">π</span><sub>name</sub>; RA drops dups automatically.</div>
+</div>
+
+<div class="scratch-work">
+need: name (emp), publisher (books) &rarr; link via borrow<br>
+join chain: emp ⋈ borrow ⋈ books<br>
+<strong>&rarr; filter publisher, project name</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q1:</span> <span class="mnote">// select + project + join</span><br>
+<br>
+<span class="ra-op">π</span><sub>name</sub>(<span class="ra-op">σ</span><sub>publisher='Springer'</sub>(<br>
+<span class="indent-1">employee <span class="ra-op">⋈</span> borrow <span class="ra-op">⋈</span> books))</span><br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>: <span class="kw">select distinct</span> e.name<br>
+<span class="kw">from</span> employee e, borrow b, books k<br>
+<span class="kw">where</span> e.empid = b.empid<br>
+<span class="indent-1"><span class="kw">and</span> b.isbn = k.isbn</span><br>
+<span class="indent-1"><span class="kw">and</span> k.publisher = 'Springer';</span>
 </div>
 
 <div class="hand-calc">
@@ -77,6 +107,29 @@ select e.name, k.title<br>
 from employee e, borrow b, books k<br>
 where e.empid = b.empid<br>
 &nbsp;&nbsp;and b.isbn = k.isbn;
+</div>
+
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Two output attributes: name (employee) and title (books). These relations don't share any attribute directly, so borrow is the bridge.</div>
+<div class="paper-step"><span class="n">Step 2</span> Chain joins: employee ⋈ borrow (on empid) then ⋈ books (on isbn). Natural join auto-matches shared names.</div>
+<div class="paper-step"><span class="n">Step 3</span> Project (name, title). No filter needed.</div>
+</div>
+
+<div class="scratch-work">
+want: (name, title) pairs<br>
+bridge: emp ⋈ borrow ⋈ books<br>
+<strong>&rarr; π<sub>name, title</sub></strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q2:</span> <span class="mnote">// natural-join exposure</span><br>
+<br>
+<span class="ra-op">π</span><sub>name, title</sub>(employee <span class="ra-op">⋈</span> borrow <span class="ra-op">⋈</span> books)<br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>: <span class="kw">select</span> e.name, k.title<br>
+<span class="kw">from</span> employee e, borrow b, books k<br>
+<span class="kw">where</span> e.empid = b.empid<br>
+<span class="indent-1"><span class="kw">and</span> b.isbn = k.isbn;</span>
 </div>
 
 <div class="hand-calc">
@@ -124,6 +177,36 @@ where not exists (<br>
 &nbsp;&nbsp;&nbsp;&nbsp;where b.empid = e.empid and b.isbn = k.isbn<br>
 &nbsp;&nbsp;)<br>
 );
+</div>
+
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "Every" = <em>division</em>. Build the <em>divisor</em>: set of things the employee must be paired with. Here: ISBNs of every Springer book &rarr; <span class="ra-op">π</span><sub>isbn</sub>(<span class="ra-op">σ</span><sub>publisher='Springer'</sub>(books)).</div>
+<div class="paper-step"><span class="n">Step 2</span> Build the <em>dividend</em>: pairs (empid, isbn) from borrow. These are the "who borrowed what" facts.</div>
+<div class="paper-step"><span class="n">Step 3</span> Divide dividend ÷ divisor. Result is empids that pair with EVERY Springer isbn.</div>
+<div class="paper-step"><span class="n">Step 4</span> Join back with employee on empid; project name.</div>
+</div>
+
+<div class="scratch-work">
+dividend: π<sub>empid, isbn</sub>(borrow)<br>
+divisor:  π<sub>isbn</sub>(σ<sub>publisher='Springer'</sub>(books))<br>
+<strong>&rarr; divide, then ⋈ employee, π name</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q3:</span> <span class="mnote">// "all Springer books" = division</span><br>
+<br>
+<span class="ra-op">π</span><sub>name</sub>(employee <span class="ra-op">⋈</span><br>
+<span class="indent-1">[<span class="ra-op">π</span><sub>empid, isbn</sub>(borrow) <span class="ra-op">÷</span></span><br>
+<span class="indent-2"><span class="ra-op">π</span><sub>isbn</sub>(<span class="ra-op">σ</span><sub>publisher='Springer'</sub>(books))])<br>
+<hr class="answer-sep">
+<em>division expanded</em> (if prof wants basic ops only):<br>
+R<sub>1</sub> <span class="ra-op">÷</span> R<sub>2</sub> = <span class="ra-op">π</span><sub>X</sub>(R<sub>1</sub>) <span class="ra-op">−</span> <span class="ra-op">π</span><sub>X</sub>((<span class="ra-op">π</span><sub>X</sub>(R<sub>1</sub>) <span class="ra-op">×</span> R<sub>2</sub>) <span class="ra-op">−</span> R<sub>1</sub>)<br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>: <span class="kw">select</span> e.name <span class="kw">from</span> employee e<br>
+<span class="kw">where not exists</span> (<br>
+<span class="indent-1">(<span class="kw">select</span> k.isbn <span class="kw">from</span> books k <span class="kw">where</span> k.publisher='Springer')</span><br>
+<span class="indent-1"><span class="kw">except</span></span><br>
+<span class="indent-1">(<span class="kw">select</span> b.isbn <span class="kw">from</span> borrow b <span class="kw">where</span> b.empid = e.empid));</span>
 </div>
 
 <div class="hand-calc">
@@ -189,6 +272,41 @@ where balance = (<br>
 );
 </div>
 
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "Smallest" in RA = "no other row has a smaller balance." Needs a self-join, so rename one copy with <span class="ra-op">ρ</span>.</div>
+<div class="paper-step"><span class="n">Step 2</span> Find the min: min-balance values are those NOT dominated by any other balance. <span class="ra-op">π</span><sub>balance</sub>(account) <span class="ra-op">−</span> <span class="ra-op">π</span><sub>R.balance</sub>(<span class="ra-op">σ</span><sub>R.balance &gt; S.balance</sub>(R <span class="ra-op">×</span> S)).</div>
+<div class="paper-step"><span class="n">Step 3</span> Remove the min from the set. Apply the min trick again on what's left &rarr; that's the second-smallest value.</div>
+<div class="paper-step"><span class="n">Step 4</span> Select account rows with that balance value, project account_number.</div>
+</div>
+
+<div class="scratch-work">
+min via self-join: "no row smaller"<br>
+R = ρ<sub>A₁</sub>(account), S = ρ<sub>A₂</sub>(account)<br>
+2nd-min = min(all balances − {min})<br>
+<strong>&rarr; σ on account, π account_number</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q4:</span> <span class="mnote">// self-join + rename; 2nd-smallest</span><br>
+<br>
+R = <span class="ra-op">ρ</span><sub>A₁</sub>(account), &nbsp; S = <span class="ra-op">ρ</span><sub>A₂</sub>(account)<br>
+<br>
+<u>min-balance set</u>:<br>
+M = <span class="ra-op">π</span><sub>balance</sub>(account) <span class="ra-op">−</span><br>
+<span class="indent-1"><span class="ra-op">π</span><sub>A₁.balance</sub>(<span class="ra-op">σ</span><sub>A₁.balance &gt; A₂.balance</sub>(R <span class="ra-op">×</span> S))</span><br>
+<br>
+<u>2nd-min set</u>: &nbsp; T = <span class="ra-op">π</span><sub>balance</sub>(account) <span class="ra-op">−</span> M,<br>
+B<sub>2</sub> = T <span class="ra-op">−</span> <span class="ra-op">π</span><sub>A₁.balance</sub>(<span class="ra-op">σ</span><sub>A₁.balance &gt; A₂.balance</sub>(<span class="ra-op">ρ</span><sub>A₁</sub>(T) <span class="ra-op">×</span> <span class="ra-op">ρ</span><sub>A₂</sub>(T)))<br>
+<br>
+<u>answer</u>: &nbsp; <span class="ra-op">π</span><sub>account_number</sub>(account <span class="ra-op">⋈</span> B<sub>2</sub>)<br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>: <span class="kw">select</span> account_number, balance<br>
+<span class="kw">from</span> account<br>
+<span class="kw">where</span> balance = (<br>
+<span class="indent-1"><span class="kw">select min</span>(balance) <span class="kw">from</span> account</span><br>
+<span class="indent-1"><span class="kw">where</span> balance &gt; (<span class="kw">select min</span>(balance) <span class="kw">from</span> account));</span>
+</div>
+
 <div class="hand-calc">
 <h3>Walkthrough</h3>
 <div class="step">
@@ -228,6 +346,35 @@ from employee e, borrow b, books k<br>
 where e.empid = b.empid and b.isbn = k.isbn<br>
 group by k.authors<br>
 having count(distinct e.empid) &gt;= 3;
+</div>
+
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> Three-way join to connect authors (books) to employees (via borrow).</div>
+<div class="paper-step"><span class="n">Step 2</span> Group by authors with <span class="ra-op">γ</span>; left-subscript = grouping attrs, right-subscript = aggregate function.</div>
+<div class="paper-step"><span class="n">Step 3</span> Count distinct empids per group; name the column cnt.</div>
+<div class="paper-step"><span class="n">Step 4</span> <span class="ra-op">σ</span><sub>cnt ≥ 3</sub> (RA's HAVING), then <span class="ra-op">π</span><sub>authors</sub>.</div>
+</div>
+
+<div class="scratch-work">
+group-axis: authors<br>
+aggregate: count-distinct(empid) → cnt<br>
+<strong>&rarr; σ cnt≥3, π authors</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q5:</span> <span class="mnote">// grouping + aggregation</span><br>
+<br>
+T<sub>1</sub> = employee <span class="ra-op">⋈</span> borrow <span class="ra-op">⋈</span> books<br>
+<br>
+T<sub>2</sub> = <sub>authors</sub><span class="ra-op">γ</span><sub>count-distinct(empid) → cnt</sub>(T<sub>1</sub>)<br>
+<br>
+<u>answer</u>: &nbsp; <span class="ra-op">π</span><sub>authors</sub>(<span class="ra-op">σ</span><sub>cnt ≥ 3</sub>(T<sub>2</sub>))<br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>: <span class="kw">select</span> k.authors<br>
+<span class="kw">from</span> employee e, borrow b, books k<br>
+<span class="kw">where</span> e.empid = b.empid <span class="kw">and</span> b.isbn = k.isbn<br>
+<span class="kw">group by</span> k.authors<br>
+<span class="kw">having count</span>(<span class="kw">distinct</span> e.empid) &gt;= 3;
 </div>
 
 <div class="hand-calc">
@@ -271,6 +418,36 @@ group by k.publisher, e.empid, e.name<br>
 having count(b.isbn) &gt; 5;
 </div>
 
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "For each publisher, find employees who..." &rarr; group axis is (publisher, empid, name).</div>
+<div class="paper-step"><span class="n">Step 2</span> Include empid in grouping even though we only output name; otherwise two employees with the same name would merge counts.</div>
+<div class="paper-step"><span class="n">Step 3</span> Aggregate: count(isbn) per group &rarr; n.</div>
+<div class="paper-step"><span class="n">Step 4</span> Filter groups with <span class="ra-op">σ</span><sub>n &gt; 5</sub>, project (publisher, name).</div>
+</div>
+
+<div class="scratch-work">
+group: (publisher, empid, name)<br>
+agg: count(isbn) → n<br>
+<strong>&rarr; σ n&gt;5, π publisher,name</strong><br>
+<em>empid in group to avoid name-collision</em>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q6:</span> <span class="mnote">// multi-attribute grouping</span><br>
+<br>
+T = employee <span class="ra-op">⋈</span> borrow <span class="ra-op">⋈</span> books<br>
+<br>
+G = <sub>publisher, empid, name</sub><span class="ra-op">γ</span><sub>count(isbn) → n</sub>(T)<br>
+<br>
+<u>answer</u>: &nbsp; <span class="ra-op">π</span><sub>publisher, name</sub>(<span class="ra-op">σ</span><sub>n &gt; 5</sub>(G))<br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>: <span class="kw">select</span> k.publisher, e.name<br>
+<span class="kw">from</span> employee e, borrow b, books k<br>
+<span class="kw">where</span> e.empid = b.empid <span class="kw">and</span> b.isbn = k.isbn<br>
+<span class="kw">group by</span> k.publisher, e.empid, e.name<br>
+<span class="kw">having count</span>(b.isbn) &gt; 5;
+</div>
+
 <div class="hand-calc">
 <h3>Walkthrough</h3>
 <div class="step">
@@ -308,6 +485,29 @@ except<br>
 (select customer_name from borrower);
 </div>
 
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> "Has X but no Y" &rarr; set difference pattern.</div>
+<div class="paper-step"><span class="n">Step 2</span> Set diff needs union-compatible schemas. Project customer_name from each side first.</div>
+<div class="paper-step"><span class="n">Step 3</span> Subtract borrowers from depositors.</div>
+</div>
+
+<div class="scratch-work">
+"but not" = <span class="ra-op">−</span><br>
+must match schema: π customer_name first<br>
+<strong>&rarr; depositors <span class="ra-op">−</span> borrowers</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q7:</span> <span class="mnote">// set difference</span><br>
+<br>
+<span class="ra-op">π</span><sub>customer_name</sub>(depositor) <span class="ra-op">−</span> <span class="ra-op">π</span><sub>customer_name</sub>(borrower)<br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>:<br>
+(<span class="kw">select</span> customer_name <span class="kw">from</span> depositor)<br>
+<span class="kw">except</span><br>
+(<span class="kw">select</span> customer_name <span class="kw">from</span> borrower);
+</div>
+
 <div class="hand-calc">
 <h3>Walkthrough</h3>
 <div class="step">
@@ -341,6 +541,33 @@ except<br>
 insert into employee values ('E05', 'Dora', 'D-220', 31);<br>
 insert into books values ('978-NEW', 'New Title', 'Author Name', 'Publisher');<br>
 insert into borrow values ('E05', '978-NEW', '2026-04-17');
+</div>
+
+<div class="paper-steps">
+<div class="paper-step"><span class="n">Step 1</span> RA INSERT = union with a singleton relation: r &larr; r ∪ {t}.</div>
+<div class="paper-step"><span class="n">Step 2</span> Respect FK order. Parent rows first (employee, books), child row last (borrow).</div>
+<div class="paper-step"><span class="n">Step 3</span> RA union is set-based &rarr; duplicates silently vanish; SQL would throw on duplicate PK.</div>
+</div>
+
+<div class="scratch-work">
+INSERT = <span class="ra-op">∪</span> {tuple}<br>
+FK order: employee, books, borrow<br>
+<strong>&rarr; 3 assignments</strong>
+</div>
+
+<div class="paper-answer">
+<span class="q-num">Q8:</span> <span class="mnote">// INSERT via union</span><br>
+<br>
+employee &larr; employee <span class="ra-op">∪</span> {(E05, Dora, D-220, 31)}<br>
+<br>
+books &larr; books <span class="ra-op">∪</span> {(978-NEW, title, authors, publisher)}<br>
+<br>
+borrow &larr; borrow <span class="ra-op">∪</span> {(E05, 978-NEW, 2026-04-17)}<br>
+<hr class="answer-sep">
+<em>equivalent SQL</em>:<br>
+<span class="kw">insert into</span> employee <span class="kw">values</span> ('E05', 'Dora', 'D-220', 31);<br>
+<span class="kw">insert into</span> books <span class="kw">values</span> ('978-NEW', 'New Title', 'Author', 'Pub');<br>
+<span class="kw">insert into</span> borrow <span class="kw">values</span> ('E05', '978-NEW', '2026-04-17');
 </div>
 
 <div class="hand-calc">
