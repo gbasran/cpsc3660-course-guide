@@ -947,6 +947,7 @@ svg text { font-family: 'Inter', system-ui, sans-serif; }
 .dl-card.reference { border-left-color: var(--accent-blue); }
 .dl-card.practice  { border-left-color: var(--accent-gold); }
 .dl-card.solutions { border-left-color: var(--accent-sage); }
+.dl-card.condensed { border-left-color: var(--accent-rose); }
 
 .dl-icon {
   background: var(--bg-base);
@@ -980,6 +981,7 @@ svg text { font-family: 'Inter', system-ui, sans-serif; }
 .dl-card.reference .dl-icon .fmt { color: var(--accent-blue); }
 .dl-card.practice  .dl-icon .fmt { color: var(--accent-gold); }
 .dl-card.solutions .dl-icon .fmt { color: var(--accent-sage); }
+.dl-card.condensed .dl-icon .fmt { color: var(--accent-rose); }
 .dl-icon .pc {
   font-size: 0.72rem;
   color: var(--text-muted);
